@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Dashboard</title>
+  <style>
+    :root{
+      --accent:#4f46e5;
+      --accent-2:#6d28d9;
+      --bg:#f4f4ff;
+      --card:#ffffff;
+      --muted:#6b7280;
+      --event-bg: rgba(79,70,229,0.12);
+    }
+   
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      display: flex;
+      height: 100vh;
+      background: var(--bg);
+    }
+   
+    .sidebar {
+      width: 220px;
+      background: linear-gradient(180deg, #4f46e5, #4338ca);
+      color: white;
+      padding: 20px 15px;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 3px 0 10px rgba(0,0,0,0.15);
+    }
+
+    .sidebar h2 {
+      margin-top: 5px;
+      font-size: 1.7rem;
+      font-weight: bold;
+      text-align: center;
+      letter-spacing: 1px;
+    }
+
+    .sidebar ul {
+      list-style: none;
+      padding: 0;
+      margin: 15px 0;
+    }
+
+    .sidebar li {
+      margin: 12px 0;
+      padding: 10px 15px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1.2rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: background 0.3s, transform 0.2s;
+    }
+
+    .sidebar li:hover {
+      background: rgba(255,255,255,0.15);
+      transform: translateX(5px);
+    }
+
+    .sidebar li.active {
+      background: rgba(255,255,255,0.2);
+    }
+
+    .sidebar li:last-child {
+      margin-top: auto;
+      background: transparent;
+      color: inherit;
+      font-weight: normal;
+    }
+
+    .main {
+      flex: 1;
+      padding: 30px;
+      background: var(--bg);
+      overflow-y: auto;
+    }
+
+    .dashboard-header {
+      margin-bottom: 30px;
+    }
+
+    .dashboard-header h1 {
+      font-size: 2.5rem;
+      color: #333;
+      margin: 0 0 10px 0;
+      font-weight: 700;
+    }
+
+    .dashboard-header p {
+      color: var(--muted);
+      font-size: 1.1rem;
+      margin: 0;
+    }
+
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 20px;
+      padding: 12px 16px;
+      background: rgba(255,255,255,0.8);
+      border-radius: 8px;
+      border: 1px solid rgba(79,70,229,0.1);
+    }
+
+    .user-email {
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 25px;
+      max-width: 1200px;
+    }
+
+    .dashboard-tile {
+      background: var(--card);
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      cursor: pointer;
+      transition: transform 0.3s, box-shadow 0.3s;
+      border: 1px solid rgba(79,70,229,0.1);
+      position: relative;
+      overflow: hidden;
+      min-height: 220px;
+    }
+
+    .dashboard-tile:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+    }
+
+    .tile-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .tile-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      color: white;
+    }
+
+    .tile-title {
+      font-size: 1.3rem;
+      font-weight: 600;
+      color: #333;
+      margin: 0;
+    }
+
+    .tile-content {
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .tile-item {
+      background: rgba(79,70,229,0.05);
+      padding: 10px 12px;
+      border-radius: 8px;
+      margin-bottom: 8px;
+      border-left: 3px solid var(--accent);
+      font-size: 0.95rem;
+    }
+
+    .tile-item:last-child {
+      margin-bottom: 0;
+    }
+
+    .tile-count {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: var(--accent);
+      color: white;
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+
+    /* Tile-specific colors */
+    .deadlines .tile-icon { background: linear-gradient(135deg, #ef4444, #dc2626); }
+    .ideas .tile-icon { background: linear-gradient(135deg, #f59e0b, #d97706); }
+    .projects .tile-icon { background: linear-gradient(135deg, #10b981, #059669); }
+    .notes .tile-icon { background: linear-gradient(135deg, #6366f1, #4f46e5); }
+    .career .tile-icon { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }
+    .future .tile-icon { background: linear-gradient(135deg, #06b6d4, #0891b2); }
+
+    .empty-state {
+      text-align: center;
+      color: var(--muted);
+      font-style: italic;
+      margin-top: 20px;
+    }
+
+    .add-item-hint {
+      position: absolute;
+      bottom: 20px;
+      left: 24px;
+      right: 24px;
+      color: var(--muted);
+      font-size: 0.85rem;
+      text-align: center;
+    }
+
+    .loading {
+      text-align: center;
+      color: var(--muted);
+      font-style: italic;
+      margin: 20px 0;
+    }
+
+    .error {
+      color: #ef4444;
+      text-align: center;
+      font-size: 0.9rem;
+      margin: 10px 0;
+    }
+
+    @media (max-width: 1024px) {
+      .dashboard-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 768px) {
+      .dashboard-grid {
+        grid-template-columns: 1fr;
+      }
+      .sidebar {
+        width: 180px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="sidebar">
+    <h2>Menu</h2>
+    <ul>
+      <li id="menu-dashboard" class="active">Dashboard</li>
+      <li id="menu-calendar">Calendar</li>
+      <li>Research Paper</li>
+      <li>Profile</li>
+      <li id="logout"> Logout</li>
+    </ul>
+  </div>
+
+  <div class="main">
+    <div id="dashboardView">
+      <div class="dashboard-header">
+        <div class="user-info">
+          <span>Welcome back,</span>
+          <span class="user-email" id="userEmail">Loading...</span>
+        </div>
+        <h1>Dashboard</h1>
+        <p>Stay organized and track your progress across all areas of life</p>
+      </div>
+     
+      <div class="dashboard-grid">
+        <!-- Deadlines Tile -->
+        <div class="dashboard-tile deadlines" data-tile="deadlines">
+          <div class="tile-header">
+            <div class="tile-icon">⏰</div>
+            <h3 class="tile-title">Deadlines</h3>
+          </div>
+          <div class="tile-count" id="deadlines-count">0</div>
+          <div class="tile-content" id="deadlines-content">
+            <div class="loading">Loading deadlines...</div>
+          </div>
+          <div class="add-item-hint">Click to manage deadlines</div>
+        </div>
+
+        <!-- Recent Ideas Tile -->
+        <div class="dashboard-tile ideas" data-tile="ideas">
+          <div class="tile-header">
+            <div class="tile-icon">💡</div>
+            <h3 class="tile-title">Recent Ideas</h3>
+          </div>
+          <div class="tile-count" id="ideas-count">0</div>
+          <div class="tile-content" id="ideas-content">
+            <div class="loading">Loading ideas...</div>
+          </div>
+          <div class="add-item-hint">Click to capture ideas</div>
+        </div>
+
+        <!-- Ongoing Projects Tile -->
+        <div class="dashboard-tile projects" data-tile="projects">
+          <div class="tile-header">
+            <div class="tile-icon">🚀</div>
+            <h3 class="tile-title">Your Projects</h3>
+          </div>
+          <div class="tile-count" id="projects-count">0</div>
+          <div class="tile-content" id="projects-content">
+            <div class="loading">Loading projects...</div>
+          </div>
+          <div class="add-item-hint">Click to manage projects</div>
+        </div>
+
+        <!-- Quick Notes Tile -->
+        <div class="dashboard-tile notes" data-tile="notes">
+          <div class="tile-header">
+            <div class="tile-icon">📝</div>
+            <h3 class="tile-title">Quick Notes</h3>
+          </div>
+          <div class="tile-count" id="notes-count">0</div>
+          <div class="tile-content" id="notes-content">
+            <div class="loading">Loading notes...</div>
+          </div>
+          <div class="add-item-hint">Click to take notes</div>
+        </div>
+
+        <!-- Career Progression Tile -->
+        <div class="dashboard-tile career" data-tile="career">
+          <div class="tile-header">
+            <div class="tile-icon">📈</div>
+            <h3 class="tile-title">Career & Goals</h3>
+          </div>
+          <div class="tile-count" id="career-count">0</div>
+          <div class="tile-content" id="career-content">
+            <div class="loading">Loading goals...</div>
+          </div>
+          <div class="add-item-hint">Click to set goals</div>
+        </div>
+
+        <!-- Future Work Tile -->
+        <div class="dashboard-tile future" data-tile="future">
+          <div class="tile-header">
+            <div class="tile-icon">🔮</div>
+            <h3 class="tile-title">Future Work</h3>
+          </div>
+          <div class="tile-count" id="future-count">0</div>
+          <div class="tile-content" id="future-content">
+            <div class="loading">Loading future work...</div>
+          </div>
+          <div class="add-item-hint">Click to plan future work</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  // ===================== API CONFIGURATION =====================
+  const API_BASE = window.location.origin;
+
+  // ===================== AUTHENTICATION =====================
+  function getCurrentUser() {
+    return sessionStorage.getItem('userEmail');
+  }
+
+  function isUserLoggedIn() {
+    return sessionStorage.getItem('isLoggedIn') === 'true';
+  }
+
+  function redirectToLogin() {
+    alert('Please log in to access this page');
+    window.location.href = '/';
+  }
+
+  // Check authentication
+  if (!isUserLoggedIn()) {
+    redirectToLogin();
+  }
+
+  const userEmail = getCurrentUser();
+  if (!userEmail) {
+    redirectToLogin();
+  }
+
+  // Display user email
+  document.getElementById('userEmail').textContent = userEmail;
+
+  // ===================== API HELPERS =====================
+  async function apiCall(endpoint, options = {}) {
+    try {
+      const response = await fetch(`${API_BASE}${endpoint}`, {
+        headers: {
+          'Content-Type': 'application/json',
+          ...options.headers
+        },
+        ...options
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'API call failed');
+      }
+      
+      return data;
+    } catch (error) {
+      console.error('API Error:', error);
+      throw error;
+    }
+  }
+
+  // ===================== DATABASE INTEGRATION =====================
+  
+  // Load tile data from database APIs
+  async function loadTileData(tileType) {
+    try {
+      const data = await apiCall(`/${tileType}/${encodeURIComponent(userEmail)}`);
+      return data;
+    } catch (error) {
+      console.error(`Failed to load ${tileType}:`, error);
+      return [];
+    }
+  }
+
+  // ===================== DASHBOARD RENDERING =====================
+
+  // Render tile content
+  function renderTile(tileType) {
+    loadTileData(tileType).then(data => {
+      const contentEl = document.getElementById(`${tileType}-content`);
+      const countEl = document.getElementById(`${tileType}-count`);
+      
+      countEl.textContent = data.length;
+      
+      if (data.length === 0) {
+        contentEl.innerHTML = `<div class="empty-state">No ${tileType} yet</div>`;
+        return;
+      }
+
+      // Show top 3 items
+      const topItems = data.slice(0, 3);
+      contentEl.innerHTML = topItems.map(item => {
+        let displayText = item.title || item.name || item.content || item.description || '';
+        
+        // Add specific formatting based on tile type
+        switch(tileType) {
+          case 'deadlines':
+            if (item.due_date) {
+              const daysLeft = Math.ceil((new Date(item.due_date) - new Date()) / (1000 * 60 * 60 * 24));
+              displayText += ` (${daysLeft > 0 ? daysLeft + ' days' : 'overdue'})`;
+            }
+            break;
+          case 'projects':
+            if (item.colleagues && item.colleagues.length > 0) {
+              displayText += ` (${item.colleagues.length} member${item.colleagues.length !== 1 ? 's' : ''})`;
+            }
+            break;
+          case 'career':
+            if (item.progress) {
+              displayText += ` (${item.progress}%)`;
+            }
+            break;
+          case 'ideas':
+            if (item.category) {
+              displayText += ` - ${item.category}`;
+            }
+            break;
+          case 'future':
+            if (item.timeline) {
+              displayText += ` (${item.timeline})`;
+            }
+            break;
+        }
+        
+        return `<div class="tile-item">${displayText}</div>`;
+      }).join('');
+      
+      if (data.length > 3) {
+        contentEl.innerHTML += `<div class="empty-state" style="margin-top: 10px;">+${data.length - 3} more items</div>`;
+      }
+    }).catch(error => {
+      const contentEl = document.getElementById(`${tileType}-content`);
+      contentEl.innerHTML = `<div class="error">Failed to load ${tileType}</div>`;
+      console.error(`Error rendering ${tileType}:`, error);
+    });
+  }
+
+  // Initialize all tiles
+  function initializeDashboard() {
+    const tileTypes = ['deadlines', 'ideas', 'projects', 'notes', 'career', 'future'];
+    tileTypes.forEach(renderTile);
+  }
+
+  // ===================== NAVIGATION =====================
+  const menuDashboard = document.getElementById("menu-dashboard");
+  const menuCalendar = document.getElementById("menu-calendar");
+
+  menuDashboard.onclick = () => {
+    // Already on dashboard, just ensure it's visible
+    menuDashboard.classList.add("active");
+    menuCalendar.classList.remove("active");
+  };
+
+  menuCalendar.onclick = () => {
+    // Redirect to Outlook Calendar page
+    window.location.href = '/outlook-calendar.html';
+  };
+
+  // Tile click handlers
+  document.querySelectorAll('.dashboard-tile').forEach(tile => {
+    tile.addEventListener('click', () => {
+      const tileType = tile.dataset.tile;
+      
+      // Store the active tile for potential use by management pages
+      sessionStorage.setItem('activeTile', tileType);
+      
+      // Navigate to appropriate management pages
+      switch(tileType) {
+        case 'ideas':
+          window.location.href = 'ideas.html';
+          break;
+        case 'notes':
+          window.location.href = 'notes.html';
+          break;
+        case 'projects':
+          window.location.href = 'projects.html';
+          break;
+        case 'deadlines':
+          window.location.href = 'deadlines.html';
+          break;
+        case 'career':
+          window.location.href = 'career.html';
+          break;
+        case 'future':
+          window.location.href = 'future.html';
+          break;
+        default:
+          alert(`${tileType.charAt(0).toUpperCase() + tileType.slice(1)} Management\n\nThis would redirect to a dedicated ${tileType} management page.`);
+      }
+    });
+  });
+
+  // Logout
+  document.getElementById("logout").onclick = () => {
+    sessionStorage.removeItem("userEmail");
+    sessionStorage.removeItem("isLoggedIn");
+    window.location.href = "/";
+  };
+
+  // ===================== INITIALIZATION =====================
+  initializeDashboard();
+
+  </script>
+</body>
+</html>

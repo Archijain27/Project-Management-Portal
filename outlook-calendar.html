@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Outlook Calendar</title>
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    .calendar-container { height: 100vh; overflow: hidden; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+
+    // Lucide React icons as inline SVG components
+    const Calendar = () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>;
+    const ChevronLeft = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="15 18 9 12 15 6"/></svg>;
+    const ChevronRight = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="9 18 15 12 9 6"/></svg>;
+    const Plus = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>;
+    const X = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>;
+    const MapPin = ({ size = 16 }) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>;
+    const Users = ({ size = 16 }) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>;
+    const Bell = ({ size = 16 }) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>;
+    const Repeat = ({ size = 16 }) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>;
+    const Video = ({ size = 16 }) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>;
+    const Search = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>;
+    const ArrowLeft = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>;
+
+    const OutlookCalendar = () => {
+      const [currentDate, setCurrentDate] = useState(new Date());
+      const [view, setView] = useState('month');
+      const [events, setEvents] = useState([]);
+      const [showEventModal, setShowEventModal] = useState(false);
+      const [selectedEvent, setSelectedEvent] = useState(null);
+      const [searchTerm, setSearchTerm] = useState('');
+      const [categories] = useState(['Work', 'Personal', 'Meeting', 'Birthday', 'Holiday']);
+      
+      const [eventForm, setEventForm] = useState({
+        title: '', location: '', startDate: '', startTime: '', endDate: '', endTime: '',
+        description: '', category: 'Work', attendees: '', reminder: '15', isAllDay: false,
+        recurrence: 'none', showAs: 'busy', priority: 'normal', isOnline: false, meetingLink: ''
+      });
+
+      const userEmail = sessionStorage.getItem('userEmail') || 'user@example.com';
+      const API_BASE = window.location.origin;
+
+      useEffect(() => {
+        if (!sessionStorage.getItem('isLoggedIn')) {
+          alert('Please log in to access the calendar');
+          window.location.href = '/';
+          return;
+        }
+        loadEvents();
+      }, []);
+
+      const loadEvents = async () => {
+        try {
+          const response = await fetch(`${API_BASE}/events/${encodeURIComponent(userEmail)}`);
+          const data = await response.json();
+          setEvents(data.map(e => ({
+            ...e,
+            startDate: e.date,
+            endDate: e.date,
+            startTime: e.start || '',
+            endTime: e.end || '',
+            category: e.category || 'Work',
+            isAllDay: !e.start && !e.end
+          })));
+        } catch (error) {
+          console.error('Failed to load events:', error);
+        }
+      };
+
+      const saveEvent = async () => {
+        try {
+          const eventData = {
+            userEmail,
+            title: eventForm.title,
+            description: eventForm.description,
+            date: eventForm.startDate,
+            start: eventForm.startTime,
+            end: eventForm.endTime,
+            repeatWeekly: eventForm.recurrence === 'weekly',
+            category: eventForm.category,
+            location: eventForm.location,
+            attendees: eventForm.attendees,
+            reminder: eventForm.reminder,
+            isAllDay: eventForm.isAllDay,
+            showAs: eventForm.showAs,
+            priority: eventForm.priority,
+            isOnline: eventForm.isOnline,
+            meetingLink: eventForm.meetingLink,
+            recurrence: eventForm.recurrence
+          };
+
+          if (selectedEvent) {
+            await fetch(`${API_BASE}/events/${selectedEvent.id}`, {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(eventData)
+            });
+          } else {
+            await fetch(`${API_BASE}/events`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(eventData)
+            });
+          }
+
+          await loadEvents();
+          closeModal();
+        } catch (error) {
+          console.error('Failed to save event:', error);
+          alert('Failed to save event');
+        }
+      };
+
+      const deleteEvent = async () => {
+        if (!selectedEvent || !confirm('Delete this event?')) return;
+        
+        try {
+          await fetch(`${API_BASE}/events/${selectedEvent.id}`, { method: 'DELETE' });
+          await loadEvents();
+          closeModal();
+        } catch (error) {
+          console.error('Failed to delete event:', error);
+        }
+      };
+
+      const openModal = (date = null, event = null) => {
+        if (event) {
+          setSelectedEvent(event);
+          setEventForm({
+            title: event.title || '',
+            location: event.location || '',
+            startDate: event.startDate || '',
+            startTime: event.startTime || '',
+            endDate: event.endDate || event.startDate || '',
+            endTime: event.endTime || '',
+            description: event.description || '',
+            category: event.category || 'Work',
+            attendees: event.attendees || '',
+            reminder: event.reminder || '15',
+            isAllDay: event.isAllDay || false,
+            recurrence: event.repeatWeekly ? 'weekly' : 'none',
+            showAs: event.showAs || 'busy',
+            priority: event.priority || 'normal',
+            isOnline: event.isOnline || false,
+            meetingLink: event.meetingLink || ''
+          });
+        } else {
+          setSelectedEvent(null);
+          const dateStr = date || formatDate(currentDate);
+          setEventForm({
+            title: '', location: '', startDate: dateStr, startTime: '09:00',
+            endDate: dateStr, endTime: '10:00', description: '', category: 'Work',
+            attendees: '', reminder: '15', isAllDay: false, recurrence: 'none',
+            showAs: 'busy', priority: 'normal', isOnline: false, meetingLink: ''
+          });
+        }
+        setShowEventModal(true);
+      };
+
+      const closeModal = () => {
+        setShowEventModal(false);
+        setSelectedEvent(null);
+      };
+
+      const formatDate = (date) => {
+        const y = date.getFullYear();
+        const m = String(date.getMonth() + 1).padStart(2, '0');
+        const d = String(date.getDate()).padStart(2, '0');
+        return `${y}-${m}-${d}`;
+      };
+
+      const getCategoryColor = (category) => {
+        const colors = {
+          Work: 'bg-blue-500',
+          Personal: 'bg-green-500',
+          Meeting: 'bg-purple-500',
+          Birthday: 'bg-pink-500',
+          Holiday: 'bg-orange-500'
+        };
+        return colors[category] || 'bg-gray-500';
+      };
+
+      const navigateDate = (direction) => {
+        const newDate = new Date(currentDate);
+        if (view === 'month') {
+          newDate.setMonth(newDate.getMonth() + direction);
+        } else if (view === 'week' || view === 'workweek') {
+          newDate.setDate(newDate.getDate() + (direction * 7));
+        } else if (view === 'day') {
+          newDate.setDate(newDate.getDate() + direction);
+        }
+        setCurrentDate(newDate);
+      };
+
+      const renderMonthView = () => {
+        const year = currentDate.getFullYear();
+        const month = currentDate.getMonth();
+        const firstDay = new Date(year, month, 1);
+        const startDate = new Date(firstDay);
+        startDate.setDate(startDate.getDate() - startDate.getDay());
+        
+        const days = [];
+        const today = formatDate(new Date());
+        
+        for (let i = 0; i < 42; i++) {
+          const date = new Date(startDate);
+          date.setDate(startDate.getDate() + i);
+          const dateStr = formatDate(date);
+          const isCurrentMonth = date.getMonth() === month;
+          const isToday = dateStr === today;
+          
+          const dayEvents = events.filter(e => {
+            if (e.startDate === dateStr) return true;
+            if (e.repeatWeekly) {
+              const eventDay = new Date(e.startDate).getDay();
+              return eventDay === date.getDay() && new Date(e.startDate) <= date;
+            }
+            return false;
+          });
+
+          days.push(
+            <div
+              key={i}
+              className={`min-h-24 border border-gray-200 p-2 cursor-pointer hover:bg-gray-50 ${
+                !isCurrentMonth ? 'bg-gray-50 opacity-50' : 'bg-white'
+              }`}
+              onClick={() => openModal(dateStr)}
+            >
+              <div className={`text-sm font-semibold ${isToday ? 'bg-blue-500 text-white rounded-full w-6 h-6 flex items-center justify-center' : ''}`}>
+                {date.getDate()}
+              </div>
+              <div className="mt-1 space-y-1">
+                {dayEvents.slice(0, 3).map((event, idx) => (
+                  <div
+                    key={idx}
+                    className={`text-xs p-1 rounded truncate ${getCategoryColor(event.category)} text-white`}
+                    onClick={(e) => { e.stopPropagation(); openModal(null, event); }}
+                  >
+                    {event.startTime && `${event.startTime} `}{event.title}
+                  </div>
+                ))}
+                {dayEvents.length > 3 && (
+                  <div className="text-xs text-gray-500">+{dayEvents.length - 3} more</div>
+                )}
+              </div>
+            </div>
+          );
+        }
+
+        return (
+          <div>
+            <div className="grid grid-cols-7 gap-0 border-b border-gray-300">
+              {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
+                <div key={day} className="p-2 font-semibold text-center bg-gray-100">{day}</div>
+              ))}
+            </div>
+            <div className="grid grid-cols-7 gap-0">{days}</div>
+          </div>
+        );
+      };
+
+      const renderWeekView = (workweekOnly = false) => {
+        const startOfWeek = new Date(currentDate);
+        startOfWeek.setDate(currentDate.getDate() - currentDate.getDay());
+        
+        const days = [];
+        const dayCount = workweekOnly ? 5 : 7;
+        const startDay = workweekOnly ? 1 : 0;
+        
+        for (let i = startDay; i < startDay + dayCount; i++) {
+          const date = new Date(startOfWeek);
+          date.setDate(startOfWeek.getDate() + i);
+          days.push(date);
+        }
+
+        return (
+          <div className="flex h-full">
+            <div className="w-20 flex-shrink-0 border-r">
+              <div className="h-10 border-b"></div>
+              {Array.from({ length: 24 }, (_, i) => (
+                <div key={i} className="h-12 border-b text-xs text-gray-500 pr-2 text-right pt-1">
+                  {i === 0 ? '12 AM' : i < 12 ? `${i} AM` : i === 12 ? '12 PM' : `${i - 12} PM`}
+                </div>
+              ))}
+            </div>
+            <div className="flex-1 overflow-x-auto">
+              <div className="grid" style={{ gridTemplateColumns: `repeat(${dayCount}, minmax(120px, 1fr))` }}>
+                {days.map((date, idx) => {
+                  const dateStr = formatDate(date);
+                  const isToday = dateStr === formatDate(new Date());
+                  
+                  return (
+                    <div key={idx} className="border-r">
+                      <div className={`h-10 border-b text-center p-2 font-semibold ${isToday ? 'bg-blue-500 text-white' : ''}`}>
+                        <div className="text-xs">{date.toLocaleDateString('en-US', { weekday: 'short' })}</div>
+                        <div>{date.getDate()}</div>
+                      </div>
+                      <div className="relative" style={{ height: '288px' }}>
+                        {Array.from({ length: 24 }, (_, hour) => (
+                          <div
+                            key={hour}
+                            className="h-12 border-b border-gray-100 hover:bg-blue-50 cursor-pointer"
+                            onClick={() => openModal(dateStr)}
+                          ></div>
+                        ))}
+                        {events.filter(e => e.startDate === dateStr && e.startTime).map((event, idx) => {
+                          const [hour, min] = event.startTime.split(':').map(Number);
+                          const top = (hour * 48) + (min * 0.8);
+                          const duration = event.endTime ? 
+                            (() => {
+                              const [eh, em] = event.endTime.split(':').map(Number);
+                              return ((eh * 60 + em) - (hour * 60 + min)) * 0.8;
+                            })() : 48;
+                          
+                          return (
+                            <div
+                              key={idx}
+                              className={`absolute left-1 right-1 ${getCategoryColor(event.category)} text-white p-1 rounded text-xs cursor-pointer`}
+                              style={{ top: `${top}px`, height: `${duration}px` }}
+                              onClick={(e) => { e.stopPropagation(); openModal(null, event); }}
+                            >
+                              <div className="font-semibold truncate">{event.title}</div>
+                              {event.location && <div className="truncate">{event.location}</div>}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        );
+      };
+
+      const renderDayView = () => {
+        const dateStr = formatDate(currentDate);
+        const dayEvents = events.filter(e => e.startDate === dateStr);
+
+        return (
+          <div className="flex h-full">
+            <div className="w-20 flex-shrink-0 border-r">
+              <div className="h-16 border-b"></div>
+              {Array.from({ length: 24 }, (_, i) => (
+                <div key={i} className="h-16 border-b text-xs text-gray-500 pr-2 text-right pt-1">
+                  {i === 0 ? '12 AM' : i < 12 ? `${i} AM` : i === 12 ? '12 PM' : `${i - 12} PM`}
+                </div>
+              ))}
+            </div>
+            <div className="flex-1">
+              <div className="h-16 border-b bg-gray-100 p-4 font-semibold">
+                {currentDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
+              </div>
+              <div className="relative" style={{ height: '384px' }}>
+                {Array.from({ length: 24 }, (_, hour) => (
+                  <div
+                    key={hour}
+                    className="h-16 border-b border-gray-100 hover:bg-blue-50 cursor-pointer"
+                    onClick={() => openModal(dateStr)}
+                  ></div>
+                ))}
+                {dayEvents.filter(e => e.startTime).map((event, idx) => {
+                  const [hour, min] = event.startTime.split(':').map(Number);
+                  const top = (hour * 64) + (min * 1.067);
+                  const duration = event.endTime ? 
+                    (() => {
+                      const [eh, em] = event.endTime.split(':').map(Number);
+                      return ((eh * 60 + em) - (hour * 60 + min)) * 1.067;
+                    })() : 64;
+                  
+                  return (
+                    <div
+                      key={idx}
+                      className={`absolute left-4 right-4 ${getCategoryColor(event.category)} text-white p-2 rounded cursor-pointer`}
+                      style={{ top: `${top}px`, height: `${duration}px` }}
+                      onClick={(e) => { e.stopPropagation(); openModal(null, event); }}
+                    >
+                      <div className="font-semibold">{event.title}</div>
+                      <div className="text-sm">{event.startTime} - {event.endTime}</div>
+                      {event.location && <div className="text-sm">{event.location}</div>}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        );
+      };
+
+      const renderAgendaView = () => {
+        const sortedEvents = [...events].sort((a, b) => {
+          const dateCompare = a.startDate.localeCompare(b.startDate);
+          if (dateCompare !== 0) return dateCompare;
+          return (a.startTime || '').localeCompare(b.startTime || '');
+        });
+
+        return (
+          <div className="p-4">
+            {sortedEvents.length === 0 ? (
+              <div className="text-center py-12 text-gray-500">No events scheduled</div>
+            ) : (
+              <div className="space-y-4">
+                {sortedEvents.map((event, idx) => (
+                  <div
+                    key={idx}
+                    className="border rounded-lg p-4 hover:shadow-lg cursor-pointer transition-shadow"
+                    onClick={() => openModal(null, event)}
+                  >
+                    <div className="flex items-start gap-4">
+                      <div className={`w-1 h-full ${getCategoryColor(event.category)} rounded`}></div>
+                      <div className="flex-1">
+                        <div className="font-semibold text-lg">{event.title}</div>
+                        <div className="text-sm text-gray-600 mt-1">
+                          {new Date(event.startDate).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
+                          {event.startTime && ` • ${event.startTime}`}
+                          {event.endTime && ` - ${event.endTime}`}
+                        </div>
+                        {event.location && (
+                          <div className="text-sm text-gray-600 mt-1 flex items-center gap-1">
+                            <MapPin size={14} /> {event.location}
+                          </div>
+                        )}
+                        {event.description && (
+                          <div className="text-sm text-gray-600 mt-2">{event.description}</div>
+                        )}
+                      </div>
+                      <div className={`px-2 py-1 rounded text-xs text-white ${getCategoryColor(event.category)}`}>
+                        {event.category}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        );
+      };
+
+      return (
+        <div className="calendar-container flex flex-col bg-white">
+          {/* Toolbar */}
+          <div className="border-b p-3 flex items-center gap-4 bg-blue-600 text-white">
+            <button 
+              onClick={() => window.location.href = '/dashboard'} 
+              className="p-2 hover:bg-blue-700 rounded"
+              title="Back to Dashboard"
+            >
+              <ArrowLeft />
+            </button>
+            <Calendar />
+            <h1 className="text-xl font-bold">Outlook Calendar</h1>
+            <div className="flex-1"></div>
+            <div className="flex items-center gap-2">
+              <input
+                type="text"
+                placeholder="Search events..."
+                className="px-3 py-1 border rounded text-black"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+              <Search />
+            </div>
+          </div>
+
+          {/* Navigation Bar */}
+          <div className="border-b p-3 flex items-center gap-4">
+            <button
+              onClick={() => setCurrentDate(new Date())}
+              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+            >
+              Today
+            </button>
+            <button onClick={() => navigateDate(-1)} className="p-2 hover:bg-gray-100 rounded">
+              <ChevronLeft />
+            </button>
+            <button onClick={() => navigateDate(1)} className="p-2 hover:bg-gray-100 rounded">
+              <ChevronRight />
+            </button>
+            <h2 className="text-xl font-semibold">
+              {view === 'month' && currentDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+              {view === 'week' && `Week of ${new Date(currentDate.getTime() - currentDate.getDay() * 86400000).toLocaleDateString()}`}
+              {view === 'workweek' && `Work Week of ${new Date(currentDate.getTime() - currentDate.getDay() * 86400000).toLocaleDateString()}`}
+              {view === 'day' && currentDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
+              {view === 'agenda' && 'Agenda'}
+            </h2>
+            <div className="flex-1"></div>
+            <div className="flex gap-2">
+              {['day', 'workweek', 'week', 'month', 'agenda'].map(v => (
+                <button
+                  key={v}
+                  onClick={() => setView(v)}
+                  className={`px-3 py-1 rounded ${view === v ? 'bg-blue-500 text-white' : 'hover:bg-gray-100'}`}
+                >
+                  {v.charAt(0).toUpperCase() + v.slice(1)}
+                </button>
+              ))}
+            </div>
+            <button
+              onClick={() => openModal()}
+              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 flex items-center gap-2"
+            >
+              <Plus /> New Event
+            </button>
+          </div>
+
+          {/* Calendar View */}
+          <div className="flex-1 overflow-auto">
+            {view === 'month' && renderMonthView()}
+            {view === 'week' && renderWeekView(false)}
+            {view === 'workweek' && renderWeekView(true)}
+            {view === 'day' && renderDayView()}
+            {view === 'agenda' && renderAgendaView()}
+          </div>
+
+          {/* Event Modal */}
+          {showEventModal && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+              <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+                <div className="p-6 border-b flex items-center justify-between">
+                  <h3 className="text-xl font-bold">{selectedEvent ? 'Edit Event' : 'New Event'}</h3>
+                  <button onClick={closeModal} className="p-1 hover:bg-gray-100 rounded">
+                    <X />
+                  </button>
+                </div>
+                
+                <div className="p-6 space-y-4">
+                  <input
+                    type="text"
+                    placeholder="Add title"
+                    className="w-full px-3 py-2 border rounded text-lg font-semibold"
+                    value={eventForm.title}
+                    onChange={(e) => setEventForm({...eventForm, title: e.target.value})}
+                  />
+
+                  <div className="flex gap-4">
+                    <div className="flex-1">
+                      <label className="block text-sm font-medium mb-1">Start Date</label>
+                      <input
+                        type="date"
+                        className="w-full px-3 py-2 border rounded"
+                        value={eventForm.startDate}
+                        onChange={(e) => setEventForm({...eventForm, startDate: e.target.value})}
+                      />
+                    </div>
+                    <div className="flex-1">
+                      <label className="block text-sm font-medium mb-1">Start Time</label>
+                      <input
+                        type="time"
+                        className="w-full px-3 py-2 border rounded"
+                        value={eventForm.startTime}
+                        onChange={(e) => setEventForm({...eventForm, startTime: e.target.value})}
+                        disabled={eventForm.isAllDay}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex gap-4">
+                    <div className="flex-1">
+                      <label className="block text-sm font-medium mb-1">End Date</label>
+                      <input
+                        type="date"
+                        className="w-full px-3 py-2 border rounded"
+                        value={eventForm.endDate}
+                        onChange={(e) => setEventForm({...eventForm, endDate: e.target.value})}
+                      />
+                    </div>
+                    <div className="flex-1">
+                      <label className="block text-sm font-medium mb-1">End Time</label>
+                      <input
+                        type="time"
+                        className="w-full px-3 py-2 border rounded"
+                        value={eventForm.endTime}
+                        onChange={(e) => setEventForm({...eventForm, endTime: e.target.value})}
+                        disabled={eventForm.isAllDay}
+                      />
+                    </div>
+                  </div>
+
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={eventForm.isAllDay}
+                      onChange={(e) => setEventForm({...eventForm, isAllDay: e.target.checked, startTime: '', endTime: ''})}
+                    />
+                    All day event
+                  </label>
+
+                  <div>
+                    <label className="block text-sm font-medium mb-1 flex items-center gap-2">
+                      <MapPin size={16} /> Location
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Add location"
+                      className="w-full px-3 py-2 border rounded"
+                      value={eventForm.location}
+                      onChange={(e) => setEventForm({...eventForm, location: e.target.value})}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Category</label>
+                    <select
+                      className="w-full px-3 py-2 border rounded"
+                      value={eventForm.category}
+                      onChange={(e) => setEventForm({...eventForm, category: e.target.value})}
+                    >
+                      {categories.map(cat => (
+                        <option key={cat} value={cat}>{cat}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium mb-1 flex items-center gap-2">
+                      <Users size={16} /> Attendees
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Add attendees (comma separated)"
+                      className="w-full px-3 py-2 border rounded"
+                      value={eventForm.attendees}
+                      onChange={(e) => setEventForm({...eventForm, attendees: e.target.value})}
+                    />
+                  </div>
+
+                  <div className="flex gap-4">
+                    <div className="flex-1">
+                      <label className="block text-sm font-medium mb-1 flex items-center gap-2">
+                        <Bell size={16} /> Reminder
+                      </label>
+                      <select
+                        className="w-full px-3 py-2 border rounded"
+                        value={eventForm.reminder}
+                        onChange={(e) => setEventForm({...eventForm, reminder: e.target.value})}
+                      >
+                        <option value="0">None</option>
+                        <option value="5">5 minutes</option>
+                        <option value="15">15 minutes</option>
+                        <option value="30">30 minutes</option>
+                        <option value="60">1 hour</option>
+                        <option value="1440">1 day</option>
+                      </select>
+                    </div>
+                    <div className="flex-1">
+                      <label className="block text-sm font-medium mb-1 flex items-center gap-2">
+                        <Repeat size={16} /> Recurrence
+                      </label>
+                      <select
+                        className="w-full px-3 py-2 border rounded"
+                        value={eventForm.recurrence}
+                        onChange={(e) => setEventForm({...eventForm, recurrence: e.target.value})}
+                      >
+                        <option value="none">None</option>
+                        <option value="daily">Daily</option>
+                        <option value="weekly">Weekly</option>
+                        <option value="monthly">Monthly</option>
+                        <option value="yearly">Yearly</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-4">
+                    <div className="flex-1">
+                      <label className="block text-sm font-medium mb-1">Show As</label>
+                      <select
+                        className="w-full px-3 py-2 border rounded"
+                        value={eventForm.showAs}
+                        onChange={(e) => setEventForm({...eventForm, showAs: e.target.value})}
+                      >
+                        <option value="free">Free</option>
+                        <option value="busy">Busy</option>
+                        <option value="tentative">Tentative</option>
+                        <option value="out">Out of Office</option>
+                      </select>
+                    </div>
+                    <div className="flex-1">
+                      <label className="block text-sm font-medium mb-1">Priority</label>
+                      <select
+                        className="w-full px-3 py-2 border rounded"
+                        value={eventForm.priority}
+                        onChange={(e) => setEventForm({...eventForm, priority: e.target.value})}
+                      >
+                        <option value="low">Low</option>
+                        <option value="normal">Normal</option>
+                        <option value="high">High</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={eventForm.isOnline}
+                      onChange={(e) => setEventForm({...eventForm, isOnline: e.target.checked})}
+                    />
+                    <Video size={16} /> Online Meeting
+                  </label>
+
+                  {eventForm.isOnline && (
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Meeting Link</label>
+                      <input
+                        type="text"
+                        placeholder="https://teams.microsoft.com/..."
+                        className="w-full px-3 py-2 border rounded"
+                        value={eventForm.meetingLink}
+                        onChange={(e) => setEventForm({...eventForm, meetingLink: e.target.value})}
+                      />
+                    </div>
+                  )}
+
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Description</label>
+                    <textarea
+                      placeholder="Add description..."
+                      className="w-full px-3 py-2 border rounded"
+                      rows="4"
+                      value={eventForm.description}
+                      onChange={(e) => setEventForm({...eventForm, description: e.target.value})}
+                    ></textarea>
+                  </div>
+                </div>
+
+                <div className="p-6 border-t flex justify-between">
+                  {selectedEvent && (
+                    <button
+                      onClick={deleteEvent}
+                      className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+                    >
+                      Delete Event
+                    </button>
+                  )}
+                  <div className="flex gap-2 ml-auto">
+                    <button
+                      onClick={closeModal}
+                      className="px-4 py-2 border rounded hover:bg-gray-100"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={saveEvent}
+                      className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                    >
+                      Save
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    };
+
+    ReactDOM.render(<OutlookCalendar />, document.getElementById('root'));
+  </script>
+</body>
+</html>
