@@ -24,6 +24,7 @@
       min-height: 100vh;
     }
 
+
     /* Navigation */
     .nav-header {
       display: flex;
@@ -34,10 +35,12 @@
       border-bottom: 2px solid #e5e7eb;
     }
 
+
     .nav-header h1 {
       margin: 0;
       color: #333;
     }
+
 
     .back-btn {
       padding: 8px 16px;
@@ -50,10 +53,12 @@
       transition: all 0.2s;
     }
 
+
     .back-btn:hover {
       background: #e5e7eb;
       color: #111827;
     }
+
 
     /* Project card*/
     .project {
@@ -66,6 +71,7 @@
       transition: transform 0.2s, box-shadow 0.2s;
     }
 
+
     .project:hover {
       transform: translateY(-2px);
       box-shadow: 0 6px 20px rgba(0,0,0,0.15);
@@ -75,6 +81,7 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
+      margin-bottom: 15px;
     }
    
     .project-header h3 {
@@ -99,6 +106,151 @@
       background: #4338ca;
     }
 
+
+    /* Progress Section */
+    .progress-section {
+      margin-bottom: 15px;
+      padding: 12px;
+      background: linear-gradient(135deg, rgba(79, 70, 229, 0.05), rgba(109, 40, 217, 0.05));
+      border-radius: 8px;
+      border: 1px solid rgba(79, 70, 229, 0.1);
+    }
+
+
+    .progress-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+
+    .progress-label {
+      font-size: 0.9rem;
+      color: #374151;
+      font-weight: 600;
+    }
+
+
+    .progress-value {
+      font-size: 1.1rem;
+      font-weight: bold;
+      color: #4f46e5;
+    }
+
+
+    .progress-bar-container {
+      position: relative;
+      width: 100%;
+      height: 8px;
+      background: #e5e7eb;
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 10px;
+    }
+
+
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #4f46e5, #6d28d9);
+      border-radius: 10px;
+      transition: width 0.3s ease;
+      box-shadow: 0 2px 4px rgba(79, 70, 229, 0.3);
+    }
+
+
+    .progress-slider {
+      width: 100%;
+      height: 6px;
+      border-radius: 5px;
+      background: #e5e7eb;
+      outline: none;
+      -webkit-appearance: none;
+      appearance: none;
+      cursor: pointer;
+    }
+
+
+    .progress-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #4f46e5;
+      cursor: pointer;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+      transition: all 0.2s;
+    }
+
+
+    .progress-slider::-webkit-slider-thumb:hover {
+      background: #4338ca;
+      transform: scale(1.2);
+    }
+
+
+    .progress-slider::-moz-range-thumb {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #4f46e5;
+      cursor: pointer;
+      border: none;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+      transition: all 0.2s;
+    }
+
+
+    .progress-slider::-moz-range-thumb:hover {
+      background: #4338ca;
+      transform: scale(1.2);
+    }
+
+
+    .progress-status {
+      text-align: center;
+      font-size: 0.85rem;
+      color: #6b7280;
+      font-weight: 500;
+      margin-top: 5px;
+    }
+
+
+    .status-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      margin-top: 5px;
+    }
+
+
+    .status-not-started {
+      background: #f3f4f6;
+      color: #6b7280;
+    }
+
+
+    .status-in-progress {
+      background: #dbeafe;
+      color: #1e40af;
+    }
+
+
+    .status-nearly-done {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+
+    .status-completed {
+      background: #d1fae5;
+      color: #065f46;
+    }
+
+
     /* Colleagues */
     .colleagues {
       margin-top: 15px;
@@ -114,6 +266,7 @@
       gap: 10px;
     }
 
+
     .colleagues p {
       display: grid;
       grid-template-columns: 200px auto;
@@ -127,15 +280,18 @@
       transition: background 0.2s;
     }
 
+
     .colleagues p:hover {
       background: rgba(79, 70, 229, 0.1);
     }
+
 
     .email-icon {
       width: 24px;
       height: 24px;
       vertical-align: middle;
     }
+
 
     /* Add project button */
     #addProjectBtn {
@@ -154,6 +310,7 @@
       transform: scale(1.05);
     }
 
+
     /* Search bar */
     #searchBar {
       width: 100%;
@@ -164,6 +321,7 @@
       font-size: 1rem;
       box-sizing: border-box;
     }
+
 
     /* Modal */
     .modal {
@@ -219,14 +377,17 @@
       background: #4338ca;
     }
 
+
     .modal-content button.cancel {
       background: #ccc;
       color: black;
     }
 
+
     .modal-content button.cancel:hover {
       background: #bbb;
     }
+
 
     .loading {
       text-align: center;
@@ -234,6 +395,7 @@
       font-style: italic;
       padding: 20px;
     }
+
 
     .error {
       text-align: center;
@@ -243,6 +405,7 @@
       border-radius: 8px;
       margin: 10px 0;
     }
+
 
     .empty-state {
       text-align: center;
@@ -254,21 +417,25 @@
       box-shadow: 0 3px 10px rgba(0,0,0,0.1);
     }
 
+
     .colleague-row {
       display: flex;
       gap: 10px;
       margin-bottom: 8px;
     }
 
+
     .colleague-row input {
       margin: 0;
     }
+
 
     .remove-colleague {
       background: #ef4444 !important;
       padding: 5px 8px !important;
       font-size: 0.8rem;
     }
+
 
     .remove-colleague:hover {
       background: #dc2626 !important;
@@ -282,28 +449,41 @@
       <a href="dashboard.html" class="back-btn">← Back to Dashboard</a>
     </div>
 
+
     <!-- Projects View -->
     <div id="projectsView">
       <input type="text" id="searchBar" placeholder="🔍 Search projects..." />
       <button id="addProjectBtn">+ Add Project</button>
-      
+     
       <div id="loadingProjects" class="loading" style="display: none;">
         Loading projects...
       </div>
-      
+     
       <div id="errorProjects" class="error" style="display: none;">
         Failed to load projects. Please try again.
       </div>
-      
+     
       <div id="projectsContainer"></div>
     </div>
   </div>
+
 
   <!-- Modal for adding project -->
   <div class="modal" id="projectModal">
     <div class="modal-content">
       <h3>Add New Project</h3>
       <input id="projectName" type="text" placeholder="Project Name" required />
+      
+      <h4>Initial Progress</h4>
+      <div style="margin-bottom: 15px;">
+        <input type="range" id="modalProgressSlider" min="0" max="100" value="0" class="progress-slider" />
+        <div class="progress-header">
+          <span class="progress-label">Completion</span>
+          <span class="progress-value" id="modalProgressValue">0%</span>
+        </div>
+      </div>
+
+
       <h4>Team Members</h4>
       <div id="colleaguesInputs">
         <div class="colleague-row">
@@ -319,11 +499,23 @@
     </div>
   </div>
 
+
   <!-- Modal for editing project -->
   <div class="modal" id="editProjectModal">
     <div class="modal-content">
       <h3>Edit Project</h3>
       <input id="editProjectName" type="text" placeholder="Project Name" />
+      
+      <h4>Progress</h4>
+      <div style="margin-bottom: 15px;">
+        <input type="range" id="editModalProgressSlider" min="0" max="100" value="0" class="progress-slider" />
+        <div class="progress-header">
+          <span class="progress-label">Completion</span>
+          <span class="progress-value" id="editModalProgressValue">0%</span>
+        </div>
+      </div>
+
+
       <h4>Team Members</h4>
       <div id="editColleaguesInputs"></div>
       <button id="editAddColleagueBtn">+ Add Team Member</button>
@@ -334,6 +526,7 @@
       </div>
     </div>
   </div>
+
 
   <!-- Colleague Meetings Modal -->
   <div class="modal" id="meetingsModal">
@@ -350,33 +543,40 @@
     </div>
   </div>
 
+
   <script>
   // API Configuration
   const API_BASE = window.location.origin;
+
 
   // Authentication check
   function getCurrentUser() {
     return sessionStorage.getItem('userEmail');
   }
 
+
   function isUserLoggedIn() {
     return sessionStorage.getItem('isLoggedIn') === 'true';
   }
+
 
   function redirectToLogin() {
     alert('Please log in to access this page');
     window.location.href = '/';
   }
 
+
   // Check authentication
   if (!isUserLoggedIn()) {
     redirectToLogin();
   }
 
+
   const userEmail = getCurrentUser();
   if (!userEmail) {
     redirectToLogin();
   }
+
 
   // Initialize variables
   let projects = [];
@@ -391,6 +591,36 @@
   const loadingEl = document.getElementById("loadingProjects");
   const errorEl = document.getElementById("errorProjects");
 
+
+  // Modal progress slider
+  const modalProgressSlider = document.getElementById("modalProgressSlider");
+  const modalProgressValue = document.getElementById("modalProgressValue");
+
+
+  modalProgressSlider.addEventListener("input", (e) => {
+    modalProgressValue.textContent = `${e.target.value}%`;
+  });
+
+
+  // Edit modal progress slider
+  const editModalProgressSlider = document.getElementById("editModalProgressSlider");
+  const editModalProgressValue = document.getElementById("editModalProgressValue");
+
+
+  editModalProgressSlider.addEventListener("input", (e) => {
+    editModalProgressValue.textContent = `${e.target.value}%`;
+  });
+
+
+  // Helper function to get status
+  function getProgressStatus(progress) {
+    if (progress === 0) return { text: 'Not Started', class: 'status-not-started' };
+    if (progress < 50) return { text: 'In Progress', class: 'status-in-progress' };
+    if (progress < 100) return { text: 'Nearly Done', class: 'status-nearly-done' };
+    return { text: 'Completed ✓', class: 'status-completed' };
+  }
+
+
   // API helper function
   async function apiCall(endpoint, options = {}) {
     try {
@@ -401,11 +631,11 @@
         },
         ...options
       });
-      
+     
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
-      
+     
       return await response.json();
     } catch (error) {
       console.error('API Error:', error);
@@ -413,14 +643,18 @@
     }
   }
 
+
   // Project modal handlers
   addProjectBtn.onclick = () => {
     document.getElementById("projectName").value = "";
+    modalProgressSlider.value = 0;
+    modalProgressValue.textContent = "0%";
     resetColleagueInputs();
     modal.style.display = "flex";
   };
-  
+ 
   closeModalBtn.onclick = () => modal.style.display = "none";
+
 
   function resetColleagueInputs() {
     colleaguesInputsDiv.innerHTML = `
@@ -430,6 +664,7 @@
       </div>
     `;
   }
+
 
   addColleagueBtn.onclick = () => {
     const current = colleaguesInputsDiv.querySelectorAll(".colleague-row").length;
@@ -447,26 +682,44 @@
     }
   }
 
+
+  // Update progress via slider
+  async function updateProgress(projectId, progress) {
+    try {
+      await apiCall(`/projects/${projectId}/progress`, {
+        method: "PATCH",
+        body: JSON.stringify({ progress: parseInt(progress) })
+      });
+    } catch (error) {
+      console.error("Failed to update progress:", error);
+      alert("Failed to update progress. Please try again.");
+    }
+  }
+
+
   function renderProjects(filter="") {
     if (projects.length === 0) {
       container.innerHTML = '<div class="empty-state">No projects found. Create your first project!</div>';
       return;
     }
 
-    const filteredProjects = projects.filter(p => 
+
+    const filteredProjects = projects.filter(p =>
       p.name.toLowerCase().includes(filter.toLowerCase())
     );
+
 
     if (filteredProjects.length === 0 && filter) {
       container.innerHTML = '<div class="empty-state">No projects match your search.</div>';
       return;
     }
 
+
     container.innerHTML = "";
     filteredProjects.forEach((p) => {
       const div = document.createElement("div");
       div.className = "project";
-      
+     
       // Parse colleagues from the project data
       let colleagues = [];
       try {
@@ -480,6 +733,11 @@
         colleagues = [];
       }
 
+
+      const progress = p.progress || 0;
+      const status = getProgressStatus(progress);
+
+
       div.innerHTML = `
         <div class="project-header">
           <h3>${p.name}</h3>
@@ -488,18 +746,43 @@
             <button class="desc-btn edit-btn" data-id="${p.id}" style="background:#16a34a;">Edit</button>
           </div>
         </div>
+
+
+        <div class="progress-section" onclick="event.stopPropagation()">
+          <div class="progress-header">
+            <span class="progress-label">Project Completion</span>
+            <span class="progress-value">${progress}%</span>
+          </div>
+          <div class="progress-bar-container">
+            <div class="progress-bar-fill" style="width: ${progress}%"></div>
+          </div>
+          <input 
+            type="range" 
+            class="progress-slider" 
+            min="0" 
+            max="100" 
+            value="${progress}" 
+            data-project-id="${p.id}"
+          />
+          <div class="progress-status">
+            <span class="status-badge ${status.class}">${status.text}</span>
+          </div>
+        </div>
       `;
+
 
       // Expand/collapse colleagues on project click
       div.onclick = (e) => {
         if(e.target.tagName === "BUTTON") return;
+        if(e.target.classList.contains("progress-slider")) return;
+        
         const existing = div.querySelector(".colleagues");
         if(existing){
           existing.remove();
         } else {
           const colDiv = document.createElement("div");
           colDiv.className = "colleagues";
-          
+         
           if (colleagues.length === 0) {
             colDiv.innerHTML = '<p style="color: #6b7280; font-style: italic;">No team members added yet</p>';
           } else {
@@ -518,8 +801,45 @@
         }
       };
 
+
       container.appendChild(div);
     });
+
+
+    // Attach progress slider handlers
+    document.querySelectorAll(".progress-slider").forEach(slider => {
+      slider.addEventListener("input", (e) => {
+        const projectId = e.target.dataset.projectId;
+        const progress = e.target.value;
+        
+        // Update visual feedback immediately
+        const projectDiv = e.target.closest(".project");
+        const progressValue = projectDiv.querySelector(".progress-value");
+        const progressBar = projectDiv.querySelector(".progress-bar-fill");
+        const statusBadge = projectDiv.querySelector(".status-badge");
+        
+        progressValue.textContent = `${progress}%`;
+        progressBar.style.width = `${progress}%`;
+        
+        const status = getProgressStatus(parseInt(progress));
+        statusBadge.textContent = status.text;
+        statusBadge.className = `status-badge ${status.class}`;
+      });
+
+
+      slider.addEventListener("change", (e) => {
+        const projectId = e.target.dataset.projectId;
+        const progress = e.target.value;
+        updateProgress(projectId, progress);
+        
+        // Update in local projects array
+        const project = projects.find(p => p.id == projectId);
+        if (project) {
+          project.progress = parseInt(progress);
+        }
+      });
+    });
+
 
     // Attach edit handlers
     document.querySelectorAll(".edit-btn").forEach(btn => {
@@ -531,10 +851,12 @@
     });
   }
 
+
   async function loadProjects() {
     loadingEl.style.display = 'block';
     errorEl.style.display = 'none';
     container.innerHTML = '';
+
 
     try {
       const data = await apiCall(`/projects/${encodeURIComponent(userEmail)}`);
@@ -552,6 +874,7 @@
   // Load projects on page load
   loadProjects();
 
+
   saveProjectBtn.onclick = async () => {
     const projectName = document.getElementById("projectName").value.trim();
     if(!projectName) {
@@ -559,294 +882,5 @@
       return;
     }
 
-    const colleagueRows = document.querySelectorAll("#colleaguesInputs .colleague-row");
-    const colleagues = [];
-    
-    colleagueRows.forEach(row => {
-      const name = row.querySelector(".colName").value.trim();
-      const email = row.querySelector(".colEmail").value.trim();
-      
-      if(name && email){
-        if(!email.includes('@')) {
-          alert(`Invalid email format: ${email}`);
-          return;
-        }
-        colleagues.push({name, email});
-      }
-    });
 
-    try {
-      saveProjectBtn.textContent = 'Saving...';
-      saveProjectBtn.disabled = true;
 
-      await apiCall("/projects", {
-        method: "POST",
-        body: JSON.stringify({
-          name: projectName,
-          owner_email: userEmail,
-          colleagues: JSON.stringify(colleagues)
-        })
-      });
-
-      modal.style.display = "none";
-      loadProjects();
-      
-    } catch (error) {
-      console.error("Failed to save project:", error);
-      alert("Failed to save project. Please try again.");
-    } finally {
-      saveProjectBtn.textContent = 'Save Project';
-      saveProjectBtn.disabled = false;
-    }
-  }
-
-  // Search filter
-  searchBar.addEventListener("input", e => {
-    renderProjects(e.target.value);
-  });
-
-  // Edit project modal handling
-  const editModal = document.getElementById("editProjectModal");
-  const editProjectName = document.getElementById("editProjectName");
-  const editColleaguesInputs = document.getElementById("editColleaguesInputs");
-  const editAddColleagueBtn = document.getElementById("editAddColleagueBtn");
-  const updateProjectBtn = document.getElementById("updateProjectBtn");
-  const deleteProjectBtn = document.getElementById("deleteProjectBtn");
-  const closeEditModalBtn = document.getElementById("closeEditModalBtn");
-
-  let editingProjectId = null;
-
-  async function openEditModal(projectId) {
-    const project = projects.find(pr => pr.id == projectId);
-    if (!project) return;
-    
-    editingProjectId = project.id;
-    editProjectName.value = project.name;
-    
-    // Parse colleagues
-    let colleagues = [];
-    try {
-      if (project.colleagues && typeof project.colleagues === 'string') {
-        colleagues = JSON.parse(project.colleagues);
-      } else if (Array.isArray(project.colleagues)) {
-        colleagues = project.colleagues;
-      }
-    } catch (e) {
-      colleagues = [];
-    }
-
-    editColleaguesInputs.innerHTML = "";
-    
-    if (colleagues.length === 0) {
-      editColleaguesInputs.innerHTML = `
-        <div class="colleague-row">
-          <input placeholder="Colleague Name" class="editColName" />
-          <input placeholder="Colleague Email" class="editColEmail" type="email" />
-        </div>
-      `;
-    } else {
-      colleagues.forEach((c, i) => {
-        const row = document.createElement('div');
-        row.className = 'colleague-row';
-        row.innerHTML = `
-          <input placeholder="Colleague Name" class="editColName" value="${c.name}" />
-          <input placeholder="Colleague Email" class="editColEmail" value="${c.email}" type="email" />
-          ${i > 0 ? '<button type="button" class="remove-colleague" onclick="this.parentElement.remove()">Remove</button>' : ''}
-        `;
-        editColleaguesInputs.appendChild(row);
-      });
-    }
-
-    editModal.style.display = "flex";
-  }
-
-  closeEditModalBtn.onclick = () => editModal.style.display = "none";
-
-  editAddColleagueBtn.onclick = () => {
-    const count = editColleaguesInputs.querySelectorAll(".colleague-row").length;
-    if(count < 10){
-      const newRow = document.createElement('div');
-      newRow.className = 'colleague-row';
-      newRow.innerHTML = `
-        <input placeholder="Colleague Name" class="editColName" />
-        <input placeholder="Colleague Email" class="editColEmail" type="email" />
-        <button type="button" class="remove-colleague" onclick="this.parentElement.remove()">Remove</button>
-      `;
-      editColleaguesInputs.appendChild(newRow);
-    } else {
-      alert("Maximum 10 colleagues allowed");
-    }
-  };
-
-  updateProjectBtn.onclick = async () => {
-    const name = editProjectName.value.trim();
-    if(!name) {
-      alert("Project name is required");
-      return;
-    }
-
-    const colleagueRows = document.querySelectorAll("#editColleaguesInputs .colleague-row");
-    const colleagues = [];
-
-    colleagueRows.forEach(row => {
-      const name = row.querySelector(".editColName").value.trim();
-      const email = row.querySelector(".editColEmail").value.trim();
-      
-      if(name && email){
-        if(!email.includes('@')) {
-          alert(`Invalid email format: ${email}`);
-          return;
-        }
-        colleagues.push({name, email});
-      }
-    });
-
-    try {
-      updateProjectBtn.textContent = 'Updating...';
-      updateProjectBtn.disabled = true;
-
-      // Note: You'll need to add a PUT endpoint for projects in your server.js
-      await apiCall(`/projects/${editingProjectId}`, {
-        method: "PUT",
-        body: JSON.stringify({ 
-          name, 
-          colleagues: JSON.stringify(colleagues) 
-        })
-      });
-
-      editModal.style.display = "none";
-      loadProjects();
-      
-    } catch (error) {
-      console.error("Failed to update project:", error);
-      alert("Failed to update project. Please try again.");
-    } finally {
-      updateProjectBtn.textContent = 'Update Project';
-      updateProjectBtn.disabled = false;
-    }
-  };
-
-  deleteProjectBtn.onclick = async () => {
-    if(!confirm("Are you sure you want to delete this project? This action cannot be undone.")) {
-      return;
-    }
-
-    try {
-      deleteProjectBtn.textContent = 'Deleting...';
-      deleteProjectBtn.disabled = true;
-
-      await apiCall(`/projects/${editingProjectId}`, {
-        method: "DELETE"
-      });
-
-      editModal.style.display = "none";
-      loadProjects();
-      
-    } catch (error) {
-      console.error("Failed to delete project:", error);
-      alert("Failed to delete project. Please try again.");
-    } finally {
-      deleteProjectBtn.textContent = 'Delete Project';
-      deleteProjectBtn.disabled = false;
-    }
-  };
-
-  // Meetings modal
-  const meetingsModal = document.getElementById("meetingsModal");
-  const meetingsList = document.getElementById("meetingsList");
-  const meetingDate = document.getElementById("meetingDate");
-  const meetingDesc = document.getElementById("meetingDesc");
-  const addMeetingBtn = document.getElementById("addMeetingBtn");
-  const closeMeetingsModalBtn = document.getElementById("closeMeetingsModalBtn");
-
-  let currentColleagueEmail = null;
-
-  document.addEventListener("click", e => {
-    if(e.target.tagName === "STRONG" && e.target.closest('.colleagues')) {
-      const name = e.target.textContent;
-      const colP = e.target.closest("p");
-      const emailLink = colP.querySelector("a");
-      if (emailLink) {
-        const email = emailLink.href.replace("mailto:", "");
-        currentColleagueEmail = email;
-        meetingsModal.style.display = "flex";
-        loadMeetings(email, name);
-      }
-    }
-  });
-
-  closeMeetingsModalBtn.onclick = () => meetingsModal.style.display = "none";
-
-  async function loadMeetings(email, name) {
-    try {
-      const meetings = await apiCall(`/meetings/${encodeURIComponent(email)}`);
-      
-      if (meetings.length === 0) {
-        meetingsList.innerHTML = `<p style="color: #6b7280; font-style: italic;">No meetings recorded with ${name} yet.</p>`;
-      } else {
-        meetingsList.innerHTML = meetings
-          .sort((a, b) => new Date(b.date) - new Date(a.date))
-          .map(m => `
-            <div style="padding: 10px; border-bottom: 1px solid #eee; margin-bottom: 8px;">
-              <strong>${new Date(m.date).toLocaleDateString()}</strong>
-              <p style="margin: 5px 0 0 0; color: #444;">${m.description}</p>
-            </div>
-          `).join("");
-      }
-    } catch (error) {
-      console.error("Failed to load meetings:", error);
-      meetingsList.innerHTML = `<p style="color: #ef4444;">Error loading meetings. Please try again.</p>`;
-    }
-  }
-
-  addMeetingBtn.onclick = async () => {
-    const date = meetingDate.value;
-    const desc = meetingDesc.value.trim();
-    
-    if(!date || !desc) {
-      alert("Date and description are required");
-      return;
-    }
-
-    try {
-      addMeetingBtn.textContent = 'Adding...';
-      addMeetingBtn.disabled = true;
-
-      await apiCall("/meetings", {
-        method: "POST",
-        body: JSON.stringify({
-          colleague_email: currentColleagueEmail,
-          date,
-          description: desc
-        })
-      });
-
-      meetingDate.value = "";
-      meetingDesc.value = "";
-      loadMeetings(currentColleagueEmail);
-      
-    } catch (error) {
-      console.error("Failed to save meeting:", error);
-      alert("Failed to save meeting. Please try again.");
-    } finally {
-      addMeetingBtn.textContent = 'Add Meeting';
-      addMeetingBtn.disabled = false;
-    }
-  };
-
-  // Modal click outside to close
-  document.querySelectorAll(".modal").forEach(m => {
-    m.addEventListener("click", (e) => {
-      if(e.target === m) m.style.display = "none";
-    });
-  });
-
-  // Keyboard shortcuts
-  document.addEventListener("keydown", (e) => {
-    if(e.key === "Escape") {
-      document.querySelectorAll(".modal").forEach(m => m.style.display = "none");
-    }
-  });
-  </script>
-</body>
-</html>
