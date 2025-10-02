@@ -5,7 +5,7 @@ const path = require("path");
 const bcrypt = require("bcryptjs");
 
 const app = express();
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 10000;
 const isProduction = process.env.NODE_ENV === 'production';
 
 // Database setup - supports both SQLite (dev) and PostgreSQL (production)
