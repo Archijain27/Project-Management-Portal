@@ -18,9 +18,9 @@ if (isProduction && process.env.DATABASE_URL) {
     connectionString: process.env.DATABASE_URL,
     ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
   });
-  
+ 
   console.log('Using PostgreSQL database in production');
-  
+ 
   // Wrapper to make PostgreSQL work like SQLite
   db = {
     serialize: (callback) => callback(),
@@ -30,11 +30,11 @@ if (isProduction && process.env.DATABASE_URL) {
       pgQuery = pgQuery.replace(/\?/g, () => `$${paramIndex++}`);
       pgQuery = pgQuery.replace(/INTEGER PRIMARY KEY AUTOINCREMENT/g, 'SERIAL PRIMARY KEY');
       pgQuery = pgQuery.replace(/AUTOINCREMENT/g, '');
-      
+     
       if (pgQuery.includes('ALTER TABLE') && pgQuery.includes('ADD COLUMN')) {
         return pool.query(pgQuery, params)
           .then(result => {
-            if (callback) callback.call({ 
+            if (callback) callback.call({
               lastID: result.rows && result.rows[0] ? result.rows[0].id : null,
               changes: result.rowCount || 0
             }, null);
@@ -50,7 +50,7 @@ if (isProduction && process.env.DATABASE_URL) {
       } else {
         return pool.query(pgQuery, params)
           .then(result => {
-            if (callback) callback.call({ 
+            if (callback) callback.call({
               lastID: result.rows && result.rows[0] ? result.rows[0].id : null,
               changes: result.rowCount || 0
             }, null);
@@ -65,7 +65,7 @@ if (isProduction && process.env.DATABASE_URL) {
       let pgQuery = query;
       let paramIndex = 1;
       pgQuery = pgQuery.replace(/\?/g, () => `$${paramIndex++}`);
-      
+     
       return pool.query(pgQuery, params)
         .then(result => callback(null, result.rows[0] || null))
         .catch(err => {
@@ -77,7 +77,7 @@ if (isProduction && process.env.DATABASE_URL) {
       let pgQuery = query;
       let paramIndex = 1;
       pgQuery = pgQuery.replace(/\?/g, () => `$${paramIndex++}`);
-      
+     
       return pool.query(pgQuery, params)
         .then(result => callback(null, result.rows || []))
         .catch(err => {
@@ -285,6 +285,16 @@ db.serialize(() => {
       }
     );
   });
+
+  // ===================== ADD PROGRESS COLUMN TO PROJECTS =====================
+  db.run(
+    `ALTER TABLE projects ADD COLUMN progress INTEGER DEFAULT 0`,
+    (err) => {
+      if (err && !err.message.includes('duplicate') && err.code !== '42701') {
+        console.error('Error adding progress column:', err);
+      }
+    }
+  );
 });
 
 // ===================== AUTH API WITH PASSWORD HASHING =====================
@@ -367,21 +377,21 @@ app.post("/login", (req, res) => {
 
 // ===================== PROJECTS API =====================
 app.post("/projects", (req, res) => {
-  const { name, owner_email, colleagues } = req.body;
+  const { name, owner_email, colleagues, progress = 0 } = req.body;
  
   if (!name || !owner_email) {
     return res.status(400).json({ error: "Project name and owner email are required." });
   }
  
   db.run(
-    "INSERT INTO projects (name, owner_email, colleagues) VALUES (?, ?, ?)",
-    [name, owner_email, colleagues || "[]"],
+    "INSERT INTO projects (name, owner_email, colleagues, progress) VALUES (?, ?, ?, ?)",
+    [name, owner_email, colleagues || "[]", progress],
     function (err) {
       if (err) {
         console.error('Project creation error:', err);
         return res.status(500).json({ error: "Error creating project." });
       }
-      res.json({ id: this.lastID, name, owner_email, colleagues });
+      res.json({ id: this.lastID, name, owner_email, colleagues, progress });
     }
   );
 });
@@ -398,15 +408,57 @@ app.get("/projects/:email", (req, res) => {
 });
 
 app.put("/projects/:id", (req, res) => {
-  const { name, colleagues } = req.body;
-  db.run(
-    "UPDATE projects SET name = ?, colleagues = ? WHERE id = ?",
-    [name, colleagues, req.params.id],
-    function (err) {
-      if (err) return res.status(500).json({ error: "Error updating project." });
-      res.json({ updated: this.changes });
+  const { name, colleagues, progress } = req.body;
+  
+  if (!name) {
+    return res.status(400).json({ error: "Name is required." });
+  }
+
+  let query = 'UPDATE projects SET name = ?, colleagues = ?';
+  let params = [name, colleagues];
+
+  if (progress !== undefined) {
+    query += ', progress = ?';
+    params.push(progress);
+  }
+
+  query += ' WHERE id = ?';
+  params.push(req.params.id);
+
+  db.run(query, params, function (err) {
+    if (err) {
+      console.error('Error updating project:', err);
+      return res.status(500).json({ error: "Error updating project." });
     }
-  );
+    
+    if (this.changes === 0) {
+      return res.status(404).json({ error: 'Project not found' });
+    }
+    
+    res.json({ message: 'Project updated successfully', updated: this.changes });
+  });
+});
+
+app.patch("/projects/:id/progress", (req, res) => {
+  const { id } = req.params;
+  const { progress } = req.body;
+
+  if (progress === undefined || progress < 0 || progress > 100) {
+    return res.status(400).json({ error: 'Progress must be between 0 and 100' });
+  }
+
+  db.run('UPDATE projects SET progress = ? WHERE id = ?', [progress, id], function(err) {
+    if (err) {
+      console.error('Error updating progress:', err);
+      return res.status(500).json({ error: 'Failed to update progress' });
+    }
+    
+    if (this.changes === 0) {
+      return res.status(404).json({ error: 'Project not found' });
+    }
+    
+    res.json({ message: 'Progress updated successfully', progress });
+  });
 });
 
 app.delete("/projects/:id", (req, res) => {
@@ -692,8 +744,8 @@ app.delete("/deadlines/:id", (req, res) => {
 // ===================== ENHANCED CALENDAR EVENTS API =====================
 app.get("/events/:email", (req, res) => {
   db.all(
-    `SELECT 
-      id, title, description, event_date as date, start_time as start, end_time as end, 
+    `SELECT
+      id, title, description, event_date as date, start_time as start, end_time as end,
       location, category, attendees, reminder, is_all_day as isAllDay, recurrence,
       recurrence_end as recurrenceEnd, show_as as showAs, priority, is_online as isOnline,
       meeting_link as meetingLink, attachments, repeat_weekly as repeatWeekly,
@@ -718,14 +770,14 @@ app.get("/events/:email", (req, res) => {
 
 app.post("/events", (req, res) => {
   const { userEmail, title, description, date, start, end, location, category, attendees, reminder, isAllDay, recurrence, recurrenceEnd, showAs, priority, isOnline, meetingLink, attachments, repeatWeekly } = req.body;
-  
+ 
   const created_date = new Date().toISOString();
   const modified_date = created_date;
-  
+ 
   db.run(
     `INSERT INTO calendar_events (
-      user_email, title, description, event_date, start_time, end_time, location, category, 
-      attendees, reminder, is_all_day, recurrence, recurrence_end, show_as, priority, 
+      user_email, title, description, event_date, start_time, end_time, location, category,
+      attendees, reminder, is_all_day, recurrence, recurrence_end, show_as, priority,
       is_online, meeting_link, attachments, repeat_weekly, created_date, modified_date
     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [userEmail, title, description, date, start, end, location, category || 'Work', attendees, reminder || 15, isAllDay ? 1 : 0, recurrence || 'none', recurrenceEnd, showAs || 'busy', priority || 'normal', isOnline ? 1 : 0, meetingLink, attachments, repeatWeekly ? 1 : 0, created_date, modified_date],
@@ -741,14 +793,14 @@ app.post("/events", (req, res) => {
 
 app.put("/events/:id", (req, res) => {
   const { title, description, date, start, end, location, category, attendees, reminder, isAllDay, recurrence, recurrenceEnd, showAs, priority, isOnline, meetingLink, attachments, repeatWeekly } = req.body;
-  
+ 
   const modified_date = new Date().toISOString();
-  
+ 
   db.run(
-    `UPDATE calendar_events SET 
-      title = ?, description = ?, event_date = ?, start_time = ?, end_time = ?, location = ?, 
-      category = ?, attendees = ?, reminder = ?, is_all_day = ?, recurrence = ?, 
-      recurrence_end = ?, show_as = ?, priority = ?, is_online = ?, meeting_link = ?, 
+    `UPDATE calendar_events SET
+      title = ?, description = ?, event_date = ?, start_time = ?, end_time = ?, location = ?,
+      category = ?, attendees = ?, reminder = ?, is_all_day = ?, recurrence = ?,
+      recurrence_end = ?, show_as = ?, priority = ?, is_online = ?, meeting_link = ?,
       attachments = ?, repeat_weekly = ?, modified_date = ?
     WHERE id = ?`,
     [title, description, date, start, end, location, category, attendees, reminder, isAllDay ? 1 : 0, recurrence, recurrenceEnd, showAs, priority, isOnline ? 1 : 0, meetingLink, attachments, repeatWeekly ? 1 : 0, modified_date, req.params.id],
@@ -831,8 +883,9 @@ app.get("*", (req, res) => {
 });
 
 // Start server
-app.listen(port, () => {
+app.listen(port, '0.0.0.0', () => {
   console.log(`Server running at http://localhost:${port}`);
   console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log(`Database: ${isProduction && process.env.DATABASE_URL ? 'PostgreSQL' : 'SQLite'}`);
 });
+
