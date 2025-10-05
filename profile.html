@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Profile</title>
+  <style>
+    :root {
+      --accent: #4f46e5;
+      --accent-2: #6d28d9;
+      --bg: #f4f4ff;
+      --card: #ffffff;
+      --muted: #6b7280;
+      --success: #10b981;
+      --error: #ef4444;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: var(--bg);
+      padding: 20px;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+      padding: 20px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    }
+
+    .header h1 {
+      color: #333;
+      font-size: 2rem;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 15px;
+    }
+
+    .btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.95rem;
+      font-weight: 600;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      color: white;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(79,70,229,0.3);
+    }
+
+    .btn-secondary {
+      background: white;
+      color: var(--accent);
+      border: 2px solid var(--accent);
+    }
+
+    .btn-secondary:hover {
+      background: var(--accent);
+      color: white;
+    }
+
+    .btn-success {
+      background: var(--success);
+      color: white;
+    }
+
+    .btn-success:hover {
+      background: #059669;
+    }
+
+    .profile-sections {
+      display: grid;
+      gap: 25px;
+    }
+
+    .section-card {
+      background: white;
+      border-radius: 12px;
+      padding: 25px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    }
+
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 15px;
+      border-bottom: 2px solid var(--bg);
+    }
+
+    .section-title {
+      font-size: 1.5rem;
+      color: #333;
+      font-weight: 700;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .form-group.full-width {
+      grid-column: 1 / -1;
+    }
+
+    label {
+      font-weight: 600;
+      color: #333;
+      font-size: 0.9rem;
+    }
+
+    input, textarea, select {
+      padding: 12px;
+      border: 2px solid #e5e7eb;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      transition: all 0.3s;
+      font-family: inherit;
+    }
+
+    input:focus, textarea:focus, select:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(79,70,229,0.1);
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 100px;
+    }
+
+    .list-items {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .list-item {
+      background: var(--bg);
+      padding: 15px;
+      border-radius: 8px;
+      border-left: 4px solid var(--accent);
+      position: relative;
+    }
+
+    .list-item-content {
+      display: grid;
+      gap: 10px;
+    }
+
+    .remove-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: var(--error);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      cursor: pointer;
+      font-size: 1.2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s;
+    }
+
+    .remove-btn:hover {
+      background: #dc2626;
+      transform: scale(1.1);
+    }
+
+    .add-btn {
+      background: var(--bg);
+      color: var(--accent);
+      border: 2px dashed var(--accent);
+      padding: 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .add-btn:hover {
+      background: var(--accent);
+      color: white;
+      border-style: solid;
+    }
+
+    .notification {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 15px 25px;
+      border-radius: 8px;
+      color: white;
+      font-weight: 600;
+      z-index: 1000;
+      animation: slideIn 0.3s ease-out;
+      display: none;
+    }
+
+    .notification.success {
+      background: var(--success);
+    }
+
+    .notification.error {
+      background: var(--error);
+    }
+
+    .notification.show {
+      display: block;
+    }
+
+    @keyframes slideIn {
+      from {
+        transform: translateX(400px);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    .scholar-link-section {
+      background: linear-gradient(135deg, rgba(79,70,229,0.1), rgba(109,40,217,0.1));
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 15px;
+    }
+
+    .scholar-link-section input {
+      width: 100%;
+    }
+
+    @media (max-width: 768px) {
+      .header {
+        flex-direction: column;
+        gap: 15px;
+      }
+
+      .header-actions {
+        width: 100%;
+        flex-direction: column;
+      }
+
+      .btn {
+        width: 100%;
+        justify-content: center;
+      }
+
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="notification" id="notification"></div>
+
+  <div class="container">
+    <div class="header">
+      <h1>📋 My Profile</h1>
+      <div class="header-actions">
+        <button class="btn btn-primary" id="generateResumeBtn">📄 Generate Resume</button>
+        <button class="btn btn-success" id="saveProfileBtn">💾 Save Profile</button>
+        <button class="btn btn-secondary" id="backToDashboard">← Back to Dashboard</button>
+      </div>
+    </div>
+
+    <div class="profile-sections">
+      <!-- Basic Information -->
+      <div class="section-card">
+        <div class="section-header">
+          <h2 class="section-title">1. Basic Information</h2>
+        </div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Full Name *</label>
+            <input type="text" id="fullName" placeholder="Enter your full name" required>
+          </div>
+          <div class="form-group">
+            <label>Designation *</label>
+            <input type="text" id="designation" placeholder="e.g., Assistant Professor">
+          </div>
+          <div class="form-group">
+            <label>Department *</label>
+            <input type="text" id="department" placeholder="e.g., Computer Science">
+          </div>
+          <div class="form-group">
+            <label>Institution Name *</label>
+            <input type="text" id="institution" placeholder="e.g., IIT Delhi">
+          </div>
+          <div class="form-group full-width">
+            <label>Office Address</label>
+            <textarea id="officeAddress" placeholder="Enter complete office address"></textarea>
+          </div>
+          <div class="form-group">
+            <label>Official Email *</label>
+            <input type="email" id="officialEmail" placeholder="official@institution.edu">
+          </div>
+          <div class="form-group">
+            <label>Alternate Email</label>
+            <input type="email" id="alternateEmail" placeholder="alternate@email.com">
+          </div>
+          <div class="form-group">
+            <label>Phone</label>
+            <input type="tel" id="phone" placeholder="+91-XXXXXXXXXX">
+          </div>
+          <div class="form-group">
+            <label>Website/Portfolio</label>
+            <input type="url" id="website" placeholder="https://yourwebsite.com">
+          </div>
+        </div>
+      </div>
+
+      <!-- Academic Background -->
+      <div class="section-card">
+        <div class="section-header">
+          <h2 class="section-title">2. Academic Background</h2>
+          <button class="btn btn-secondary" id="addDegreeBtn">+ Add Degree</button>
+        </div>
+        <div class="list-items" id="degreesList"></div>
+      </div>
+
+      <!-- Employment History -->
+      <div class="section-card">
+        <div class="section-header">
+          <h2 class="section-title">3. Employment History</h2>
+          <button class="btn btn-secondary" id="addEmploymentBtn">+ Add Position</button>
+        </div>
+        <div class="list-items" id="employmentList"></div>
+      </div>
+
+      <!-- Research Interests -->
+      <div class="section-card">
+        <div class="section-header">
+          <h2 class="section-title">4. Research Interests</h2>
+        </div>
+        <div class="form-grid">
+          <div class="form-group full-width">
+            <label>Keywords (comma-separated)</label>
+            <input type="text" id="researchKeywords" placeholder="e.g., Wireless Communication, 6G, MIMO, Sub-THz">
+          </div>
+          <div class="form-group full-width">
+            <label>Description (2-3 sentences)</label>
+            <textarea id="researchDescription" placeholder="Describe your research interests in detail..."></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- Publications -->
+      <div class="section-card">
+        <div class="section-header">
+          <h2 class="section-title">5. Publications</h2>
+        </div>
+        <div class="scholar-link-section">
+          <div class="form-group">
+            <label>Google Scholar Profile Link</label>
+            <input type="url" id="scholarLink" placeholder="https://scholar.google.com/citations?user=...">
+          </div>
+        </div>
+      </div>
+
+      <!-- Teaching -->
+      <div class="section-card">
+        <div class="section-header">
+          <h2 class="section-title">6. Teaching</h2>
+          <button class="btn btn-secondary" id="addCourseBtn">+ Add Course</button>
+        </div>
+        <div class="list-items" id="coursesList"></div>
+      </div>
+
+      <!-- Grants & Funding -->
+      <div class="section-card">
+        <div class="section-header">
+          <h2 class="section-title">7. Grants & Funding</h2>
+          <button class="btn btn-secondary" id="addGrantBtn">+ Add Grant</button>
+        </div>
+        <div class="list-items" id="grantsList"></div>
+      </div>
+
+      <!-- Professional Activities -->
+      <div class="section-card">
+        <div class="section-header">
+          <h2 class="section-title">8. Professional Activities</h2>
+        </div>
+        <div class="form-group full-width">
+          <label>Professional Activities (conferences, memberships, reviewer roles, etc.)</label>
+          <textarea id="professionalActivities" rows="5" placeholder="List your professional activities..."></textarea>
+        </div>
+      </div>
+
+      <!-- Awards & Achievements -->
+      <div class="section-card">
+        <div class="section-header">
+          <h2 class="section-title">10. Awards & Achievements</h2>
+          <button class="btn btn-secondary" id="addAwardBtn">+ Add Award</button>
+        </div>
+        <div class="list-items" id="awardsList"></div>
+      </div>
+
+      <!-- Skills & Tools -->
+      <div class="section-card">
+        <div class="section-header">
+          <h2 class="section-title">11. Skills & Tools</h2>
+        </div>
+        <div class="form-group full-width">
+          <label>Skills & Tools (comma-separated)</label>
+          <input type="text" id="skills" placeholder="e.g., MATLAB, Python, LaTeX, Network Simulation, Machine Learning">
+        </div>
+      </div>
+
+      <!-- Outreach & Service -->
+      <div class="section-card">
+        <div class="section-header">
+          <h2 class="section-title">12. Outreach & Service</h2>
+        </div>
+        <div class="form-group full-width">
+          <label>Outreach & Service Activities</label>
+          <textarea id="outreachService" rows="5" placeholder="Community engagement, public lectures, consultancy, etc."></textarea>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API_BASE = window.location.origin;
+    let userEmail = sessionStorage.getItem('userEmail');
+
+    if (!userEmail) {
+      alert('Please log in first');
+      window.location.href = '/';
+    }
+
+    // Notification system
+    function showNotification(message, type = 'success') {
+      const notification = document.getElementById('notification');
+      notification.textContent = message;
+      notification.className = `notification ${type} show`;
+      setTimeout(() => {
+        notification.classList.remove('show');
+      }, 3000);
+    }
+
+    // Dynamic list management
+    function createListItem(type, data = {}) {
+      const item = document.createElement('div');
+      item.className = 'list-item';
+      
+      let content = '';
+      
+      switch(type) {
+        case 'degree':
+          content = `
+            <div class="list-item-content">
+              <input type="text" placeholder="Degree (e.g., Ph.D.)" value="${data.degree || ''}" data-field="degree">
+              <input type="text" placeholder="Specialization" value="${data.specialization || ''}" data-field="specialization">
+              <input type="text" placeholder="Institution" value="${data.institution || ''}" data-field="institution">
+              <input type="text" placeholder="Year" value="${data.year || ''}" data-field="year">
+              <input type="text" placeholder="Thesis Title (if applicable)" value="${data.thesis || ''}" data-field="thesis">
+              <input type="text" placeholder="Advisor/Mentor" value="${data.advisor || ''}" data-field="advisor">
+            </div>
+          `;
+          break;
+        
+        case 'employment':
+          content = `
+            <div class="list-item-content">
+              <input type="text" placeholder="Position Title" value="${data.position || ''}" data-field="position">
+              <input type="text" placeholder="Organization" value="${data.organization || ''}" data-field="organization">
+              <input type="text" placeholder="Duration (e.g., 2020-2023)" value="${data.duration || ''}" data-field="duration">
+              <textarea placeholder="Responsibilities" data-field="responsibilities">${data.responsibilities || ''}</textarea>
+            </div>
+          `;
+          break;
+        
+        case 'course':
+          content = `
+            <div class="list-item-content">
+              <input type="text" placeholder="Course Name" value="${data.courseName || ''}" data-field="courseName">
+              <input type="text" placeholder="Course Code" value="${data.courseCode || ''}" data-field="courseCode">
+              <input type="text" placeholder="Semester/Year" value="${data.semester || ''}" data-field="semester">
+              <textarea placeholder="Lab Supervision Details" data-field="labDetails">${data.labDetails || ''}</textarea>
+            </div>
+          `;
+          break;
+        
+        case 'grant':
+          content = `
+            <div class="list-item-content">
+              <input type="text" placeholder="Project Title" value="${data.projectTitle || ''}" data-field="projectTitle">
+              <input type="text" placeholder="Role (PI/Co-PI)" value="${data.role || ''}" data-field="role">
+              <input type="text" placeholder="Funding Agency" value="${data.agency || ''}" data-field="agency">
+              <input type="text" placeholder="Amount" value="${data.amount || ''}" data-field="amount">
+              <input type="text" placeholder="Duration" value="${data.duration || ''}" data-field="duration">
+              <select data-field="status">
+                <option value="ongoing" ${data.status === 'ongoing' ? 'selected' : ''}>Ongoing</option>
+                <option value="completed" ${data.status === 'completed' ? 'selected' : ''}>Completed</option>
+              </select>
+            </div>
+          `;
+          break;
+        
+        case 'award':
+          content = `
+            <div class="list-item-content">
+              <input type="text" placeholder="Award Title" value="${data.title || ''}" data-field="title">
+              <input type="text" placeholder="Awarding Organization" value="${data.organization || ''}" data-field="organization">
+              <input type="text" placeholder="Year" value="${data.year || ''}" data-field="year">
+              <textarea placeholder="Description" data-field="description">${data.description || ''}</textarea>
+            </div>
+          `;
+          break;
+      }
+      
+      item.innerHTML = content + '<button class="remove-btn">×</button>';
+      
+      item.querySelector('.remove-btn').onclick = () => item.remove();
+      
+      return item;
+    }
+
+    // Add button handlers
+    document.getElementById('addDegreeBtn').onclick = () => {
+      document.getElementById('degreesList').appendChild(createListItem('degree'));
+    };
+
+    document.getElementById('addEmploymentBtn').onclick = () => {
+      document.getElementById('employmentList').appendChild(createListItem('employment'));
+    };
+
+    document.getElementById('addCourseBtn').onclick = () => {
+      document.getElementById('coursesList').appendChild(createListItem('course'));
+    };
+
+    document.getElementById('addGrantBtn').onclick = () => {
+      document.getElementById('grantsList').appendChild(createListItem('grant'));
+    };
+
+    document.getElementById('addAwardBtn').onclick = () => {
+      document.getElementById('awardsList').appendChild(createListItem('award'));
+    };
+
+    // Collect list data
+    function collectListData(listId) {
+      const items = document.querySelectorAll(`#${listId} .list-item`);
+      return Array.from(items).map(item => {
+        const data = {};
+        item.querySelectorAll('[data-field]').forEach(field => {
+          data[field.dataset.field] = field.value;
+        });
+        return data;
+      });
+    }
+
+    // Save profile
+    document.getElementById('saveProfileBtn').onclick = async () => {
+      const profileData = {
+        userEmail: userEmail,
+        fullName: document.getElementById('fullName').value,
+        designation: document.getElementById('designation').value,
+        department: document.getElementById('department').value,
+        institution: document.getElementById('institution').value,
+        officeAddress: document.getElementById('officeAddress').value,
+        officialEmail: document.getElementById('officialEmail').value,
+        alternateEmail: document.getElementById('alternateEmail').value,
+        phone: document.getElementById('phone').value,
+        website: document.getElementById('website').value,
+        degrees: collectListData('degreesList'),
+        employment: collectListData('employmentList'),
+        researchKeywords: document.getElementById('researchKeywords').value,
+        researchDescription: document.getElementById('researchDescription').value,
+        scholarLink: document.getElementById('scholarLink').value,
+        courses: collectListData('coursesList'),
+        grants: collectListData('grantsList'),
+        professionalActivities: document.getElementById('professionalActivities').value,
+        awards: collectListData('awardsList'),
+        skills: document.getElementById('skills').value,
+        outreachService: document.getElementById('outreachService').value
+      };
+
+      try {
+        const response = await fetch(`${API_BASE}/profile`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(profileData)
+        });
+
+        const result = await response.json();
+        
+        if (response.ok) {
+          showNotification('Profile saved successfully!', 'success');
+        } else {
+          showNotification(result.error || 'Failed to save profile', 'error');
+        }
+      } catch (error) {
+        console.error('Save error:', error);
+        showNotification('Error saving profile', 'error');
+      }
+    };
+
+    // Load profile
+    async function loadProfile() {
+      try {
+        const response = await fetch(`${API_BASE}/profile/${encodeURIComponent(userEmail)}`);
+        const data = await response.json();
+
+        if (response.ok && data) {
+          document.getElementById('fullName').value = data.fullName || '';
+          document.getElementById('designation').value = data.designation || '';
+          document.getElementById('department').value = data.department || '';
+          document.getElementById('institution').value = data.institution || '';
+          document.getElementById('officeAddress').value = data.officeAddress || '';
+          document.getElementById('officialEmail').value = data.officialEmail || '';
+          document.getElementById('alternateEmail').value = data.alternateEmail || '';
+          document.getElementById('phone').value = data.phone || '';
+          document.getElementById('website').value = data.website || '';
+          document.getElementById('researchKeywords').value = data.researchKeywords || '';
+          document.getElementById('researchDescription').value = data.researchDescription || '';
+          document.getElementById('scholarLink').value = data.scholarLink || '';
+          document.getElementById('professionalActivities').value = data.professionalActivities || '';
+          document.getElementById('skills').value = data.skills || '';
+          document.getElementById('outreachService').value = data.outreachService || '';
+
+          // Load lists
+          if (data.degrees) {
+            data.degrees.forEach(degree => {
+              document.getElementById('degreesList').appendChild(createListItem('degree', degree));
+            });
+          }
+          if (data.employment) {
+            data.employment.forEach(emp => {
+              document.getElementById('employmentList').appendChild(createListItem('employment', emp));
+            });
+          }
+          if (data.courses) {
+            data.courses.forEach(course => {
+              document.getElementById('coursesList').appendChild(createListItem('course', course));
+            });
+          }
+          if (data.grants) {
+            data.grants.forEach(grant => {
+              document.getElementById('grantsList').appendChild(createListItem('grant', grant));
+            });
+          }
+          if (data.awards) {
+            data.awards.forEach(award => {
+              document.getElementById('awardsList').appendChild(createListItem('award', award));
+            });
+          }
+        }
+      } catch (error) {
+        console.error('Load error:', error);
+      }
+    }
+
+    // Generate Resume
+    document.getElementById('generateResumeBtn').onclick = () => {
+      showNotification('Generating resume...', 'success');
+      window.open(`${API_BASE}/generate-resume/${encodeURIComponent(userEmail)}`, '_blank');
+    };
+
+    // Back to dashboard
+    document.getElementById('backToDashboard').onclick = () => {
+      window.location.href = '/dashboard';
+    };
+
+    // Initialize
+    loadProfile();
+  </script>
+</body>
+</html>
+
