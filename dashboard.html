@@ -259,7 +259,7 @@
       <li id="menu-dashboard" class="active">Dashboard</li>
       <li id="menu-calendar">Calendar</li>
       <li>Research Paper</li>
-      <li>Profile</li>
+      <li id="menu-profile">Profile</li>
       <li id="logout"> Logout</li>
     </ul>
   </div>
@@ -508,7 +508,13 @@
     // Redirect to Outlook Calendar page
     window.location.href = '/outlook-calendar.html';
   };
-
+  // Profile menu handler
+const menuProfile = document.getElementById("menu-profile");
+if (menuProfile) {
+  menuProfile.onclick = () => {
+    window.location.href = '/profile.html';
+  };
+}
   // Tile click handlers
   document.querySelectorAll('.dashboard-tile').forEach(tile => {
     tile.addEventListener('click', () => {
@@ -555,4 +561,5 @@
 
   </script>
 </body>
+
 </html>
