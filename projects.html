@@ -70,8 +70,9 @@
     }
    
     .project-header {
-      display: flex;
-      justify-content: space-between;
+      display: grid;
+      grid-template-columns: 200px 1fr auto;
+      gap: 15px;
       align-items: center;
     }
    
@@ -79,6 +80,11 @@
       margin: 0;
       font-size: 1.5rem;
       color: #333;
+    }
+
+    .project-header-buttons {
+      display: flex;
+      gap: 8px;
     }
    
     .desc-btn {
@@ -89,49 +95,43 @@
       color: white;
       cursor: pointer;
       font-size: 0.85rem;
-      margin-left: 5px;
       transition: background 0.2s;
+      white-space: nowrap;
     }
    
     .desc-btn:hover {
       background: #4338ca;
     }
 
-    /* Progress Section */
-    .progress-section {
-      margin-top: 15px;
-      padding: 15px;
+    /* Compact Progress Section in Header */
+    .progress-compact {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 15px;
       background: rgba(79, 70, 229, 0.05);
       border-radius: 8px;
-      border-left: 4px solid #4f46e5;
+      border-left: 3px solid #4f46e5;
+      min-width: 300px;
     }
 
-    .progress-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 10px;
-    }
-
-    .progress-label {
-      font-weight: 600;
-      color: #374151;
-      font-size: 0.95rem;
-    }
-
-    .progress-percentage {
+    .progress-percentage-compact {
       font-weight: bold;
-      font-size: 1.2rem;
+      font-size: 1rem;
       color: #4f46e5;
+      min-width: 45px;
+      text-align: right;
     }
 
-    .progress-slider-container {
+    .progress-slider-container-compact {
       position: relative;
+      flex: 1;
+      min-width: 150px;
     }
 
-    .progress-slider {
+    .progress-slider-compact {
       width: 100%;
-      height: 8px;
+      height: 6px;
       border-radius: 5px;
       background: #e5e7eb;
       outline: none;
@@ -140,11 +140,11 @@
       cursor: pointer;
     }
 
-    .progress-slider::-webkit-slider-thumb {
+    .progress-slider-compact::-webkit-slider-thumb {
       -webkit-appearance: none;
       appearance: none;
-      width: 20px;
-      height: 20px;
+      width: 16px;
+      height: 16px;
       border-radius: 50%;
       background: #4f46e5;
       cursor: pointer;
@@ -152,14 +152,14 @@
       transition: all 0.2s;
     }
 
-    .progress-slider::-webkit-slider-thumb:hover {
+    .progress-slider-compact::-webkit-slider-thumb:hover {
       background: #4338ca;
-      transform: scale(1.1);
+      transform: scale(1.15);
     }
 
-    .progress-slider::-moz-range-thumb {
-      width: 20px;
-      height: 20px;
+    .progress-slider-compact::-moz-range-thumb {
+      width: 16px;
+      height: 16px;
       border-radius: 50%;
       background: #4f46e5;
       cursor: pointer;
@@ -168,37 +168,28 @@
       transition: all 0.2s;
     }
 
-    .progress-slider::-moz-range-thumb:hover {
+    .progress-slider-compact::-moz-range-thumb:hover {
       background: #4338ca;
-      transform: scale(1.1);
+      transform: scale(1.15);
     }
 
-    .progress-bar {
+    .progress-bar-compact {
       position: absolute;
       top: 0;
       left: 0;
-      height: 8px;
+      height: 6px;
       border-radius: 5px;
       background: linear-gradient(90deg, #4f46e5, #6d28d9);
       pointer-events: none;
       transition: width 0.3s ease;
     }
 
-    .progress-milestones {
-      display: flex;
-      justify-content: space-between;
-      margin-top: 8px;
+    .progress-status-compact {
+      padding: 4px 10px;
+      border-radius: 12px;
       font-size: 0.75rem;
-      color: #6b7280;
-    }
-
-    .progress-status {
-      margin-top: 10px;
-      padding: 8px 12px;
-      border-radius: 6px;
-      font-size: 0.85rem;
-      font-weight: 500;
-      text-align: center;
+      font-weight: 600;
+      white-space: nowrap;
     }
 
     .status-not-started {
@@ -402,6 +393,17 @@
       font-weight: 600;
       color: #374151;
     }
+
+    @media (max-width: 768px) {
+      .project-header {
+        grid-template-columns: 1fr;
+        gap: 10px;
+      }
+
+      .progress-compact {
+        min-width: auto;
+      }
+    }
   </style>
 </head>
 <body>
@@ -434,7 +436,7 @@
       
       <div class="modal-progress-section">
         <label>Initial Progress: <span id="newProjectProgress">0</span>%</label>
-        <input type="range" id="newProgressSlider" min="0" max="100" value="0" class="progress-slider" />
+        <input type="range" id="newProgressSlider" min="0" max="100" value="0" class="progress-slider-compact" />
       </div>
 
       <h4>Team Members</h4>
@@ -459,7 +461,7 @@
       
       <div class="modal-progress-section">
         <label>Progress: <span id="editProjectProgress">0</span>%</label>
-        <input type="range" id="editProgressSlider" min="0" max="100" value="0" class="progress-slider" />
+        <input type="range" id="editProgressSlider" min="0" max="100" value="0" class="progress-slider-compact" />
       </div>
 
       <h4>Team Members</h4>
@@ -554,8 +556,8 @@
   function getProgressStatus(progress) {
     if (progress === 0) return { class: 'status-not-started', text: 'Not Started' };
     if (progress < 50) return { class: 'status-in-progress', text: 'In Progress' };
-    if (progress < 100) return { class: 'status-nearly-done', text: 'Nearly Complete' };
-    return { class: 'status-completed', text: 'Completed ✓' };
+    if (progress < 100) return { class: 'status-nearly-done', text: 'Nearly Done' };
+    return { class: 'status-completed', text: 'Done ✓' };
   }
 
   addProjectBtn.onclick = () => {
@@ -631,28 +633,18 @@
       div.innerHTML = `
         <div class="project-header">
           <h3>${p.name}</h3>
-          <div>
+          <div class="progress-compact">
+            <div class="progress-slider-container-compact">
+              <div class="progress-bar-compact" style="width: ${progress}%"></div>
+              <input type="range" class="progress-slider-compact" min="0" max="100" value="${progress}" data-project-id="${p.id}" />
+            </div>
+            <span class="progress-percentage-compact">${progress}%</span>
+            <span class="progress-status-compact ${status.class}">${status.text}</span>
+          </div>
+          <div class="project-header-buttons">
             <button class="desc-btn" onclick="window.location.href='description.html?id=${p.id}'">Description</button>
             <button class="desc-btn edit-btn" data-id="${p.id}" style="background:#16a34a;">Edit</button>
           </div>
-        </div>
-        <div class="progress-section">
-          <div class="progress-header">
-            <span class="progress-label">Project Progress</span>
-            <span class="progress-percentage">${progress}%</span>
-          </div>
-          <div class="progress-slider-container">
-            <div class="progress-bar" style="width: ${progress}%"></div>
-            <input type="range" class="progress-slider" min="0" max="100" value="${progress}" data-project-id="${p.id}" />
-          </div>
-          <div class="progress-milestones">
-            <span>0%</span>
-            <span>25%</span>
-            <span>50%</span>
-            <span>75%</span>
-            <span>100%</span>
-          </div>
-          <div class="progress-status ${status.class}">${status.text}</div>
         </div>
       `;
 
@@ -672,7 +664,7 @@
               colDiv.innerHTML += `
                 <p>
                   <strong>${c.name}</strong>
-                  <a href="mailto:${c.email}" target="_blank" title="Send email to ${c.name}">
+                  <a href="https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(c.email)}" target="_blank" title="Send email to ${c.name}">
                     <img src="https://www.gstatic.com/images/icons/material/product/2x/gmail_48dp.png"
                          alt="Gmail" class="email-icon">
                   </a>
@@ -694,7 +686,7 @@
       });
     });
 
-    document.querySelectorAll(".progress-slider").forEach(slider => {
+    document.querySelectorAll(".progress-slider-compact").forEach(slider => {
       slider.addEventListener('change', async (e) => {
         const projectId = e.target.dataset.projectId;
         const newProgress = parseInt(e.target.value);
@@ -702,16 +694,16 @@
       });
 
       slider.addEventListener('input', (e) => {
-        const container = e.target.closest('.progress-section');
-        const percentage = container.querySelector('.progress-percentage');
-        const bar = container.querySelector('.progress-bar');
-        const statusDiv = container.querySelector('.progress-status');
+        const container = e.target.closest('.progress-compact');
+        const percentage = container.querySelector('.progress-percentage-compact');
+        const bar = container.querySelector('.progress-bar-compact');
+        const statusDiv = container.querySelector('.progress-status-compact');
         
         percentage.textContent = e.target.value + '%';
         bar.style.width = e.target.value + '%';
         
         const status = getProgressStatus(parseInt(e.target.value));
-        statusDiv.className = 'progress-status ' + status.class;
+        statusDiv.className = 'progress-status-compact ' + status.class;
         statusDiv.textContent = status.text;
       });
     });
@@ -984,10 +976,10 @@
       const colP = e.target.closest("p");
       const emailLink = colP.querySelector("a");
       if (emailLink) {
-        const email = emailLink.href.replace("mailto:", "");
-        currentColleagueEmail = email;
+        const email = emailLink.href.replace("https://mail.google.com/mail/?view=cm&fs=1&to=", "");
+        currentColleagueEmail = decodeURIComponent(email);
         meetingsModal.style.display = "flex";
-        loadMeetings(email, name);
+        loadMeetings(currentColleagueEmail, name);
       }
     }
   });
