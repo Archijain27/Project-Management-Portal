@@ -869,14 +869,29 @@ app.get("/profile/:email", (req, res) => {
         return res.json(null);
       }
       
-      // Parse JSON fields
+      // Convert snake_case to camelCase for frontend
       const profile = {
-        ...row,
+        userEmail: row.user_email,
+        fullName: row.full_name,
+        designation: row.designation,
+        department: row.department,
+        institution: row.institution,
+        officeAddress: row.office_address,
+        officialEmail: row.official_email,
+        alternateEmail: row.alternate_email,
+        phone: row.phone,
+        website: row.website,
         degrees: row.degrees ? JSON.parse(row.degrees) : [],
         employment: row.employment ? JSON.parse(row.employment) : [],
+        researchKeywords: row.research_keywords,
+        researchDescription: row.research_description,
+        scholarLink: row.scholar_link,
         courses: row.courses ? JSON.parse(row.courses) : [],
         grants: row.grants ? JSON.parse(row.grants) : [],
-        awards: row.awards ? JSON.parse(row.awards) : []
+        professionalActivities: row.professional_activities,
+        awards: row.awards ? JSON.parse(row.awards) : [],
+        skills: row.skills,
+        outreachService: row.outreach_service
       };
       
       res.json(profile);
@@ -1358,10 +1373,20 @@ app.get("*", (req, res) => {
   }
 });
 
+// ===================== ERROR HANDLING =====================
+app.use((err, req, res, next) => { console.error('Unhandled error:', err);
+res.status(500).json({ error: 'Internal server error' }); });
+
+
 // Start server
 app.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`);
   console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log(`Database: ${isProduction && process.env.DATABASE_URL ? 'PostgreSQL' : 'SQLite'}`);
 });
+
+// ===================== PROCESS ERROR HANDLERS =====================
+process.on('unhandledRejection', (reason, promise) => { console.error('Unhandled Rejection at:', promise, 'reason:', reason); });
+process.on('uncaughtException', (error) => { console.error('Uncaught Exception:', error); });
+
 
