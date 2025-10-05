@@ -244,6 +244,35 @@ db.serialize(() => {
     FOREIGN KEY(user_email) REFERENCES users(email)
   )`);
 
+  // ===================== PROFILE TABLE =====================
+  db.run(`CREATE TABLE IF NOT EXISTS profiles (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_email TEXT UNIQUE,
+    full_name TEXT,
+    designation TEXT,
+    department TEXT,
+    institution TEXT,
+    office_address TEXT,
+    official_email TEXT,
+    alternate_email TEXT,
+    phone TEXT,
+    website TEXT,
+    degrees TEXT,
+    employment TEXT,
+    research_keywords TEXT,
+    research_description TEXT,
+    scholar_link TEXT,
+    courses TEXT,
+    grants TEXT,
+    professional_activities TEXT,
+    awards TEXT,
+    skills TEXT,
+    outreach_service TEXT,
+    created_date TEXT,
+    modified_date TEXT,
+    FOREIGN KEY(user_email) REFERENCES users(email)
+  )`);
+
   // Add new columns to existing calendar_events table
   const calendarColumns = [
     "location TEXT",
@@ -823,6 +852,494 @@ app.delete("/calendar_events/:id", (req, res) => {
   });
 });
 
+// ===================== PROFILE API ENDPOINTS =====================
+
+// GET profile by email
+app.get("/profile/:email", (req, res) => {
+  db.get(
+    "SELECT * FROM profiles WHERE user_email = ?",
+    [req.params.email],
+    (err, row) => {
+      if (err) {
+        console.error('Error fetching profile:', err);
+        return res.status(500).json({ error: "Error fetching profile." });
+      }
+      
+      if (!row) {
+        return res.json(null);
+      }
+      
+      // Parse JSON fields
+      const profile = {
+        ...row,
+        degrees: row.degrees ? JSON.parse(row.degrees) : [],
+        employment: row.employment ? JSON.parse(row.employment) : [],
+        courses: row.courses ? JSON.parse(row.courses) : [],
+        grants: row.grants ? JSON.parse(row.grants) : [],
+        awards: row.awards ? JSON.parse(row.awards) : []
+      };
+      
+      res.json(profile);
+    }
+  );
+});
+
+// POST/UPDATE profile
+app.post("/profile", (req, res) => {
+  const {
+    userEmail,
+    fullName,
+    designation,
+    department,
+    institution,
+    officeAddress,
+    officialEmail,
+    alternateEmail,
+    phone,
+    website,
+    degrees,
+    employment,
+    researchKeywords,
+    researchDescription,
+    scholarLink,
+    courses,
+    grants,
+    professionalActivities,
+    awards,
+    skills,
+    outreachService
+  } = req.body;
+
+  if (!userEmail) {
+    return res.status(400).json({ error: "User email is required." });
+  }
+
+  const modifiedDate = new Date().toISOString();
+
+  // Check if profile exists
+  db.get(
+    "SELECT id FROM profiles WHERE user_email = ?",
+    [userEmail],
+    (err, row) => {
+      if (err) {
+        console.error('Error checking profile:', err);
+        return res.status(500).json({ error: "Error saving profile." });
+      }
+
+      const degreesJson = JSON.stringify(degrees || []);
+      const employmentJson = JSON.stringify(employment || []);
+      const coursesJson = JSON.stringify(courses || []);
+      const grantsJson = JSON.stringify(grants || []);
+      const awardsJson = JSON.stringify(awards || []);
+
+      if (row) {
+        // Update existing profile
+        db.run(
+          `UPDATE profiles SET 
+            full_name = ?, designation = ?, department = ?, institution = ?,
+            office_address = ?, official_email = ?, alternate_email = ?, phone = ?,
+            website = ?, degrees = ?, employment = ?, research_keywords = ?,
+            research_description = ?, scholar_link = ?, courses = ?, grants = ?,
+            professional_activities = ?, awards = ?, skills = ?, outreach_service = ?,
+            modified_date = ?
+          WHERE user_email = ?`,
+          [
+            fullName, designation, department, institution,
+            officeAddress, officialEmail, alternateEmail, phone,
+            website, degreesJson, employmentJson, researchKeywords,
+            researchDescription, scholarLink, coursesJson, grantsJson,
+            professionalActivities, awardsJson, skills, outreachService,
+            modifiedDate, userEmail
+          ],
+          function(err) {
+            if (err) {
+              console.error('Error updating profile:', err);
+              return res.status(500).json({ error: "Error updating profile." });
+            }
+            res.json({ message: "Profile updated successfully", updated: this.changes });
+          }
+        );
+      } else {
+        // Create new profile
+        const createdDate = new Date().toISOString();
+        db.run(
+          `INSERT INTO profiles (
+            user_email, full_name, designation, department, institution,
+            office_address, official_email, alternate_email, phone, website,
+            degrees, employment, research_keywords, research_description,
+            scholar_link, courses, grants, professional_activities, awards,
+            skills, outreach_service, created_date, modified_date
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          [
+            userEmail, fullName, designation, department, institution,
+            officeAddress, officialEmail, alternateEmail, phone, website,
+            degreesJson, employmentJson, researchKeywords, researchDescription,
+            scholarLink, coursesJson, grantsJson, professionalActivities,
+            awardsJson, skills, outreachService, createdDate, modifiedDate
+          ],
+          function(err) {
+            if (err) {
+              console.error('Error creating profile:', err);
+              return res.status(500).json({ error: "Error creating profile." });
+            }
+            res.json({ message: "Profile created successfully", id: this.lastID });
+          }
+        );
+      }
+    }
+  );
+});
+
+// DELETE profile
+app.delete("/profile/:email", (req, res) => {
+  db.run(
+    "DELETE FROM profiles WHERE user_email = ?",
+    [req.params.email],
+    function(err) {
+      if (err) {
+        console.error('Error deleting profile:', err);
+        return res.status(500).json({ error: "Error deleting profile." });
+      }
+      res.json({ deleted: this.changes, message: "Profile deleted successfully" });
+    }
+  );
+});
+
+// ===================== RESUME GENERATION API =====================
+
+app.get("/generate-resume/:email", async (req, res) => {
+  try {
+    const profile = await new Promise((resolve, reject) => {
+      db.get(
+        "SELECT * FROM profiles WHERE user_email = ?",
+        [req.params.email],
+        (err, row) => {
+          if (err) reject(err);
+          else resolve(row);
+        }
+      );
+    });
+
+    if (!profile) {
+      return res.status(404).send(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Resume Not Available</title>
+          <style>
+            body { font-family: Arial, sans-serif; padding: 50px; text-align: center; }
+            h1 { color: #ef4444; }
+          </style>
+        </head>
+        <body>
+          <h1>Profile Not Found</h1>
+          <p>Please complete your profile first before generating a resume.</p>
+          <button onclick="window.close()">Close</button>
+        </body>
+        </html>
+      `);
+    }
+
+    // Parse JSON fields
+    const degrees = profile.degrees ? JSON.parse(profile.degrees) : [];
+    const employment = profile.employment ? JSON.parse(profile.employment) : [];
+    const courses = profile.courses ? JSON.parse(profile.courses) : [];
+    const grants = profile.grants ? JSON.parse(profile.grants) : [];
+    const awards = profile.awards ? JSON.parse(profile.awards) : [];
+
+    // Generate HTML resume
+    const resumeHTML = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Resume - ${profile.full_name || 'Academic Professional'}</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Georgia', serif;
+      line-height: 1.6;
+      color: #333;
+      background: #f5f5f5;
+      padding: 20px;
+    }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      background: white;
+      padding: 50px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.1);
+    }
+    .header {
+      text-align: center;
+      border-bottom: 3px solid #4f46e5;
+      padding-bottom: 20px;
+      margin-bottom: 30px;
+    }
+    .header h1 {
+      font-size: 2.5rem;
+      color: #1a1a1a;
+      margin-bottom: 10px;
+    }
+    .header .designation {
+      font-size: 1.3rem;
+      color: #4f46e5;
+      font-weight: 600;
+      margin-bottom: 15px;
+    }
+    .contact-info {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 20px;
+      font-size: 0.95rem;
+      color: #666;
+    }
+    .contact-info span {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .section {
+      margin-bottom: 30px;
+    }
+    .section-title {
+      font-size: 1.5rem;
+      color: #4f46e5;
+      border-bottom: 2px solid #e5e7eb;
+      padding-bottom: 8px;
+      margin-bottom: 15px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .item {
+      margin-bottom: 20px;
+    }
+    .item-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 5px;
+    }
+    .item-title {
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: #1a1a1a;
+    }
+    .item-subtitle {
+      font-style: italic;
+      color: #666;
+      margin-bottom: 5px;
+    }
+    .item-date {
+      color: #888;
+      font-size: 0.9rem;
+    }
+    .item-description {
+      color: #555;
+      margin-top: 8px;
+      line-height: 1.7;
+    }
+    .keywords {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .keyword {
+      background: #e0e7ff;
+      color: #4f46e5;
+      padding: 5px 12px;
+      border-radius: 15px;
+      font-size: 0.9rem;
+    }
+    .print-btn {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: #4f46e5;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1rem;
+      font-weight: 600;
+      box-shadow: 0 4px 10px rgba(79,70,229,0.3);
+      transition: all 0.3s;
+    }
+    .print-btn:hover {
+      background: #4338ca;
+      transform: translateY(-2px);
+    }
+    @media print {
+      body { background: white; padding: 0; }
+      .container { box-shadow: none; padding: 0; }
+      .print-btn { display: none; }
+    }
+    ul { margin-left: 20px; margin-top: 8px; }
+    li { margin-bottom: 5px; color: #555; }
+  </style>
+</head>
+<body>
+  <button class="print-btn" onclick="window.print()">🖨️ Print Resume</button>
+  
+  <div class="container">
+    <div class="header">
+      <h1>${profile.full_name || 'Name Not Provided'}</h1>
+      <div class="designation">${profile.designation || ''} ${profile.department ? '| ' + profile.department : ''}</div>
+      ${profile.institution ? `<div style="font-size: 1.1rem; color: #666; margin-bottom: 15px;">${profile.institution}</div>` : ''}
+      <div class="contact-info">
+        ${profile.official_email ? `<span>✉️ ${profile.official_email}</span>` : ''}
+        ${profile.phone ? `<span>📱 ${profile.phone}</span>` : ''}
+        ${profile.website ? `<span>🌐 <a href="${profile.website}" target="_blank">${profile.website}</a></span>` : ''}
+        ${profile.scholar_link ? `<span>📚 <a href="${profile.scholar_link}" target="_blank">Google Scholar</a></span>` : ''}
+      </div>
+    </div>
+
+    ${profile.research_description ? `
+    <div class="section">
+      <h2 class="section-title">Research Interests</h2>
+      <p class="item-description">${profile.research_description}</p>
+      ${profile.research_keywords ? `
+        <div class="keywords">
+          ${profile.research_keywords.split(',').map(kw => `<span class="keyword">${kw.trim()}</span>`).join('')}
+        </div>
+      ` : ''}
+    </div>
+    ` : ''}
+
+    ${degrees.length > 0 ? `
+    <div class="section">
+      <h2 class="section-title">Education</h2>
+      ${degrees.map(deg => `
+        <div class="item">
+          <div class="item-header">
+            <div class="item-title">${deg.degree || ''} ${deg.specialization ? 'in ' + deg.specialization : ''}</div>
+            <div class="item-date">${deg.year || ''}</div>
+          </div>
+          <div class="item-subtitle">${deg.institution || ''}</div>
+          ${deg.thesis ? `<div class="item-description"><strong>Thesis:</strong> ${deg.thesis}</div>` : ''}
+          ${deg.advisor ? `<div class="item-description"><strong>Advisor:</strong> ${deg.advisor}</div>` : ''}
+        </div>
+      `).join('')}
+    </div>
+    ` : ''}
+
+    ${employment.length > 0 ? `
+    <div class="section">
+      <h2 class="section-title">Professional Experience</h2>
+      ${employment.map(emp => `
+        <div class="item">
+          <div class="item-header">
+            <div class="item-title">${emp.position || ''}</div>
+            <div class="item-date">${emp.duration || ''}</div>
+          </div>
+          <div class="item-subtitle">${emp.organization || ''}</div>
+          ${emp.responsibilities ? `<div class="item-description">${emp.responsibilities}</div>` : ''}
+        </div>
+      `).join('')}
+    </div>
+    ` : ''}
+
+    ${grants.length > 0 ? `
+    <div class="section">
+      <h2 class="section-title">Research Grants & Funding</h2>
+      ${grants.map(grant => `
+        <div class="item">
+          <div class="item-header">
+            <div class="item-title">${grant.projectTitle || ''}</div>
+            <div class="item-date">${grant.duration || ''}</div>
+          </div>
+          <div class="item-subtitle">${grant.role || ''} | ${grant.agency || ''} ${grant.amount ? '| ' + grant.amount : ''}</div>
+          <div class="item-description"><strong>Status:</strong> ${grant.status || 'N/A'}</div>
+        </div>
+      `).join('')}
+    </div>
+    ` : ''}
+
+    ${courses.length > 0 ? `
+    <div class="section">
+      <h2 class="section-title">Teaching</h2>
+      ${courses.map(course => `
+        <div class="item">
+          <div class="item-header">
+            <div class="item-title">${course.courseName || ''} ${course.courseCode ? '(' + course.courseCode + ')' : ''}</div>
+            <div class="item-date">${course.semester || ''}</div>
+          </div>
+          ${course.labDetails ? `<div class="item-description">${course.labDetails}</div>` : ''}
+        </div>
+      `).join('')}
+    </div>
+    ` : ''}
+
+    ${awards.length > 0 ? `
+    <div class="section">
+      <h2 class="section-title">Awards & Achievements</h2>
+      ${awards.map(award => `
+        <div class="item">
+          <div class="item-header">
+            <div class="item-title">${award.title || ''}</div>
+            <div class="item-date">${award.year || ''}</div>
+          </div>
+          <div class="item-subtitle">${award.organization || ''}</div>
+          ${award.description ? `<div class="item-description">${award.description}</div>` : ''}
+        </div>
+      `).join('')}
+    </div>
+    ` : ''}
+
+    ${profile.professional_activities ? `
+    <div class="section">
+      <h2 class="section-title">Professional Activities</h2>
+      <div class="item-description">${profile.professional_activities}</div>
+    </div>
+    ` : ''}
+
+    ${profile.skills ? `
+    <div class="section">
+      <h2 class="section-title">Skills & Tools</h2>
+      <div class="keywords">
+        ${profile.skills.split(',').map(skill => `<span class="keyword">${skill.trim()}</span>`).join('')}
+      </div>
+    </div>
+    ` : ''}
+
+    ${profile.outreach_service ? `
+    <div class="section">
+      <h2 class="section-title">Outreach & Service</h2>
+      <div class="item-description">${profile.outreach_service}</div>
+    </div>
+    ` : ''}
+  </div>
+</body>
+</html>
+    `;
+
+    res.send(resumeHTML);
+  } catch (error) {
+    console.error('Resume generation error:', error);
+    res.status(500).send(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Error</title>
+        <style>
+          body { font-family: Arial, sans-serif; padding: 50px; text-align: center; }
+          h1 { color: #ef4444; }
+        </style>
+      </head>
+      <body>
+        <h1>Error Generating Resume</h1>
+        <p>An error occurred while generating your resume. Please try again.</p>
+        <button onclick="window.close()">Close</button>
+      </body>
+      </html>
+    `);
+  }
+});
+
 // ===================== FRONTEND ROUTES =====================
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "index.html"));
@@ -847,3 +1364,4 @@ app.listen(port, () => {
   console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log(`Database: ${isProduction && process.env.DATABASE_URL ? 'PostgreSQL' : 'SQLite'}`);
 });
+
