@@ -304,17 +304,59 @@
 
     .progress-bar {
       width: 100%;
-      height: 12px;
+      height: 18px;
       background: #f3f4f6;
-      border-radius: 6px;
+      border-radius: 9px;
       overflow: hidden;
+      position: relative;
     }
 
     .progress-fill {
       height: 100%;
-      background: linear-gradient(90deg, var(--accent), var(--accent-hover));
-      border-radius: 6px;
+      background: linear-gradient(90deg, #ff6b6b, #feca57, #48dbfb, #ff9ff3, #54a0ff);
+      border-radius: 9px;
       transition: width 0.3s ease;
+      position: relative;
+    }
+
+    .stage-markers {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      pointer-events: none;
+    }
+
+    .stage-marker {
+      flex: 1;
+      border-right: 2px solid rgba(255, 255, 255, 0.5);
+    }
+
+    .stage-marker:last-child {
+      border-right: none;
+    }
+
+    .stage-description {
+      margin-top: 12px;
+      padding: 12px;
+      background: #f9fafb;
+      border-radius: 8px;
+      border-left: 3px solid var(--accent);
+    }
+
+    .stage-description-label {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    .stage-description-text {
+      font-size: 0.9rem;
+      color: #4b5563;
+      line-height: 1.5;
     }
 
     .target-date {
@@ -413,20 +455,63 @@
 
     .progress-slider-container {
       display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .progress-slider-wrapper {
+      display: flex;
       align-items: center;
       gap: 15px;
     }
 
     .progress-slider {
       flex: 1;
+      -webkit-appearance: none;
+      appearance: none;
+      height: 10px;
+      border-radius: 5px;
+      background: linear-gradient(90deg, #ff6b6b, #feca57, #48dbfb, #ff9ff3, #54a0ff);
+      outline: none;
+      cursor: pointer;
+    }
+
+    .progress-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: white;
+      border: 3px solid var(--accent);
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
+
+    .progress-slider::-moz-range-thumb {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: white;
+      border: 3px solid var(--accent);
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
     }
 
     .progress-display {
       font-size: 1.1rem;
       font-weight: 600;
       color: var(--accent);
-      min-width: 50px;
+      min-width: 80px;
       text-align: right;
+    }
+
+    .stage-labels {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 5px;
+      font-size: 0.75rem;
+      color: var(--muted);
     }
 
     .form-actions {
@@ -546,9 +631,9 @@
         <label>Progress:</label>
         <select class="filter-select" id="progressFilter" onchange="applyFilters()">
           <option value="all">All Progress</option>
-          <option value="not-started">Not Started (0%)</option>
-          <option value="in-progress">In Progress (1-99%)</option>
-          <option value="completed">Completed (100%)</option>
+          <option value="not-started">Not Started (Stage 0)</option>
+          <option value="in-progress">In Progress</option>
+          <option value="completed">Completed</option>
         </select>
       </div>
       <div class="filter-group">
@@ -596,6 +681,17 @@
             </select>
           </div>
           <div class="form-group">
+            <label>No. of Stages *</label>
+            <input type="number" id="stagesInput" min="1" max="20" value="5" required oninput="updateStagesDisplay()">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Start Date</label>
+            <input type="date" id="startDateInput">
+          </div>
+          <div class="form-group">
             <label>Target Date</label>
             <input type="date" id="targetDateInput">
           </div>
@@ -607,11 +703,19 @@
         </div>
 
         <div class="form-group">
-          <label>Progress: <span id="progressDisplay">0%</span></label>
+          <label>Progress: <span id="progressDisplay">Stage 0</span></label>
           <div class="progress-slider-container">
-            <input type="range" id="progressInput" min="0" max="100" value="0" class="progress-slider" oninput="updateProgressDisplay()">
-            <div class="progress-display"><span id="progressValue">0</span>%</div>
+            <div class="progress-slider-wrapper">
+              <input type="range" id="progressInput" min="0" max="5" value="0" step="1" class="progress-slider" oninput="updateProgressDisplay()">
+              <div class="progress-display"><span id="progressValue">Stage 0</span></div>
+            </div>
+            <div class="stage-labels" id="stageLabels"></div>
           </div>
+        </div>
+
+        <div class="form-group">
+          <label>Stage Description</label>
+          <textarea id="stageDescriptionInput" placeholder="Describe the current stage, what needs to be done, key milestones..."></textarea>
         </div>
 
         <div class="form-actions">
@@ -661,10 +765,10 @@
 
     function updateStats() {
       const total = allGoals.length;
-      const completed = allGoals.filter(g => g.progress === 100).length;
-      const active = allGoals.filter(g => g.progress > 0 && g.progress < 100).length;
+      const completed = allGoals.filter(g => g.current_stage === g.total_stages).length;
+      const active = allGoals.filter(g => g.current_stage > 0 && g.current_stage < g.total_stages).length;
       const avgProgress = total > 0 
-        ? Math.round(allGoals.reduce((sum, g) => sum + (g.progress || 0), 0) / total)
+        ? Math.round(allGoals.reduce((sum, g) => sum + ((g.current_stage / g.total_stages) * 100 || 0), 0) / total)
         : 0;
 
       document.getElementById('totalGoals').textContent = total;
@@ -688,11 +792,24 @@
       }
 
       grid.innerHTML = goals.map(goal => {
-        const isCompleted = goal.progress === 100;
+        const currentStage = goal.current_stage || 0;
+        const totalStages = goal.total_stages || 5;
+        const progressPercent = (currentStage / totalStages) * 100;
+        const isCompleted = currentStage === totalStages;
+        
+        const startDate = goal.start_date 
+          ? new Date(goal.start_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+          : null;
         const targetDate = goal.target_date 
           ? new Date(goal.target_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
           : null;
         const createdDate = new Date(goal.created_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+
+        // Generate stage markers
+        let stageMarkersHtml = '';
+        for (let i = 1; i < totalStages; i++) {
+          stageMarkersHtml += '<div class="stage-marker"></div>';
+        }
 
         return `
           <div class="goal-card ${isCompleted ? 'completed' : ''}">
@@ -706,17 +823,27 @@
             <div class="goal-meta">
               <span class="goal-type-badge type-${goal.goal_type}">${goal.goal_type.toUpperCase()}</span>
               <span class="meta-item">📅 Added: ${createdDate}</span>
+              ${startDate ? `<span class="meta-item">🚀 Start: ${startDate}</span>` : ''}
             </div>
             ${goal.description ? `<div class="goal-description">${goal.description}</div>` : ''}
             <div class="progress-section">
               <div class="progress-header">
-                <span class="progress-label">Progress</span>
-                <span class="progress-value">${goal.progress || 0}%</span>
+                <span class="progress-label">Progress (${totalStages} Stages)</span>
+                <span class="progress-value">Stage ${currentStage} of ${totalStages}</span>
               </div>
               <div class="progress-bar">
-                <div class="progress-fill" style="width: ${goal.progress || 0}%"></div>
+                <div class="progress-fill" style="width: ${progressPercent}%"></div>
+                <div class="stage-markers">
+                  ${stageMarkersHtml}
+                </div>
               </div>
             </div>
+            ${goal.stage_description ? `
+              <div class="stage-description">
+                <div class="stage-description-label">Current Stage (${currentStage}):</div>
+                <div class="stage-description-text">${goal.stage_description}</div>
+              </div>
+            ` : ''}
             ${targetDate ? `<div class="target-date">🎯 Target: ${targetDate}</div>` : ''}
           </div>
         `;
@@ -736,11 +863,14 @@
 
       if (progressFilter !== 'all') {
         if (progressFilter === 'not-started') {
-          filtered = filtered.filter(g => (g.progress || 0) === 0);
+          filtered = filtered.filter(g => (g.current_stage || 0) === 0);
         } else if (progressFilter === 'in-progress') {
-          filtered = filtered.filter(g => (g.progress || 0) > 0 && (g.progress || 0) < 100);
+          filtered = filtered.filter(g => {
+            const stage = g.current_stage || 0;
+            return stage > 0 && stage < g.total_stages;
+          });
         } else if (progressFilter === 'completed') {
-          filtered = filtered.filter(g => (g.progress || 0) === 100);
+          filtered = filtered.filter(g => g.current_stage === g.total_stages);
         }
       }
 
@@ -748,7 +878,11 @@
       if (sortFilter === 'date') {
         filtered.sort((a, b) => new Date(b.created_date) - new Date(a.created_date));
       } else if (sortFilter === 'progress') {
-        filtered.sort((a, b) => (b.progress || 0) - (a.progress || 0));
+        filtered.sort((a, b) => {
+          const progressA = (a.current_stage / a.total_stages) * 100;
+          const progressB = (b.current_stage / b.total_stages) * 100;
+          return progressB - progressA;
+        });
       } else if (sortFilter === 'target') {
         filtered.sort((a, b) => {
           if (!a.target_date) return 1;
@@ -760,12 +894,40 @@
       renderGoals(filtered);
     }
 
+    function updateStagesDisplay() {
+      const stages = parseInt(document.getElementById('stagesInput').value) || 5;
+      const progressInput = document.getElementById('progressInput');
+      const currentValue = parseInt(progressInput.value);
+      
+      progressInput.max = stages;
+      if (currentValue > stages) {
+        progressInput.value = stages;
+      }
+      
+      updateProgressDisplay();
+      updateStageLabels();
+    }
+
+    function updateStageLabels() {
+      const stages = parseInt(document.getElementById('stagesInput').value) || 5;
+      const labelsContainer = document.getElementById('stageLabels');
+      
+      let labelsHtml = '';
+      for (let i = 0; i <= stages; i++) {
+        labelsHtml += `<span>S${i}</span>`;
+      }
+      labelsContainer.innerHTML = labelsHtml;
+    }
+
     function openAddModal() {
       editingId = null;
       document.getElementById('modalTitle').textContent = 'Add Career Goal';
       document.getElementById('goalForm').reset();
-      document.getElementById('progressValue').textContent = '0';
-      document.getElementById('progressDisplay').textContent = '0%';
+      document.getElementById('stagesInput').value = 5;
+      document.getElementById('progressInput').max = 5;
+      document.getElementById('progressInput').value = 0;
+      updateProgressDisplay();
+      updateStageLabels();
       document.getElementById('goalModal').classList.add('active');
     }
 
@@ -777,10 +939,15 @@
       document.getElementById('modalTitle').textContent = 'Edit Career Goal';
       document.getElementById('titleInput').value = goal.title;
       document.getElementById('typeInput').value = goal.goal_type;
-      document.getElementById('targetDateInput').value = goal.target_date || '';
+      document.getElementById('stagesInput').value = goal.total_stages || 5;
+      document.getElementById('startDateInput').value = goal.start_date || '';
+document.getElementById('targetDateInput').value = goal.target_date || '';
       document.getElementById('descriptionInput').value = goal.description || '';
-      document.getElementById('progressInput').value = goal.progress || 0;
+      document.getElementById('stageDescriptionInput').value = goal.stage_description || '';
+      document.getElementById('progressInput').max = goal.total_stages || 5;
+      document.getElementById('progressInput').value = goal.current_stage || 0;
       updateProgressDisplay();
+      updateStageLabels();
       document.getElementById('goalModal').classList.add('active');
     }
 
@@ -792,8 +959,9 @@
 
     function updateProgressDisplay() {
       const value = document.getElementById('progressInput').value;
-      document.getElementById('progressValue').textContent = value;
-      document.getElementById('progressDisplay').textContent = value + '%';
+      const stages = document.getElementById('stagesInput').value;
+      document.getElementById('progressValue').textContent = `Stage ${value}`;
+      document.getElementById('progressDisplay').textContent = `Stage ${value} of ${stages}`;
     }
 
     async function saveGoal(event) {
@@ -803,9 +971,12 @@
         user_email: userEmail,
         title: document.getElementById('titleInput').value.trim(),
         goal_type: document.getElementById('typeInput').value,
+        total_stages: parseInt(document.getElementById('stagesInput').value),
+        current_stage: parseInt(document.getElementById('progressInput').value),
+        start_date: document.getElementById('startDateInput').value || null,
         target_date: document.getElementById('targetDateInput').value || null,
         description: document.getElementById('descriptionInput').value.trim(),
-        progress: parseInt(document.getElementById('progressInput').value)
+        stage_description: document.getElementById('stageDescriptionInput').value.trim()
       };
 
       try {
