@@ -537,9 +537,6 @@
           <label>Content</label>
           <textarea id="contentInput" placeholder="Write your idea here..."></textarea>
         </div>
-        <div class="form-group">
-          <span id="modalWordCount" style="color: var(--muted); font-size: 0.9rem;">0 words</span>
-        </div>
         <div class="form-actions">
           <button type="button" class="btn-cancel" onclick="closeModal()">Cancel</button>
           <button type="submit" class="btn-save">Save Idea</button>
@@ -588,13 +585,26 @@
     async function loadIdeas() {
       try {
         const response = await fetch(`${API_BASE}/ideas/${encodeURIComponent(userEmail)}`);
+        
+        if (!response.ok) {
+          // If 404 or 500, it might just mean no ideas exist yet
+          console.log('Response status:', response.status);
+          allIdeas = [];
+          renderIdeas(allIdeas);
+          updateStats();
+          return;
+        }
+        
         const data = await response.json();
-        allIdeas = data;
+        allIdeas = Array.isArray(data) ? data : [];
         renderIdeas(allIdeas);
         updateStats();
       } catch (error) {
         console.error('Error loading ideas:', error);
-        alert('Failed to load ideas');
+        // Don't show alert - just display empty state
+        allIdeas = [];
+        renderIdeas(allIdeas);
+        updateStats();
       }
     }
 
@@ -615,7 +625,6 @@
       const sorted = [...ideas].sort((a, b) => new Date(b.created_date) - new Date(a.created_date));
 
       grid.innerHTML = sorted.map(idea => {
-        const wordCount = countWords(idea.content || '');
         const date = formatDate(idea.created_date);
 
         return `
@@ -630,7 +639,6 @@
             <div class="idea-meta">
               <span class="meta-item">📅 ${date}</span>
               <span class="category-badge category-${idea.category || 'general'}">${(idea.category || 'general').toUpperCase()}</span>
-              <span class="meta-item">📝 ${wordCount} words</span>
             </div>
             ${idea.content ? `<div class="idea-content">${idea.content}</div>` : '<div class="idea-content" style="color: #9ca3af; font-style: italic;">No content</div>'}
           </div>
@@ -641,11 +649,17 @@
     function updateStats() {
       const today = new Date().toDateString();
       const todayCount = allIdeas.filter(i => new Date(i.created_date).toDateString() === today).length;
-      const totalWordCount = allIdeas.reduce((sum, idea) => sum + countWords(idea.content || ''), 0);
+      
+      // Calculate this week's count
+      const now = new Date();
+      const weekStart = new Date(now);
+      weekStart.setDate(now.getDate() - now.getDay()); // Start of week (Sunday)
+      weekStart.setHours(0, 0, 0, 0);
+      const thisWeekCount = allIdeas.filter(i => new Date(i.created_date) >= weekStart).length;
 
       document.getElementById('totalNotes').textContent = allIdeas.length;
       document.getElementById('todayNotes').textContent = todayCount;
-      document.getElementById('totalWords').textContent = totalWordCount;
+      document.getElementById('thisWeek').textContent = thisWeekCount;
     }
 
     function applyFilters() {
@@ -672,7 +686,6 @@
       editingId = null;
       document.getElementById('modalTitle').textContent = 'Add Idea';
       document.getElementById('ideaForm').reset();
-      document.getElementById('modalWordCount').textContent = '0 words';
       document.getElementById('ideaModal').classList.add('active');
     }
 
@@ -685,7 +698,6 @@
       document.getElementById('titleInput').value = idea.title;
       document.getElementById('categoryInput').value = idea.category || 'general';
       document.getElementById('contentInput').value = idea.content || '';
-      updateModalWordCount();
       document.getElementById('ideaModal').classList.add('active');
     }
 
@@ -694,14 +706,6 @@
       document.getElementById('ideaForm').reset();
       editingId = null;
     }
-
-    function updateModalWordCount() {
-      const content = document.getElementById('contentInput').value;
-      const words = countWords(content);
-      document.getElementById('modalWordCount').textContent = `${words} words`;
-    }
-
-    document.getElementById('contentInput').addEventListener('input', updateModalWordCount);
 
     async function saveIdea(event) {
       event.preventDefault();
