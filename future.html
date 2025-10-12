@@ -1,3 +1,6 @@
+
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -240,6 +243,20 @@
       color: var(--muted);
     }
 
+    .date-info {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .date-label {
+      font-size: 0.75rem;
+      color: #9ca3af;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-weight: 600;
+    }
+
     .card-actions {
       display: flex;
       gap: 8px;
@@ -404,7 +421,6 @@
         <select class="filter-select" id="sortBy">
           <option value="date">Date Created</option>
           <option value="priority">Priority</option>
-          <option value="timeline">Timeline</option>
           <option value="title">Title</option>
         </select>
       </div>
@@ -581,8 +597,6 @@
           case 'priority':
             const priorityOrder = { high: 0, medium: 1, low: 2 };
             return priorityOrder[a.priority] - priorityOrder[b.priority];
-          case 'timeline':
-            return (a.timeline || '').localeCompare(b.timeline || '');
           case 'title':
             return a.title.localeCompare(b.title);
           case 'date':
@@ -613,7 +627,10 @@
           </div>
           ${item.description ? `<div class="card-description">${escapeHtml(item.description)}</div>` : ''}
           <div class="card-footer">
-            <span>${formatDate(item.created_date)}</span>
+            <div class="date-info">
+              <span class="date-label">Added</span>
+              <span>${formatDate(item.created_date)}</span>
+            </div>
             <div class="card-actions">
               <button class="icon-btn delete" onclick="event.stopPropagation(); deleteItem(${item.id})" title="Delete">
                 🗑️
