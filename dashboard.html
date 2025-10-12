@@ -260,6 +260,7 @@
       <li id="menu-calendar">Calendar</li>
       <li>Research Paper</li>
       <li id="menu-profile">Profile</li>
+      <li id="menu-aboutus">About Us</li>
       <li id="logout"> Logout</li>
     </ul>
   </div>
@@ -510,6 +511,14 @@ if (menuProfile) {
     window.location.href = '/profile.html';
   };
 }
+
+    // About Us menu handler
+const menuAboutUs = document.getElementById("menu-aboutus");
+if (menuAboutUs) {
+  menuAboutUs.onclick = () => {
+    window.location.href = '/aboutus.html';
+  };
+}
   // Tile click handlers
   document.querySelectorAll('.dashboard-tile').forEach(tile => {
     tile.addEventListener('click', () => {
@@ -558,3 +567,4 @@ if (menuProfile) {
 </body>
 
 </html>
+
