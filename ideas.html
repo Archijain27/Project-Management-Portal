@@ -48,6 +48,29 @@
       gap: 15px;
     }
 
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .total-count {
+      background: white;
+      padding: 10px 20px;
+      border-radius: 8px;
+      border: 1px solid #e5e7eb;
+      font-size: 0.95rem;
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    .total-count .count-number {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: var(--accent);
+      margin-right: 5px;
+    }
+
     .back-btn {
       background: white;
       border: 1px solid #e5e7eb;
@@ -97,11 +120,7 @@
     }
 
     .stats-section {
-      background: white;
-      padding: 20px;
-      border-radius: 12px;
-      margin-bottom: 25px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      display: none;
     }
 
     .stats {
@@ -463,9 +482,14 @@
         <a href="dashboard.html" class="back-btn">← Back</a>
         <h1>💡 Recent Ideas</h1>
       </div>
-      <button class="add-btn" onclick="openAddModal()">
-        + Add Idea
-      </button>
+      <div class="header-right">
+        <div class="total-count">
+          <span class="count-number" id="totalNotes">0</span> Total Ideas
+        </div>
+        <button class="add-btn" onclick="openAddModal()">
+          + Add Idea
+        </button>
+      </div>
     </div>
 
     <div class="stats-section">
@@ -647,19 +671,7 @@
     }
 
     function updateStats() {
-      const today = new Date().toDateString();
-      const todayCount = allIdeas.filter(i => new Date(i.created_date).toDateString() === today).length;
-      
-      // Calculate this week's count
-      const now = new Date();
-      const weekStart = new Date(now);
-      weekStart.setDate(now.getDate() - now.getDay()); // Start of week (Sunday)
-      weekStart.setHours(0, 0, 0, 0);
-      const thisWeekCount = allIdeas.filter(i => new Date(i.created_date) >= weekStart).length;
-
       document.getElementById('totalNotes').textContent = allIdeas.length;
-      document.getElementById('todayNotes').textContent = todayCount;
-      document.getElementById('thisWeek').textContent = thisWeekCount;
     }
 
     function applyFilters() {
