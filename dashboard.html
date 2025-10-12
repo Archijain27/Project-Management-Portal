@@ -445,17 +445,12 @@
       contentEl.innerHTML = topItems.map(item => {
         let displayText = item.title || item.name || item.content || item.description || '';
         
-        // Add specific formatting based on tile type
+        // Add specific formatting based on tile type (REMOVED member count for projects)
         switch(tileType) {
           case 'deadlines':
             if (item.due_date) {
               const daysLeft = Math.ceil((new Date(item.due_date) - new Date()) / (1000 * 60 * 60 * 24));
               displayText += ` (${daysLeft > 0 ? daysLeft + ' days' : 'overdue'})`;
-            }
-            break;
-          case 'projects':
-            if (item.colleagues && item.colleagues.length > 0) {
-              displayText += ` (${item.colleagues.length} member${item.colleagues.length !== 1 ? 's' : ''})`;
             }
             break;
           case 'career':
