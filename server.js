@@ -325,6 +325,27 @@ db.serialize(() => {
       }
     }
   );
+  // Add after the career_goals table creation
+const careerGoalsColumns = [
+  "total_stages INTEGER DEFAULT 5",
+  "current_stage INTEGER DEFAULT 0",
+  "start_date TEXT",
+  "stage_description TEXT"
+];
+
+careerGoalsColumns.forEach((columnDef) => {
+  const columnName = columnDef.split(' ')[0];
+  db.run(
+    `ALTER TABLE career_goals ADD COLUMN ${columnDef}`,
+    (err) => {
+      if (err && !err.message.includes('duplicate') && err.code !== '42701') {
+        console.error(`Error adding column ${columnName} to career_goals:`, err);
+      }
+    }
+  );
+});
+
+
 });
 
 // ===================== AUTH API WITH PASSWORD HASHING =====================
@@ -611,29 +632,32 @@ app.get("/career/:email", (req, res) => {
 });
 
 app.post("/career_goals", (req, res) => {
-  const { user_email, title, description, progress, goal_type, target_date, created_date } = req.body;
+  const { user_email, title, description, progress, goal_type, target_date, total_stages, current_stage, start_date, stage_description, created_date } = req.body;
   const date = created_date || new Date().toISOString();
   db.run(
-    "INSERT INTO career_goals (user_email, title, description, progress, goal_type, target_date, created_date) VALUES (?, ?, ?, ?, ?, ?, ?)",
-    [user_email, title, description, progress || 0, goal_type || 'general', target_date, date],
+    "INSERT INTO career_goals (user_email, title, description, progress, goal_type, target_date, total_stages, current_stage, start_date, stage_description, created_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+    [user_email, title, description, progress || 0, goal_type || 'general', target_date, total_stages || 5, current_stage || 0, start_date, stage_description, date],
     function (err) {
       if (err) return res.status(500).json({ error: "Error creating career goal." });
-      res.json({ id: this.lastID, user_email, title, description, progress, goal_type, target_date, created_date: date });
+      res.json({ id: this.lastID, user_email, title, description, progress, goal_type, target_date, total_stages, current_stage, start_date, stage_description, created_date: date });
     }
   );
 });
 
+
+
 app.put("/career_goals/:id", (req, res) => {
-  const { title, description, progress, goal_type, target_date } = req.body;
+  const { title, description, progress, goal_type, target_date, total_stages, current_stage, start_date, stage_description } = req.body;
   db.run(
-    "UPDATE career_goals SET title = ?, description = ?, progress = ?, goal_type = ?, target_date = ? WHERE id = ?",
-    [title, description, progress, goal_type, target_date, req.params.id],
+    "UPDATE career_goals SET title = ?, description = ?, progress = ?, goal_type = ?, target_date = ?, total_stages = ?, current_stage = ?, start_date = ?, stage_description = ? WHERE id = ?",
+    [title, description, progress, goal_type, target_date, total_stages, current_stage, start_date, stage_description, req.params.id],
     function (err) {
       if (err) return res.status(500).json({ error: "Error updating career goal." });
       res.json({ updated: this.changes });
     }
   );
 });
+
 
 app.delete("/career_goals/:id", (req, res) => {
   db.run("DELETE FROM career_goals WHERE id = ?", [req.params.id], function (err) {
@@ -1388,5 +1412,6 @@ app.listen(port, () => {
 // ===================== PROCESS ERROR HANDLERS =====================
 process.on('unhandledRejection', (reason, promise) => { console.error('Unhandled Rejection at:', promise, 'reason:', reason); });
 process.on('uncaughtException', (error) => { console.error('Uncaught Exception:', error); });
+
 
 
