@@ -2,183 +2,354 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Quick Notes</title>
+  <title>Quick Notes - Project Management</title>
   <style>
-    :root{
-      --accent:#4f46e5;
-      --accent-2:#6d28d9;
-      --bg:#f4f4ff;
-      --card:#ffffff;
-      --muted:#6b7280;
-      --success:#10b981;
-      --danger:#ef4444;
+    :root {
+      --accent: #ef4444;
+      --accent-hover: #dc2626;
+      --bg: #f4f4ff;
+      --card: #ffffff;
+      --muted: #6b7280;
+      --success: #10b981;
+      --warning: #f59e0b;
     }
-   
+
     * {
+      margin: 0;
+      padding: 0;
       box-sizing: border-box;
     }
 
     body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      display: flex;
-      height: 100vh;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
       background: var(--bg);
+      min-height: 100vh;
     }
-   
-    .sidebar {
-      width: 220px;
-      background: linear-gradient(180deg, #4f46e5, #4338ca);
-      color: white;
-      padding: 20px 15px;
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 30px 20px;
+    }
+
+    .header {
       display: flex;
-      flex-direction: column;
-      box-shadow: 3px 0 10px rgba(0,0,0,0.15);
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+      flex-wrap: wrap;
+      gap: 15px;
     }
 
-    .sidebar h2 {
-      margin-top: 5px;
-      font-size: 1.7rem;
-      font-weight: bold;
-      text-align: center;
-      letter-spacing: 1px;
-    }
-
-    .sidebar ul {
-      list-style: none;
-      padding: 0;
-      margin: 15px 0;
-    }
-
-    .sidebar li {
-      margin: 12px 0;
-      padding: 10px 15px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 1.2rem;
+    .header-left {
       display: flex;
       align-items: center;
-      gap: 10px;
-      transition: background 0.3s, transform 0.2s;
-    }
-
-    .sidebar li:hover {
-      background: rgba(255,255,255,0.15);
-      transform: translateX(5px);
-    }
-
-    .sidebar li.active {
-      background: rgba(255,255,255,0.2);
-    }
-
-    .main {
-      flex: 1;
-      padding: 30px;
-      background: var(--bg);
-      overflow-y: auto;
-    }
-
-    .page-header {
-      margin-bottom: 30px;
-    }
-
-    .page-header h1 {
-      font-size: 2.5rem;
-      color: #333;
-      margin: 0 0 10px 0;
-      font-weight: 700;
-    }
-
-    .page-header p {
-      color: var(--muted);
-      font-size: 1.1rem;
-      margin: 0;
+      gap: 15px;
     }
 
     .back-btn {
-      background: transparent;
-      border: 1px solid var(--accent);
-      color: var(--accent);
-      padding: 8px 16px;
+      background: white;
+      border: 1px solid #e5e7eb;
+      padding: 10px 15px;
       border-radius: 8px;
       cursor: pointer;
-      font-size: 0.9rem;
-      margin-bottom: 20px;
-      transition: all 0.3s;
+      font-size: 0.95rem;
+      transition: all 0.2s;
+      text-decoration: none;
+      color: #374151;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
     }
 
     .back-btn:hover {
-      background: var(--accent);
-      color: white;
+      background: #f9fafb;
+      border-color: #d1d5db;
     }
 
-    .notes-container {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 30px;
-      max-width: 1400px;
-    }
-
-    .notes-section {
-      background: var(--card);
-      border-radius: 16px;
-      padding: 24px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-      border: 1px solid rgba(79,70,229,0.1);
-    }
-
-    .section-header {
+    h1 {
+      font-size: 2rem;
+      color: #1f2937;
       display: flex;
       align-items: center;
-      gap: 12px;
-      margin-bottom: 20px;
-      padding-bottom: 15px;
-      border-bottom: 1px solid #f0f0f7;
+      gap: 10px;
     }
 
-    .section-icon {
-      width: 40px;
-      height: 40px;
-      border-radius: 10px;
+    .add-buttons {
+      display: flex;
+      gap: 10px;
+    }
+
+    .add-btn {
+      background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1rem;
+      font-weight: 600;
+      transition: transform 0.2s, box-shadow 0.2s;
       display: flex;
       align-items: center;
-      justify-content: center;
-      font-size: 20px;
-      color: white;
+      gap: 8px;
     }
 
-    .voice-section .section-icon {
+    .add-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+    }
+
+    .add-btn.voice {
       background: linear-gradient(135deg, #f59e0b, #d97706);
     }
 
-    .text-section .section-icon {
-      background: linear-gradient(135deg, #6366f1, #4f46e5);
+    .add-btn.voice:hover {
+      box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
     }
 
-    .section-title {
-      font-size: 1.4rem;
+    .filter-section {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      margin-bottom: 25px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .filter-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .filter-group label {
+      font-size: 0.9rem;
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    .filter-select {
+      padding: 8px 12px;
+      border: 1px solid #e5e7eb;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      background: white;
+    }
+
+    .notes-grid {
+      display: grid;
+      gap: 20px;
+    }
+
+    .note-card {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      border-left: 4px solid var(--accent);
+      transition: transform 0.2s, box-shadow 0.2s;
+      position: relative;
+    }
+
+    .note-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+    }
+
+    .note-card.voice {
+      border-left-color: #f59e0b;
+    }
+
+    .note-card.text {
+      border-left-color: #6366f1;
+    }
+
+    .note-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 12px;
+      gap: 15px;
+    }
+
+    .note-title {
+      font-size: 1.2rem;
       font-weight: 600;
-      color: #333;
-      margin: 0;
+      color: #1f2937;
+      flex: 1;
     }
 
-    .voice-controls {
+    .note-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .icon-btn {
+      background: transparent;
+      border: 1px solid #e5e7eb;
+      padding: 6px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: all 0.2s;
+    }
+
+    .icon-btn:hover {
+      background: #f9fafb;
+      border-color: #d1d5db;
+    }
+
+    .icon-btn.delete:hover {
+      background: #fef2f2;
+      border-color: #fecaca;
+      color: #dc2626;
+    }
+
+    .icon-btn.play:hover {
+      background: #ecfdf5;
+      border-color: #a7f3d0;
+      color: var(--success);
+    }
+
+    .note-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      margin-bottom: 12px;
+      font-size: 0.9rem;
+    }
+
+    .meta-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      color: var(--muted);
+    }
+
+    .type-badge {
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
+    .type-voice {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .type-text {
+      background: #e0e7ff;
+      color: #3730a3;
+    }
+
+    .note-content {
+      color: #4b5563;
+      line-height: 1.6;
+      margin-top: 10px;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .modal.active {
+      display: flex;
+    }
+
+    .modal-content {
+      background: white;
+      padding: 30px;
+      border-radius: 16px;
+      width: 90%;
+      max-width: 500px;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .modal-header h2 {
+      font-size: 1.5rem;
+      color: #1f2937;
+    }
+
+    .close-btn {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: var(--muted);
+      padding: 0;
+      width: 30px;
+      height: 30px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: #374151;
+    }
+
+    .form-group input,
+    .form-group textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      font-family: inherit;
+    }
+
+    .form-group textarea {
+      resize: vertical;
+      min-height: 150px;
+    }
+
+    .voice-recorder {
       display: flex;
       flex-direction: column;
+      align-items: center;
       gap: 20px;
+      padding: 20px;
+      background: #f9fafb;
+      border-radius: 12px;
       margin-bottom: 20px;
     }
 
     .record-button {
-      width: 100px;
-      height: 100px;
+      width: 80px;
+      height: 80px;
       border-radius: 50%;
       border: none;
       background: linear-gradient(135deg, #ef4444, #dc2626);
       color: white;
       font-size: 2rem;
       cursor: pointer;
-      margin: 0 auto;
       transition: all 0.3s;
       box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
     }
@@ -203,154 +374,61 @@
       text-align: center;
       color: var(--muted);
       font-size: 1rem;
-      margin-top: 10px;
     }
 
     .recording-time {
       font-weight: 600;
       color: var(--accent);
+      font-size: 1.2rem;
     }
 
-    .text-input {
+    .form-actions {
       display: flex;
-      flex-direction: column;
-      gap: 15px;
-      margin-bottom: 20px;
+      gap: 10px;
+      justify-content: flex-end;
+      margin-top: 25px;
     }
 
-    .note-input {
-      width: 100%;
-      min-height: 200px;
-      padding: 15px;
-      border: 1px solid #e5e7eb;
-      border-radius: 12px;
-      font-size: 1rem;
-      font-family: inherit;
-      resize: vertical;
-      outline: none;
-      transition: border-color 0.3s;
-    }
-
-    .note-input:focus {
-      border-color: var(--accent);
-    }
-
-    .note-title {
-      width: 100%;
-      padding: 12px 15px;
-      border: 1px solid #e5e7eb;
-      border-radius: 12px;
-      font-size: 1rem;
-      font-family: inherit;
-      outline: none;
-      transition: border-color 0.3s;
-    }
-
-    .note-title:focus {
-      border-color: var(--accent);
-    }
-
-    .save-btn {
-      background: linear-gradient(135deg, var(--accent), var(--accent-2));
-      color: white;
-      border: none;
-      padding: 12px 24px;
+    .btn-cancel {
+      background: white;
+      border: 1px solid #d1d5db;
+      padding: 10px 20px;
       border-radius: 8px;
       cursor: pointer;
-      font-size: 1rem;
+      font-size: 0.95rem;
+    }
+
+    .btn-save {
+      background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.95rem;
       font-weight: 600;
-      transition: opacity 0.3s;
     }
 
-    .save-btn:hover {
-      opacity: 0.9;
-    }
-
-    .save-btn:disabled {
+    .btn-save:disabled {
       opacity: 0.5;
       cursor: not-allowed;
     }
 
-    .notes-list {
-      display: flex;
-      flex-direction: column;
-      gap: 15px;
-      max-height: 600px;
-      overflow-y: auto;
-    }
-
-    .note-item, .voice-item {
-      background: rgba(79,70,229,0.05);
-      border: 1px solid rgba(79,70,229,0.1);
-      border-radius: 12px;
-      padding: 15px;
-      transition: all 0.3s;
-    }
-
-    .note-item:hover, .voice-item:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-    }
-
-    .item-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      margin-bottom: 8px;
-    }
-
-    .item-title {
-      font-weight: 600;
-      color: #333;
-      margin: 0;
-      font-size: 1.1rem;
-    }
-
-    .item-date {
-      color: var(--muted);
-      font-size: 0.85rem;
-    }
-
-    .item-content {
-      color: #4b5563;
-      line-height: 1.5;
-      margin-bottom: 10px;
-    }
-
-    .item-actions {
-      display: flex;
-      gap: 8px;
-      justify-content: flex-end;
-    }
-
-    .btn-small {
-      padding: 4px 8px;
-      border: none;
-      border-radius: 6px;
-      font-size: 0.8rem;
-      cursor: pointer;
-      transition: opacity 0.3s;
-    }
-
-    .btn-small:hover {
-      opacity: 0.8;
-    }
-
-    .btn-play {
-      background: var(--success);
-      color: white;
-    }
-
-    .btn-delete {
-      background: var(--danger);
-      color: white;
-    }
-
     .empty-state {
       text-align: center;
+      padding: 60px 20px;
       color: var(--muted);
-      font-style: italic;
-      padding: 40px 20px;
+    }
+
+    .empty-state-icon {
+      font-size: 4rem;
+      margin-bottom: 15px;
+    }
+
+    .empty-state h3 {
+      font-size: 1.3rem;
+      margin-bottom: 10px;
+      color: #4b5563;
     }
 
     .toast {
@@ -393,35 +471,61 @@
     }
 
     @media (max-width: 768px) {
-      .notes-container {
-        grid-template-columns: 1fr;
-        gap: 20px;
+      .header {
+        flex-direction: column;
+        align-items: flex-start;
       }
-      
-      .sidebar {
-        width: 180px;
+
+      .filter-section {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .note-header {
+        flex-direction: column;
+      }
+
+      .note-actions {
+        align-self: flex-end;
+      }
+
+      .add-buttons {
+        flex-direction: column;
+        width: 100%;
+      }
+
+      .add-btn {
+        width: 100%;
       }
     }
   </style>
 </head>
 <body>
-  <div class="sidebar">
-    <h2>Menu</h2>
-    <ul>
-      <li id="menu-dashboard">Dashboard</li>
-      <li id="menu-calendar">Calendar</li>
-      <li>Research Paper</li>
-      <li>Profile</li>
-      <li id="logout">Logout</li>
-    </ul>
-  </div>
+  <div class="container">
+    <div class="header">
+      <div class="header-left">
+        <a href="dashboard.html" class="back-btn">← Back</a>
+        <h1>📝 Quick Notes</h1>
+      </div>
+      <div class="add-buttons">
+        <button class="add-btn voice" onclick="openVoiceModal()">
+          🎤 Add Voice Note
+        </button>
+        <button class="add-btn" onclick="openTextModal()">
+          + Add Text Note
+        </button>
+      </div>
+    </div>
 
-  <div class="main">
-    <button class="back-btn" id="backBtn">← Back to Dashboard</button>
-    
-    <div class="page-header">
-      <h1>Quick Notes</h1>
-      <p>Capture your thoughts with voice recordings or text notes</p>
+    <div class="filter-section">
+      <div class="filter-group">
+        <label>Type:</label>
+        <select class="filter-select" id="typeFilter" onchange="applyFilters()">
+          <option value="all">All Notes</option>
+          <option value="text">Text Notes</option>
+          <option value="voice">Voice Recordings</option>
+        </select>
+      </div>
     </div>
 
     <div id="loadingMessage" class="loading" style="display: none;">
@@ -432,56 +536,78 @@
       Failed to load notes. Please try again.
     </div>
 
-    <div class="notes-container" id="notesContainer">
-      <!-- Voice Recording Section -->
-      <div class="notes-section voice-section">
-        <div class="section-header">
-          <div class="section-icon">🎤</div>
-          <h3 class="section-title">Voice Recordings</h3>
-        </div>
+    <div class="notes-grid" id="notesGrid">
+      <div class="empty-state">
+        <div class="empty-state-icon">📝</div>
+        <h3>No notes yet</h3>
+        <p>Click "Add Text Note" or "Add Voice Note" to create your first note</p>
+      </div>
+    </div>
+  </div>
 
-        <div class="voice-controls">
-          <button class="record-button" id="recordBtn">🎤</button>
-          <div class="recording-status">
-            <div id="recordingStatus">Click to start recording</div>
-            <div class="recording-time" id="recordingTime" style="display: none;">00:00</div>
-          </div>
-          <input type="text" class="note-title" id="voiceTitle" placeholder="Recording title (optional)" style="display: none;">
-          <button class="save-btn" id="saveVoiceBtn" style="display: none;" disabled>Save Recording</button>
-        </div>
-
-        <div class="notes-list" id="voiceList">
-          <div class="empty-state">No voice recordings yet</div>
+  <!-- Voice Recording Modal -->
+  <div class="modal" id="voiceModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Record Voice Note</h2>
+        <button class="close-btn" onclick="closeVoiceModal()">×</button>
+      </div>
+      <div class="voice-recorder">
+        <button class="record-button" id="recordBtn">🎤</button>
+        <div class="recording-status">
+          <div id="recordingStatus">Click to start recording</div>
+          <div class="recording-time" id="recordingTime" style="display: none;">00:00</div>
         </div>
       </div>
-
-      <!-- Text Notes Section -->
-      <div class="notes-section text-section">
-        <div class="section-header">
-          <div class="section-icon">📝</div>
-          <h3 class="section-title">Text Notes</h3>
+      <form id="voiceForm" onsubmit="saveVoiceNote(event)">
+        <div class="form-group">
+          <label>Title</label>
+          <input type="text" id="voiceTitle" placeholder="Recording title (optional)">
         </div>
-
-        <div class="text-input">
-          <input type="text" class="note-title" id="textTitle" placeholder="Note title">
-          <textarea class="note-input" id="textContent" placeholder="Write your note here..."></textarea>
-          <button class="save-btn" id="saveTextBtn">Save Note</button>
+        <div class="form-actions">
+          <button type="button" class="btn-cancel" onclick="closeVoiceModal()">Cancel</button>
+          <button type="submit" class="btn-save" id="saveVoiceBtn" disabled>Save Recording</button>
         </div>
+      </form>
+    </div>
+  </div>
 
-        <div class="notes-list" id="textList">
-          <div class="empty-state">No text notes yet</div>
-        </div>
+  <!-- Text Note Modal -->
+  <div class="modal" id="textModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Add Text Note</h2>
+        <button class="close-btn" onclick="closeTextModal()">×</button>
       </div>
+      <form id="textForm" onsubmit="saveTextNote(event)">
+        <div class="form-group">
+          <label>Title *</label>
+          <input type="text" id="textTitle" required>
+        </div>
+        <div class="form-group">
+          <label>Content</label>
+          <textarea id="textContent" placeholder="Write your note here..."></textarea>
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn-cancel" onclick="closeTextModal()">Cancel</button>
+          <button type="submit" class="btn-save">Save Note</button>
+        </div>
+      </form>
     </div>
   </div>
 
   <div class="toast" id="toast"></div>
 
   <script>
-    // API Configuration
     const API_BASE = window.location.origin;
+    let allNotes = [];
+    let mediaRecorder;
+    let audioChunks = [];
+    let isRecording = false;
+    let recordingStartTime;
+    let recordingTimer;
+    let currentAudioBlob;
 
-    // Authentication check
     function getCurrentUser() {
       return sessionStorage.getItem('userEmail');
     }
@@ -490,113 +616,141 @@
       return sessionStorage.getItem('isLoggedIn') === 'true';
     }
 
-    function redirectToLogin() {
+    if (!isUserLoggedIn()) {
       alert('Please log in to access this page');
       window.location.href = '/';
     }
 
-    // Check authentication
-    if (!isUserLoggedIn()) {
-      redirectToLogin();
-    }
-
     const userEmail = getCurrentUser();
     if (!userEmail) {
-      redirectToLogin();
-    }
-    
-    // Voice Recording Variables (Note: Voice recordings will still use localStorage for audio data)
-    let mediaRecorder;
-    let audioChunks = [];
-    let isRecording = false;
-    let recordingStartTime;
-    let recordingTimer;
-    let currentAudioBlob;
-
-    // State
-    let textNotes = [];
-
-    // DOM Elements
-    const recordBtn = document.getElementById('recordBtn');
-    const recordingStatus = document.getElementById('recordingStatus');
-    const recordingTime = document.getElementById('recordingTime');
-    const voiceTitle = document.getElementById('voiceTitle');
-    const saveVoiceBtn = document.getElementById('saveVoiceBtn');
-    const voiceList = document.getElementById('voiceList');
-    const textTitle = document.getElementById('textTitle');
-    const textContent = document.getElementById('textContent');
-    const saveTextBtn = document.getElementById('saveTextBtn');
-    const textList = document.getElementById('textList');
-    const toast = document.getElementById('toast');
-    const backBtn = document.getElementById('backBtn');
-    const loadingMessage = document.getElementById('loadingMessage');
-    const errorMessage = document.getElementById('errorMessage');
-    const notesContainer = document.getElementById('notesContainer');
-
-    // API helper function
-    async function apiCall(endpoint, options = {}) {
-      try {
-        const response = await fetch(`${API_BASE}${endpoint}`, {
-          headers: {
-            'Content-Type': 'application/json',
-            ...options.headers
-          },
-          ...options
-        });
-        
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-        }
-        
-        return await response.json();
-      } catch (error) {
-        console.error('API Error:', error);
-        throw error;
-      }
+      alert('Please log in to access this page');
+      window.location.href = '/';
     }
 
-    // Navigation
-    backBtn.onclick = () => window.location.href = 'dashboard.html';
-    document.getElementById('menu-dashboard').onclick = () => window.location.href = 'dashboard.html';
-    document.getElementById('menu-calendar').onclick = () => window.location.href = 'dashboard.html';
-    document.getElementById('logout').onclick = () => {
-      sessionStorage.removeItem("userEmail");
-      sessionStorage.removeItem("isLoggedIn");
-      window.location.href = "/";
-    };
-
-    // Toast notification
     function showToast(message, isError = false) {
+      const toast = document.getElementById('toast');
       toast.textContent = message;
       toast.className = 'toast' + (isError ? ' error' : '');
       toast.classList.add('show');
       setTimeout(() => toast.classList.remove('show'), 3000);
     }
 
-    // Load text notes from database
-    async function loadTextNotes() {
+    async function loadAllNotes() {
       try {
-        loadingMessage.style.display = 'block';
-        errorMessage.style.display = 'none';
-        notesContainer.style.display = 'none';
+        document.getElementById('loadingMessage').style.display = 'block';
+        document.getElementById('errorMessage').style.display = 'none';
+        document.getElementById('notesGrid').style.display = 'none';
 
-        const data = await apiCall(`/notes/${encodeURIComponent(userEmail)}`);
-        textNotes = data;
+        const response = await fetch(`${API_BASE}/notes/${encodeURIComponent(userEmail)}`);
+        const textNotes = await response.json();
         
-        renderTextNotes();
-        renderVoiceRecordings(); // Load voice recordings from localStorage
+        const voiceRecordings = getVoiceRecordings();
         
-        loadingMessage.style.display = 'none';
-        notesContainer.style.display = 'grid';
+        allNotes = [
+          ...textNotes.map(note => ({ ...note, type: 'text' })),
+          ...voiceRecordings.map(rec => ({ ...rec, type: 'voice' }))
+        ];
+
+        document.getElementById('loadingMessage').style.display = 'none';
+        document.getElementById('notesGrid').style.display = 'grid';
+        renderNotes(allNotes);
       } catch (error) {
-        console.error("Failed to load notes:", error);
-        loadingMessage.style.display = 'none';
-        errorMessage.style.display = 'block';
-        errorMessage.textContent = 'Failed to load notes. Please refresh the page.';
+        console.error('Error loading notes:', error);
+        document.getElementById('loadingMessage').style.display = 'none';
+        document.getElementById('errorMessage').style.display = 'block';
       }
     }
 
-    // Voice Recording Functions
+    function getVoiceRecordings() {
+      const stored = localStorage.getItem(`voice_recordings_${userEmail}`);
+      return stored ? JSON.parse(stored) : [];
+    }
+
+    function renderNotes(notes) {
+      const grid = document.getElementById('notesGrid');
+      
+      if (notes.length === 0) {
+        grid.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-state-icon">📝</div>
+            <h3>No notes found</h3>
+            <p>Try adjusting your filters or add a new note</p>
+          </div>
+        `;
+        return;
+      }
+
+      const sorted = [...notes].sort((a, b) => {
+        const dateA = new Date(a.created_date || a.date);
+        const dateB = new Date(b.created_date || b.date);
+        return dateB - dateA;
+      });
+
+      grid.innerHTML = sorted.map(note => {
+        const isVoice = note.type === 'voice';
+        const date = new Date(note.created_date || note.date).toLocaleDateString('en-US', { 
+          month: 'short', 
+          day: 'numeric', 
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        });
+
+        return `
+          <div class="note-card ${note.type}">
+            <div class="note-header">
+              <div class="note-title">${note.title}</div>
+              <div class="note-actions">
+                ${isVoice ? `<button class="icon-btn play" onclick="playRecording('${note.id}')" title="Play">▶️</button>` : ''}
+                <button class="icon-btn delete" onclick="deleteNote('${note.id}', '${note.type}')" title="Delete">🗑️</button>
+              </div>
+            </div>
+            <div class="note-meta">
+              <span class="meta-item">📅 ${date}</span>
+              <span class="type-badge type-${note.type}">${isVoice ? 'VOICE' : 'TEXT'}</span>
+            </div>
+            ${!isVoice && note.content ? `<div class="note-content">${note.content.substring(0, 200)}${note.content.length > 200 ? '...' : ''}</div>` : ''}
+          </div>
+        `;
+      }).join('');
+    }
+
+    function applyFilters() {
+      const typeFilter = document.getElementById('typeFilter').value;
+      let filtered = allNotes;
+
+      if (typeFilter !== 'all') {
+        filtered = filtered.filter(n => n.type === typeFilter);
+      }
+
+      renderNotes(filtered);
+    }
+
+    function openVoiceModal() {
+      document.getElementById('voiceModal').classList.add('active');
+    }
+
+    function closeVoiceModal() {
+      if (isRecording) {
+        stopRecording();
+      }
+      document.getElementById('voiceModal').classList.remove('active');
+      document.getElementById('voiceForm').reset();
+      document.getElementById('recordingStatus').textContent = 'Click to start recording';
+      document.getElementById('recordingTime').style.display = 'none';
+      document.getElementById('saveVoiceBtn').disabled = true;
+      currentAudioBlob = null;
+    }
+
+    function openTextModal() {
+      document.getElementById('textModal').classList.add('active');
+    }
+
+    function closeTextModal() {
+      document.getElementById('textModal').classList.remove('active');
+      document.getElementById('textForm').reset();
+    }
+
     async function initializeMediaRecorder() {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -609,14 +763,12 @@
         mediaRecorder.onstop = () => {
           currentAudioBlob = new Blob(audioChunks, { type: 'audio/wav' });
           audioChunks = [];
-          voiceTitle.style.display = 'block';
-          saveVoiceBtn.style.display = 'block';
-          saveVoiceBtn.disabled = false;
+          document.getElementById('saveVoiceBtn').disabled = false;
         };
 
         return true;
       } catch (error) {
-        showToast('Microphone access denied. Please enable microphone permissions.', true);
+        showToast('Microphone access denied', true);
         return false;
       }
     }
@@ -625,10 +777,11 @@
       if (!mediaRecorder) return;
       
       isRecording = true;
-      recordBtn.classList.add('recording');
-      recordBtn.innerHTML = '⏹️';
-      recordingStatus.textContent = 'Recording...';
-      recordingTime.style.display = 'block';
+      const btn = document.getElementById('recordBtn');
+      btn.classList.add('recording');
+      btn.innerHTML = '⏹️';
+      document.getElementById('recordingStatus').textContent = 'Recording...';
+      document.getElementById('recordingTime').style.display = 'block';
       
       recordingStartTime = Date.now();
       recordingTimer = setInterval(updateRecordingTime, 1000);
@@ -640,10 +793,11 @@
       if (!mediaRecorder || !isRecording) return;
       
       isRecording = false;
-      recordBtn.classList.remove('recording');
-      recordBtn.innerHTML = '🎤';
-      recordingStatus.textContent = 'Recording stopped. Add a title and save.';
-      recordingTime.style.display = 'none';
+      const btn = document.getElementById('recordBtn');
+      btn.classList.remove('recording');
+      btn.innerHTML = '🎤';
+      document.getElementById('recordingStatus').textContent = 'Recording stopped. Add a title and save.';
+      document.getElementById('recordingTime').style.display = 'none';
       
       clearInterval(recordingTimer);
       mediaRecorder.stop();
@@ -653,10 +807,11 @@
       const elapsed = Math.floor((Date.now() - recordingStartTime) / 1000);
       const minutes = Math.floor(elapsed / 60);
       const seconds = elapsed % 60;
-      recordingTime.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+      document.getElementById('recordingTime').textContent = 
+        `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
     }
 
-    recordBtn.onclick = async () => {
+    document.getElementById('recordBtn').onclick = async () => {
       if (!isRecording) {
         if (!mediaRecorder) {
           const initialized = await initializeMediaRecorder();
@@ -668,171 +823,98 @@
       }
     };
 
-    // Save voice recording (still uses localStorage for audio data)
-    saveVoiceBtn.onclick = () => {
+    function saveVoiceNote(event) {
+      event.preventDefault();
       if (!currentAudioBlob) return;
 
-      const title = voiceTitle.value.trim() || `Recording ${new Date().toLocaleString()}`;
-      const recording = {
-        id: Date.now(),
-        title: title,
-        date: new Date().toISOString(),
-        audioData: currentAudioBlob
-      };
-
-      // Convert blob to base64 for storage
+      const title = document.getElementById('voiceTitle').value.trim() || 
+                    `Recording ${new Date().toLocaleString()}`;
+      
       const reader = new FileReader();
       reader.onload = () => {
-        recording.audioData = reader.result;
-        saveVoiceRecording(recording);
+        const recording = {
+          id: Date.now(),
+          title: title,
+          date: new Date().toISOString(),
+          audioData: reader.result
+        };
+
+        const recordings = getVoiceRecordings();
+        recordings.unshift(recording);
+        localStorage.setItem(`voice_recordings_${userEmail}`, JSON.stringify(recordings));
+        
+        closeVoiceModal();
+        loadAllNotes();
+        showToast('Voice recording saved successfully!');
       };
       reader.readAsDataURL(currentAudioBlob);
-    };
-
-    function saveVoiceRecording(recording) {
-      const recordings = getVoiceRecordings();
-      recordings.unshift(recording);
-      localStorage.setItem(`voice_recordings_${userEmail}`, JSON.stringify(recordings));
-      
-      // Reset form
-      voiceTitle.value = '';
-      voiceTitle.style.display = 'none';
-      saveVoiceBtn.style.display = 'none';
-      saveVoiceBtn.disabled = true;
-      recordingStatus.textContent = 'Click to start recording';
-      currentAudioBlob = null;
-      
-      renderVoiceRecordings();
-      showToast('Voice recording saved successfully!');
     }
 
-    // Text Notes Functions - Updated to use database
-    saveTextBtn.onclick = async () => {
-      const title = textTitle.value.trim();
-      const content = textContent.value.trim();
-      
-      if (!title && !content) {
-        showToast('Please enter a title or content for your note.', true);
-        return;
-      }
+    async function saveTextNote(event) {
+      event.preventDefault();
+
+      const title = document.getElementById('textTitle').value.trim();
+      const content = document.getElementById('textContent').value.trim();
 
       try {
-        saveTextBtn.textContent = 'Saving...';
-        saveTextBtn.disabled = true;
-
-        await apiCall("/notes", {
-          method: "POST",
+        await fetch(`${API_BASE}/notes`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             user_email: userEmail,
-            title: title || 'Untitled Note',
+            title: title,
             content: content,
             created_date: new Date().toISOString()
           })
         });
-        
-        // Reset form
-        textTitle.value = '';
-        textContent.value = '';
-        
-        await loadTextNotes(); // Refresh the list
+
+        closeTextModal();
+        loadAllNotes();
         showToast('Note saved successfully!');
-        
       } catch (error) {
-        console.error("Failed to save note:", error);
-        showToast('Failed to save note. Please try again.', true);
-      } finally {
-        saveTextBtn.textContent = 'Save Note';
-        saveTextBtn.disabled = false;
+        console.error('Error saving note:', error);
+        showToast('Failed to save note', true);
       }
-    };
-
-    // Data persistence functions
-    function getVoiceRecordings() {
-      const stored = localStorage.getItem(`voice_recordings_${userEmail}`);
-      return stored ? JSON.parse(stored) : [];
     }
 
-    // Render functions
-    function renderVoiceRecordings() {
-      const recordings = getVoiceRecordings();
-      
-      if (recordings.length === 0) {
-        voiceList.innerHTML = '<div class="empty-state">No voice recordings yet</div>';
-        return;
-      }
-
-      voiceList.innerHTML = recordings.map(recording => `
-        <div class="voice-item">
-          <div class="item-header">
-            <h4 class="item-title">${recording.title}</h4>
-            <span class="item-date">${new Date(recording.date).toLocaleDateString()}</span>
-          </div>
-          <div class="item-actions">
-            <button class="btn-small btn-play" onclick="playRecording('${recording.id}')">▶ Play</button>
-            <button class="btn-small btn-delete" onclick="deleteVoiceRecording('${recording.id}')">Delete</button>
-          </div>
-        </div>
-      `).join('');
-    }
-
-    function renderTextNotes() {
-      if (textNotes.length === 0) {
-        textList.innerHTML = '<div class="empty-state">No text notes yet</div>';
-        return;
-      }
-
-      textList.innerHTML = textNotes.map(note => `
-        <div class="note-item">
-          <div class="item-header">
-            <h4 class="item-title">${note.title}</h4>
-            <span class="item-date">${new Date(note.created_date).toLocaleDateString()}</span>
-          </div>
-          <div class="item-content">${(note.content || '').substring(0, 200)}${(note.content || '').length > 200 ? '...' : ''}</div>
-          <div class="item-actions">
-            <button class="btn-small btn-delete" onclick="deleteTextNote('${note.id}')">Delete</button>
-          </div>
-        </div>
-      `).join('');
-    }
-
-    // Global functions for button actions
     window.playRecording = (id) => {
       const recordings = getVoiceRecordings();
       const recording = recordings.find(r => r.id === parseInt(id));
       if (recording && recording.audioData) {
         const audio = new Audio(recording.audioData);
-        audio.play().catch(e => showToast('Error playing recording', true));
+        audio.play().catch(() => showToast('Error playing recording', true));
       }
     };
 
-    window.deleteVoiceRecording = (id) => {
-      if (confirm('Are you sure you want to delete this recording?')) {
-        const recordings = getVoiceRecordings().filter(r => r.id !== parseInt(id));
-        localStorage.setItem(`voice_recordings_${userEmail}`, JSON.stringify(recordings));
-        renderVoiceRecordings();
-        showToast('Recording deleted');
-      }
-    };
+    window.deleteNote = async (id, type) => {
+      if (!confirm('Are you sure you want to delete this note?')) return;
 
-    window.deleteTextNote = async (id) => {
-      if (confirm('Are you sure you want to delete this note?')) {
-        try {
-          await apiCall(`/notes/${id}`, {
-            method: "DELETE"
-          });
-          
-          await loadTextNotes(); // Refresh the list
-          showToast('Note deleted');
-          
-        } catch (error) {
-          console.error("Failed to delete note:", error);
-          showToast('Failed to delete note. Please try again.', true);
+      try {
+        if (type === 'voice') {
+          const recordings = getVoiceRecordings().filter(r => r.id !== parseInt(id));
+          localStorage.setItem(`voice_recordings_${userEmail}`, JSON.stringify(recordings));
+        } else {
+          await fetch(`${API_BASE}/notes/${id}`, { method: 'DELETE' });
         }
+        
+        loadAllNotes();
+        showToast('Note deleted');
+      } catch (error) {
+        console.error('Error deleting note:', error);
+        showToast('Failed to delete note', true);
       }
     };
 
-    // Initialize the page
-    loadTextNotes();
+    document.getElementById('voiceModal').addEventListener('click', (e) => {
+      if (e.target.id === 'voiceModal') closeVoiceModal();
+    });
+
+    document.getElementById('textModal').addEventListener('click', (e) => {
+      if (e.target.id === 'textModal') closeTextModal();
+    });
+
+    loadAllNotes();
   </script>
 </body>
 </html>
+
