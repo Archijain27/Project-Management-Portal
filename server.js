@@ -349,15 +349,17 @@ careerGoalsColumns.forEach((columnDef) => {
 });
 
 // ===================== AUTH API WITH PASSWORD HASHING =====================
-app.post("/signup", async (req, res) => {
-  const { email, password } = req.body;
+
+// REGISTER endpoint (for frontend compatibility)
+app.post("/register", async (req, res) => {
+  const { name, email, password } = req.body;
  
   if (!email || !password) {
-    return res.status(400).json({ error: "Email and password are required." });
+    return res.status(400).json({ success: false, message: "Email and password are required." });
   }
  
   if (password.length < 6) {
-    return res.status(400).json({ error: "Password must be at least 6 characters long." });
+    return res.status(400).json({ success: false, message: "Password must be at least 6 characters long." });
   }
 
   try {
@@ -370,11 +372,12 @@ app.post("/signup", async (req, res) => {
       function (err) {
         if (err) {
           if (err.message.includes('UNIQUE constraint failed') || err.code === '23505') {
-            return res.status(400).json({ error: "User already exists." });
+            return res.status(400).json({ success: false, message: "User already exists." });
           }
-          return res.status(500).json({ error: "Failed to create user." });
+          return res.status(500).json({ success: false, message: "Failed to create user." });
         }
         res.json({
+          success: true,
           id: this.lastID,
           email: email.toLowerCase().trim(),
           message: "Account created successfully!"
@@ -383,15 +386,56 @@ app.post("/signup", async (req, res) => {
     );
   } catch (error) {
     console.error('Signup error:', error);
-    res.status(500).json({ error: "Server error during signup." });
+    res.status(500).json({ success: false, message: "Server error during signup." });
   }
 });
 
+// SIGNUP endpoint (keep for backward compatibility)
+app.post("/signup", async (req, res) => {
+  const { email, password } = req.body;
+ 
+  if (!email || !password) {
+    return res.status(400).json({ success: false, message: "Email and password are required." });
+  }
+ 
+  if (password.length < 6) {
+    return res.status(400).json({ success: false, message: "Password must be at least 6 characters long." });
+  }
+
+  try {
+    const saltRounds = 10;
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
+   
+    db.run(
+      "INSERT INTO users (email, password) VALUES (?, ?)",
+      [email.toLowerCase().trim(), hashedPassword],
+      function (err) {
+        if (err) {
+          if (err.message.includes('UNIQUE constraint failed') || err.code === '23505') {
+            return res.status(400).json({ success: false, message: "User already exists." });
+          }
+          return res.status(500).json({ success: false, message: "Failed to create user." });
+        }
+        res.json({
+          success: true,
+          id: this.lastID,
+          email: email.toLowerCase().trim(),
+          message: "Account created successfully!"
+        });
+      }
+    );
+  } catch (error) {
+    console.error('Signup error:', error);
+    res.status(500).json({ success: false, message: "Server error during signup." });
+  }
+});
+
+// LOGIN endpoint
 app.post("/login", (req, res) => {
   const { email, password } = req.body;
  
   if (!email || !password) {
-    return res.status(400).json({ error: "Email and password are required." });
+    return res.status(400).json({ success: false, message: "Email and password are required." });
   }
 
   db.get(
@@ -400,31 +444,33 @@ app.post("/login", (req, res) => {
     async (err, row) => {
       if (err) {
         console.error('Login database error:', err);
-        return res.status(500).json({ error: "Login failed." });
+        return res.status(500).json({ success: false, message: "Login failed." });
       }
      
       if (!row) {
-        return res.status(400).json({ error: "Invalid credentials." });
+        return res.status(400).json({ success: false, message: "Invalid credentials." });
       }
 
       try {
         const passwordMatch = await bcrypt.compare(password, row.password);
        
         if (!passwordMatch) {
-          return res.status(400).json({ error: "Invalid credentials." });
+          return res.status(400).json({ success: false, message: "Invalid credentials." });
         }
        
         res.json({
+          success: true,
           email: row.email,
           message: "Login successful!"
         });
       } catch (error) {
         console.error('Password comparison error:', error);
-        res.status(500).json({ error: "Login failed." });
+        res.status(500).json({ success: false, message: "Login failed." });
       }
     }
   );
 });
+
 
 // ===================== PROJECTS API WITH PROGRESS =====================
 app.post("/projects", (req, res) => {
@@ -1412,6 +1458,7 @@ app.listen(port, () => {
 // ===================== PROCESS ERROR HANDLERS =====================
 process.on('unhandledRejection', (reason, promise) => { console.error('Unhandled Rejection at:', promise, 'reason:', reason); });
 process.on('uncaughtException', (error) => { console.error('Uncaught Exception:', error); });
+
 
 
 
