@@ -16,7 +16,7 @@ if (isProduction && process.env.DATABASE_URL) {
   const { Pool } = require('pg');
   const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
-    ssl: { rejectUnauthorized: false }
+    ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
   });
   
   console.log('Using PostgreSQL database in production');
@@ -31,31 +31,45 @@ if (isProduction && process.env.DATABASE_URL) {
       pgQuery = pgQuery.replace(/INTEGER PRIMARY KEY AUTOINCREMENT/g, 'SERIAL PRIMARY KEY');
       pgQuery = pgQuery.replace(/AUTOINCREMENT/g, '');
       
-      pool.query(pgQuery, params)
-        .then(result => {
-          if (callback) callback.call({ 
-            lastID: result.rows && result.rows[0] ? result.rows[0].id : null,
-            changes: result.rowCount || 0
-          }, null);
-        })
-        .catch(err => {
-          if (err.code === '42701' || err.message.includes('already exists')) {
-            if (callback) callback.call({ lastID: null, changes: 0 }, null);
-          } else {
-            console.error('Database error:', err.message);
+      if (pgQuery.includes('ALTER TABLE') && pgQuery.includes('ADD COLUMN')) {
+        return pool.query(pgQuery, params)
+          .then(result => {
+            if (callback) callback.call({ 
+              lastID: result.rows && result.rows[0] ? result.rows[0].id : null,
+              changes: result.rowCount || 0
+            }, null);
+          })
+          .catch(err => {
+            if (err.code === '42701' || err.message.includes('already exists')) {
+              if (callback) callback.call({ lastID: null, changes: 0 }, null);
+            } else {
+              console.error('Database error:', err);
+              if (callback) callback.call({ lastID: null, changes: 0 }, err);
+            }
+          });
+      } else {
+        return pool.query(pgQuery, params)
+          .then(result => {
+            if (callback) callback.call({ 
+              lastID: result.rows && result.rows[0] ? result.rows[0].id : null,
+              changes: result.rowCount || 0
+            }, null);
+          })
+          .catch(err => {
+            console.error('Database error:', err);
             if (callback) callback.call({ lastID: null, changes: 0 }, err);
-          }
-        });
+          });
+      }
     },
     get: (query, params = [], callback) => {
       let pgQuery = query;
       let paramIndex = 1;
       pgQuery = pgQuery.replace(/\?/g, () => `$${paramIndex++}`);
       
-      pool.query(pgQuery, params)
+      return pool.query(pgQuery, params)
         .then(result => callback(null, result.rows[0] || null))
         .catch(err => {
-          console.error('Database error:', err.message);
+          console.error('Database error:', err);
           callback(err, null);
         });
     },
@@ -64,10 +78,10 @@ if (isProduction && process.env.DATABASE_URL) {
       let paramIndex = 1;
       pgQuery = pgQuery.replace(/\?/g, () => `$${paramIndex++}`);
       
-      pool.query(pgQuery, params)
+      return pool.query(pgQuery, params)
         .then(result => callback(null, result.rows || []))
         .catch(err => {
-          console.error('Database error:', err.message);
+          console.error('Database error:', err);
           callback(err, []);
         });
     }
@@ -277,12 +291,12 @@ db.serialize(() => {
   ];
 
   calendarColumns.forEach((columnDef) => {
+    const columnName = columnDef.split(' ')[0];
     db.run(
       `ALTER TABLE calendar_events ADD COLUMN ${columnDef}`,
       (err) => {
-        // Silently ignore duplicate column errors
         if (err && !err.message.includes('duplicate') && err.code !== '42701') {
-          console.error(`Error adding column to calendar_events:`, err.message);
+          console.error(`Error adding column ${columnName}:`, err);
         }
       }
     );
@@ -296,7 +310,7 @@ db.serialize(() => {
       `ALTER TABLE projects ADD COLUMN ${column} TEXT`,
       (err) => {
         if (err && !err.message.includes('duplicate') && err.code !== '42701') {
-          console.error(`Error adding column ${column} to projects:`, err.message);
+          console.error(`Error adding column ${column}:`, err);
         }
       }
     );
@@ -307,29 +321,31 @@ db.serialize(() => {
     `ALTER TABLE projects ADD COLUMN progress INTEGER DEFAULT 0`,
     (err) => {
       if (err && !err.message.includes('duplicate') && err.code !== '42701') {
-        console.error('Error adding progress column:', err.message);
+        console.error('Error adding progress column:', err);
       }
     }
   );
+  // Add after the career_goals table creation
+const careerGoalsColumns = [
+  "total_stages INTEGER DEFAULT 5",
+  "current_stage INTEGER DEFAULT 0",
+  "start_date TEXT",
+  "stage_description TEXT"
+];
 
-  // Add career goals columns
-  const careerGoalsColumns = [
-    "total_stages INTEGER DEFAULT 5",
-    "current_stage INTEGER DEFAULT 0",
-    "start_date TEXT",
-    "stage_description TEXT"
-  ];
-
-  careerGoalsColumns.forEach((columnDef) => {
-    db.run(
-      `ALTER TABLE career_goals ADD COLUMN ${columnDef}`,
-      (err) => {
-        if (err && !err.message.includes('duplicate') && err.code !== '42701') {
-          console.error(`Error adding column to career_goals:`, err.message);
-        }
+careerGoalsColumns.forEach((columnDef) => {
+  const columnName = columnDef.split(' ')[0];
+  db.run(
+    `ALTER TABLE career_goals ADD COLUMN ${columnDef}`,
+    (err) => {
+      if (err && !err.message.includes('duplicate') && err.code !== '42701') {
+        console.error(`Error adding column ${columnName} to career_goals:`, err);
       }
-    );
-  });
+    }
+  );
+});
+
+
 });
 
 // ===================== AUTH API WITH PASSWORD HASHING =====================
@@ -454,6 +470,7 @@ app.post("/login", (req, res) => {
     }
   );
 });
+
 
 // ===================== PROJECTS API WITH PROGRESS =====================
 app.post("/projects", (req, res) => {
@@ -673,6 +690,8 @@ app.post("/career_goals", (req, res) => {
   );
 });
 
+
+
 app.put("/career_goals/:id", (req, res) => {
   const { title, description, progress, goal_type, target_date, total_stages, current_stage, start_date, stage_description } = req.body;
   db.run(
@@ -684,6 +703,7 @@ app.put("/career_goals/:id", (req, res) => {
     }
   );
 });
+
 
 app.delete("/career_goals/:id", (req, res) => {
   db.run("DELETE FROM career_goals WHERE id = ?", [req.params.id], function (err) {
@@ -903,6 +923,8 @@ app.delete("/calendar_events/:id", (req, res) => {
 });
 
 // ===================== PROFILE API ENDPOINTS =====================
+
+// GET profile by email
 app.get("/profile/:email", (req, res) => {
   db.get(
     "SELECT * FROM profiles WHERE user_email = ?",
@@ -917,6 +939,7 @@ app.get("/profile/:email", (req, res) => {
         return res.json(null);
       }
       
+      // Convert snake_case to camelCase for frontend
       const profile = {
         userEmail: row.user_email,
         fullName: row.full_name,
@@ -946,13 +969,30 @@ app.get("/profile/:email", (req, res) => {
   );
 });
 
+// POST/UPDATE profile
 app.post("/profile", (req, res) => {
   const {
-    userEmail, fullName, designation, department, institution,
-    officeAddress, officialEmail, alternateEmail, phone, website,
-    degrees, employment, researchKeywords, researchDescription,
-    scholarLink, courses, grants, professionalActivities,
-    awards, skills, outreachService
+    userEmail,
+    fullName,
+    designation,
+    department,
+    institution,
+    officeAddress,
+    officialEmail,
+    alternateEmail,
+    phone,
+    website,
+    degrees,
+    employment,
+    researchKeywords,
+    researchDescription,
+    scholarLink,
+    courses,
+    grants,
+    professionalActivities,
+    awards,
+    skills,
+    outreachService
   } = req.body;
 
   if (!userEmail) {
@@ -961,6 +1001,7 @@ app.post("/profile", (req, res) => {
 
   const modifiedDate = new Date().toISOString();
 
+  // Check if profile exists
   db.get(
     "SELECT id FROM profiles WHERE user_email = ?",
     [userEmail],
@@ -977,6 +1018,7 @@ app.post("/profile", (req, res) => {
       const awardsJson = JSON.stringify(awards || []);
 
       if (row) {
+        // Update existing profile
         db.run(
           `UPDATE profiles SET 
             full_name = ?, designation = ?, department = ?, institution = ?,
@@ -1003,6 +1045,7 @@ app.post("/profile", (req, res) => {
           }
         );
       } else {
+        // Create new profile
         const createdDate = new Date().toISOString();
         db.run(
           `INSERT INTO profiles (
@@ -1032,6 +1075,7 @@ app.post("/profile", (req, res) => {
   );
 });
 
+// DELETE profile
 app.delete("/profile/:email", (req, res) => {
   db.run(
     "DELETE FROM profiles WHERE user_email = ?",
@@ -1047,6 +1091,7 @@ app.delete("/profile/:email", (req, res) => {
 });
 
 // ===================== RESUME GENERATION API =====================
+
 app.get("/generate-resume/:email", async (req, res) => {
   try {
     const profile = await new Promise((resolve, reject) => {
@@ -1080,12 +1125,14 @@ app.get("/generate-resume/:email", async (req, res) => {
       `);
     }
 
+    // Parse JSON fields
     const degrees = profile.degrees ? JSON.parse(profile.degrees) : [];
     const employment = profile.employment ? JSON.parse(profile.employment) : [];
     const courses = profile.courses ? JSON.parse(profile.courses) : [];
     const grants = profile.grants ? JSON.parse(profile.grants) : [];
     const awards = profile.awards ? JSON.parse(profile.awards) : [];
 
+    // Generate HTML resume
     const resumeHTML = `
 <!DOCTYPE html>
 <html lang="en">
@@ -1095,29 +1142,134 @@ app.get("/generate-resume/:email", async (req, res) => {
   <title>Resume - ${profile.full_name || 'Academic Professional'}</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'Georgia', serif; line-height: 1.6; color: #333; background: #f5f5f5; padding: 20px; }
-    .container { max-width: 900px; margin: 0 auto; background: white; padding: 50px; box-shadow: 0 0 20px rgba(0,0,0,0.1); }
-    .header { text-align: center; border-bottom: 3px solid #4f46e5; padding-bottom: 20px; margin-bottom: 30px; }
-    .header h1 { font-size: 2.5rem; color: #1a1a1a; margin-bottom: 10px; }
-    .header .designation { font-size: 1.3rem; color: #4f46e5; font-weight: 600; margin-bottom: 15px; }
-    .contact-info { display: flex; justify-content: center; flex-wrap: wrap; gap: 20px; font-size: 0.95rem; color: #666; }
-    .section { margin-bottom: 30px; }
-    .section-title { font-size: 1.5rem; color: #4f46e5; border-bottom: 2px solid #e5e7eb; padding-bottom: 8px; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 1px; }
-    .item { margin-bottom: 20px; }
-    .item-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 5px; }
-    .item-title { font-weight: 700; font-size: 1.1rem; color: #1a1a1a; }
-    .item-subtitle { font-style: italic; color: #666; margin-bottom: 5px; }
-    .item-date { color: #888; font-size: 0.9rem; }
-    .item-description { color: #555; margin-top: 8px; line-height: 1.7; }
-    .keywords { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
-    .keyword { background: #e0e7ff; color: #4f46e5; padding: 5px 12px; border-radius: 15px; font-size: 0.9rem; }
-    .print-btn { position: fixed; top: 20px; right: 20px; background: #4f46e5; color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-size: 1rem; font-weight: 600; box-shadow: 0 4px 10px rgba(79,70,229,0.3); transition: all 0.3s; }
-    .print-btn:hover { background: #4338ca; transform: translateY(-2px); }
-    @media print { body { background: white; padding: 0; } .container { box-shadow: none; padding: 0; } .print-btn { display: none; } }
+    body {
+      font-family: 'Georgia', serif;
+      line-height: 1.6;
+      color: #333;
+      background: #f5f5f5;
+      padding: 20px;
+    }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      background: white;
+      padding: 50px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.1);
+    }
+    .header {
+      text-align: center;
+      border-bottom: 3px solid #4f46e5;
+      padding-bottom: 20px;
+      margin-bottom: 30px;
+    }
+    .header h1 {
+      font-size: 2.5rem;
+      color: #1a1a1a;
+      margin-bottom: 10px;
+    }
+    .header .designation {
+      font-size: 1.3rem;
+      color: #4f46e5;
+      font-weight: 600;
+      margin-bottom: 15px;
+    }
+    .contact-info {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 20px;
+      font-size: 0.95rem;
+      color: #666;
+    }
+    .contact-info span {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .section {
+      margin-bottom: 30px;
+    }
+    .section-title {
+      font-size: 1.5rem;
+      color: #4f46e5;
+      border-bottom: 2px solid #e5e7eb;
+      padding-bottom: 8px;
+      margin-bottom: 15px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .item {
+      margin-bottom: 20px;
+    }
+    .item-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 5px;
+    }
+    .item-title {
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: #1a1a1a;
+    }
+    .item-subtitle {
+      font-style: italic;
+      color: #666;
+      margin-bottom: 5px;
+    }
+    .item-date {
+      color: #888;
+      font-size: 0.9rem;
+    }
+    .item-description {
+      color: #555;
+      margin-top: 8px;
+      line-height: 1.7;
+    }
+    .keywords {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .keyword {
+      background: #e0e7ff;
+      color: #4f46e5;
+      padding: 5px 12px;
+      border-radius: 15px;
+      font-size: 0.9rem;
+    }
+    .print-btn {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: #4f46e5;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1rem;
+      font-weight: 600;
+      box-shadow: 0 4px 10px rgba(79,70,229,0.3);
+      transition: all 0.3s;
+    }
+    .print-btn:hover {
+      background: #4338ca;
+      transform: translateY(-2px);
+    }
+    @media print {
+      body { background: white; padding: 0; }
+      .container { box-shadow: none; padding: 0; }
+      .print-btn { display: none; }
+    }
+    ul { margin-left: 20px; margin-top: 8px; }
+    li { margin-bottom: 5px; color: #555; }
   </style>
 </head>
 <body>
   <button class="print-btn" onclick="window.print()">🖨️ Print Resume</button>
+  
   <div class="container">
     <div class="header">
       <h1>${profile.full_name || 'Name Not Provided'}</h1>
@@ -1126,11 +1278,125 @@ app.get("/generate-resume/:email", async (req, res) => {
       <div class="contact-info">
         ${profile.official_email ? `<span>✉️ ${profile.official_email}</span>` : ''}
         ${profile.phone ? `<span>📱 ${profile.phone}</span>` : ''}
-        ${profile.website ? `<span>🌐 <a href="${profile.website}">${profile.website}</a></span>` : ''}
+        ${profile.website ? `<span>🌐 <a href="${profile.website}" target="_blank">${profile.website}</a></span>` : ''}
+        ${profile.scholar_link ? `<span>📚 <a href="${profile.scholar_link}" target="_blank">Google Scholar</a></span>` : ''}
       </div>
     </div>
-    ${profile.research_description ? `<div class="section"><h2 class="section-title">Research Interests</h2><p class="item-description">${profile.research_description}</p></div>` : ''}
-    ${degrees.length > 0 ? `<div class="section"><h2 class="section-title">Education</h2>${degrees.map(deg => `<div class="item"><div class="item-header"><div class="item-title">${deg.degree || ''} ${deg.specialization ? 'in ' + deg.specialization : ''}</div><div class="item-date">${deg.year || ''}</div></div><div class="item-subtitle">${deg.institution || ''}</div></div>`).join('')}</div>` : ''}
+
+    ${profile.research_description ? `
+    <div class="section">
+      <h2 class="section-title">Research Interests</h2>
+      <p class="item-description">${profile.research_description}</p>
+      ${profile.research_keywords ? `
+        <div class="keywords">
+          ${profile.research_keywords.split(',').map(kw => `<span class="keyword">${kw.trim()}</span>`).join('')}
+        </div>
+      ` : ''}
+    </div>
+    ` : ''}
+
+    ${degrees.length > 0 ? `
+    <div class="section">
+      <h2 class="section-title">Education</h2>
+      ${degrees.map(deg => `
+        <div class="item">
+          <div class="item-header">
+            <div class="item-title">${deg.degree || ''} ${deg.specialization ? 'in ' + deg.specialization : ''}</div>
+            <div class="item-date">${deg.year || ''}</div>
+          </div>
+          <div class="item-subtitle">${deg.institution || ''}</div>
+          ${deg.thesis ? `<div class="item-description"><strong>Thesis:</strong> ${deg.thesis}</div>` : ''}
+          ${deg.advisor ? `<div class="item-description"><strong>Advisor:</strong> ${deg.advisor}</div>` : ''}
+        </div>
+      `).join('')}
+    </div>
+    ` : ''}
+
+    ${employment.length > 0 ? `
+    <div class="section">
+      <h2 class="section-title">Professional Experience</h2>
+      ${employment.map(emp => `
+        <div class="item">
+          <div class="item-header">
+            <div class="item-title">${emp.position || ''}</div>
+            <div class="item-date">${emp.duration || ''}</div>
+          </div>
+          <div class="item-subtitle">${emp.organization || ''}</div>
+          ${emp.responsibilities ? `<div class="item-description">${emp.responsibilities}</div>` : ''}
+        </div>
+      `).join('')}
+    </div>
+    ` : ''}
+
+    ${grants.length > 0 ? `
+    <div class="section">
+      <h2 class="section-title">Research Grants & Funding</h2>
+      ${grants.map(grant => `
+        <div class="item">
+          <div class="item-header">
+            <div class="item-title">${grant.projectTitle || ''}</div>
+            <div class="item-date">${grant.duration || ''}</div>
+          </div>
+          <div class="item-subtitle">${grant.role || ''} | ${grant.agency || ''} ${grant.amount ? '| ' + grant.amount : ''}</div>
+          <div class="item-description"><strong>Status:</strong> ${grant.status || 'N/A'}</div>
+        </div>
+      `).join('')}
+    </div>
+    ` : ''}
+
+    ${courses.length > 0 ? `
+    <div class="section">
+      <h2 class="section-title">Teaching</h2>
+      ${courses.map(course => `
+        <div class="item">
+          <div class="item-header">
+            <div class="item-title">${course.courseName || ''} ${course.courseCode ? '(' + course.courseCode + ')' : ''}</div>
+            <div class="item-date">${course.semester || ''}</div>
+          </div>
+          ${course.labDetails ? `<div class="item-description">${course.labDetails}</div>` : ''}
+        </div>
+      `).join('')}
+    </div>
+    ` : ''}
+
+    ${awards.length > 0 ? `
+    <div class="section">
+      <h2 class="section-title">Awards & Achievements</h2>
+      ${awards.map(award => `
+        <div class="item">
+          <div class="item-header">
+            <div class="item-title">${award.title || ''}</div>
+            <div class="item-date">${award.year || ''}</div>
+          </div>
+          <div class="item-subtitle">${award.organization || ''}</div>
+          ${award.description ? `<div class="item-description">${award.description}</div>` : ''}
+        </div>
+      `).join('')}
+    </div>
+    ` : ''}
+
+    ${profile.professional_activities ? `
+    <div class="section">
+      <h2 class="section-title">Professional Activities</h2>
+      <div class="item-description">${profile.professional_activities}</div>
+    </div>
+    ` : ''}
+
+    ${profile.skills ? `
+    <div class="section">
+      <h2 class="section-title">Skills & Tools</h2>
+      <div class="keywords">
+        ${profile.skills.split(',').map(skill => `<span class="keyword">${skill.trim()}</span>`).join('')}
+      </div>
+    </div>
+    ` : ''}
+
+    ${profile.outreach_service ? `
+    <div class="section">
+      <h2 class="section-title">Outreach & Service</h2>
+      <div class="item-description">${profile.outreach_service}</div>
+    </div>
+    ` : ''}
   </div>
 </body>
 </html>
@@ -1139,7 +1405,23 @@ app.get("/generate-resume/:email", async (req, res) => {
     res.send(resumeHTML);
   } catch (error) {
     console.error('Resume generation error:', error);
-    res.status(500).send('<h1>Error</h1>');
+    res.status(500).send(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Error</title>
+        <style>
+          body { font-family: Arial, sans-serif; padding: 50px; text-align: center; }
+          h1 { color: #ef4444; }
+        </style>
+      </head>
+      <body>
+        <h1>Error Generating Resume</h1>
+        <p>An error occurred while generating your resume. Please try again.</p>
+        <button onclick="window.close()">Close</button>
+      </body>
+      </html>
+    `);
   }
 });
 
@@ -1152,6 +1434,7 @@ app.get("/dashboard", (req, res) => {
   res.sendFile(path.join(__dirname, "dashboard.html"));
 });
 
+// Catch all route for SPA
 app.get("*", (req, res) => {
   if (req.path.endsWith('.html')) {
     res.sendFile(path.join(__dirname, req.path));
@@ -1161,10 +1444,9 @@ app.get("*", (req, res) => {
 });
 
 // ===================== ERROR HANDLING =====================
-app.use((err, req, res, next) => {
-  console.error('Unhandled error:', err);
-  res.status(500).json({ error: 'Internal server error' });
-});
+app.use((err, req, res, next) => { console.error('Unhandled error:', err);
+res.status(500).json({ error: 'Internal server error' }); });
+
 
 // Start server
 app.listen(port, () => {
@@ -1173,14 +1455,9 @@ app.listen(port, () => {
   console.log(`Database: ${isProduction && process.env.DATABASE_URL ? 'PostgreSQL' : 'SQLite'}`);
 });
 
-// Process error handlers
-process.on('unhandledRejection', (reason, promise) => {
-  console.error('Unhandled Rejection at:', promise, 'reason:', reason);
-});
-
-process.on('uncaughtException', (error) => {
-  console.error('Uncaught Exception:', error);
-});
+// ===================== PROCESS ERROR HANDLERS =====================
+process.on('unhandledRejection', (reason, promise) => { console.error('Unhandled Rejection at:', promise, 'reason:', reason); });
+process.on('uncaughtException', (error) => { console.error('Uncaught Exception:', error); });
 
 
 
