@@ -9,7 +9,6 @@ const port = process.env.PORT || 10000;
 const isProduction = process.env.NODE_ENV === 'production';
 
 // Database setup - supports both SQLite (dev) and PostgreSQL (production)
-// Database setup - supports both SQLite (dev) and PostgreSQL (production)
 let db;
 
 if (isProduction && process.env.DATABASE_URL) {
@@ -32,9 +31,7 @@ if (isProduction && process.env.DATABASE_URL) {
       pgQuery = pgQuery.replace(/INTEGER PRIMARY KEY AUTOINCREMENT/g, 'SERIAL PRIMARY KEY');
       pgQuery = pgQuery.replace(/AUTOINCREMENT/g, '');
       
-      const queryPromise = pool.query(pgQuery, params);
-      
-      queryPromise
+      pool.query(pgQuery, params)
         .then(result => {
           if (callback) callback.call({ 
             lastID: result.rows && result.rows[0] ? result.rows[0].id : null,
@@ -49,15 +46,13 @@ if (isProduction && process.env.DATABASE_URL) {
             if (callback) callback.call({ lastID: null, changes: 0 }, err);
           }
         });
-      
-      return queryPromise;
     },
     get: (query, params = [], callback) => {
       let pgQuery = query;
       let paramIndex = 1;
       pgQuery = pgQuery.replace(/\?/g, () => `$${paramIndex++}`);
       
-      return pool.query(pgQuery, params)
+      pool.query(pgQuery, params)
         .then(result => callback(null, result.rows[0] || null))
         .catch(err => {
           console.error('Database error:', err.message);
@@ -69,7 +64,7 @@ if (isProduction && process.env.DATABASE_URL) {
       let paramIndex = 1;
       pgQuery = pgQuery.replace(/\?/g, () => `$${paramIndex++}`);
       
-      return pool.query(pgQuery, params)
+      pool.query(pgQuery, params)
         .then(result => callback(null, result.rows || []))
         .catch(err => {
           console.error('Database error:', err.message);
@@ -1186,6 +1181,7 @@ process.on('unhandledRejection', (reason, promise) => {
 process.on('uncaughtException', (error) => {
   console.error('Uncaught Exception:', error);
 });
+
 
 
 
