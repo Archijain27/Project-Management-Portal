@@ -63,6 +63,7 @@ if (isProduction && process.env.DATABASE_URL) {
           console.error('Database error:', err.message);
           if (callback) callback.call({ lastID: null, changes: 0 }, err);
         });
+      return;
     },
     get: (query, params = [], callback) => {
       let pgQuery = query;
@@ -1198,3 +1199,4 @@ process.on('unhandledRejection', (reason, promise) => {
 process.on('uncaughtException', (error) => {
   console.error('Uncaught Exception:', error);
 });
+
