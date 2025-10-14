@@ -24,32 +24,35 @@ if (isProduction && process.env.DATABASE_URL) {
   // Wrapper to make PostgreSQL work like SQLite
   db = {
     serialize: (callback) => callback(),
-    run: (query, params = [], callback) => {
-      let pgQuery = query;
-      let paramIndex = 1;
-      pgQuery = pgQuery.replace(/\?/g, () => `$${paramIndex++}`);
-      pgQuery = pgQuery.replace(/INTEGER PRIMARY KEY AUTOINCREMENT/g, 'SERIAL PRIMARY KEY');
-      pgQuery = pgQuery.replace(/AUTOINCREMENT/g, '');
-      
-      // Handle ALTER TABLE ADD COLUMN
-      if (pgQuery.includes('ALTER TABLE') && pgQuery.includes('ADD COLUMN')) {
-        return pool.query(pgQuery, params)
-          .then(result => {
-            if (callback) callback.call({ 
-              lastID: result.rows && result.rows[0] ? result.rows[0].id : null,
-              changes: result.rowCount || 0
-            }, null);
-          })
-          .catch(err => {
-            // Silently ignore "column already exists" errors
-            if (err.code === '42701' || err.message.includes('already exists')) {
-              if (callback) callback.call({ lastID: null, changes: 0 }, null);
-            } else {
-              console.error('Database error:', err.message);
-              if (callback) callback.call({ lastID: null, changes: 0 }, err);
-            }
-          });
+   run: (query, params = [], callback) => {
+  let pgQuery = query;
+  let paramIndex = 1;
+  pgQuery = pgQuery.replace(/\?/g, () => `$${paramIndex++}`);
+  pgQuery = pgQuery.replace(/INTEGER PRIMARY KEY AUTOINCREMENT/g, 'SERIAL PRIMARY KEY');
+  pgQuery = pgQuery.replace(/AUTOINCREMENT/g, '');
+  
+  // Execute query
+  const queryPromise = pool.query(pgQuery, params);
+  
+  queryPromise
+    .then(result => {
+      if (callback) callback.call({ 
+        lastID: result.rows && result.rows[0] ? result.rows[0].id : null,
+        changes: result.rowCount || 0
+      }, null);
+    })
+    .catch(err => {
+      // Ignore duplicate column errors silently
+      if (err.code === '42701' || err.message.includes('already exists')) {
+        if (callback) callback.call({ lastID: null, changes: 0 }, null);
+      } else {
+        console.error('Database error:', err.message);
+        if (callback) callback.call({ lastID: null, changes: 0 }, err);
       }
+    });
+  
+  return queryPromise;
+},
       
       // Handle regular queries
       return pool.query(pgQuery, params)
@@ -1199,4 +1202,5 @@ process.on('unhandledRejection', (reason, promise) => {
 process.on('uncaughtException', (error) => {
   console.error('Uncaught Exception:', error);
 });
+
 
