@@ -735,23 +735,20 @@
           
           console.log('Has actual description data:', hasData);
           
-          if (hasData) {
-            descriptionData = description;
-            fields.forEach(field => {
-              const element = document.getElementById(field);
-              const apiField = fieldMapping[field];
-              if (element && description[apiField] !== null && description[apiField] !== undefined) {
-                element.value = description[apiField];
-              }
-            });
-            updateLastSaved();
-            // Show view mode if data exists
-            switchToViewMode();
-          } else {
-            // Show form mode if no data
-            console.log('Showing form - no description data found (all fields are null)');
-            switchToFormMode();
-          }
+          // Always open in form mode on first visit
+descriptionData = description;
+fields.forEach(field => {
+  const element = document.getElementById(field);
+  const apiField = fieldMapping[field];
+  if (element && description[apiField] !== null && description[apiField] !== undefined) {
+    element.value = description[apiField];
+  }
+});
+updateLastSaved();
+
+// Force form mode on initial load
+switchToFormMode();
+
         } catch (error) {
           // If no description exists yet, show form
           console.log('Error loading description, showing form:', error);
@@ -861,3 +858,4 @@
   </script>
 </body>
 </html>
+
