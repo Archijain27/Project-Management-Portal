@@ -70,21 +70,31 @@
     }
    
     .project-header {
-      display: grid;
-      grid-template-columns: 200px 1fr auto;
-      gap: 15px;
-      align-items: center;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
     }
    
     .project-header h3 {
       margin: 0;
       font-size: 1.5rem;
       color: #333;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .project-controls {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      flex-wrap: wrap;
     }
 
     .project-header-buttons {
       display: flex;
       gap: 8px;
+      margin-left: auto;
     }
    
     .desc-btn {
@@ -267,7 +277,46 @@
       border-radius: 8px;
       padding: 15px;
     }
-   
+
+    .colleagues-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid rgba(79, 70, 229, 0.2);
+    }
+
+    .colleagues-header h4 {
+      margin: 0;
+      color: #333;
+    }
+
+    .timeline-btn {
+      padding: 6px 12px;
+      border: none;
+      border-radius: 6px;
+      background: #8b5cf6;
+      color: white;
+      cursor: pointer;
+      font-size: 0.85rem;
+      transition: background 0.2s;
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .timeline-btn:hover {
+      background: #7c3aed;
+    }
+
+    .colleague-actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
     #colleaguesInputs, #editColleaguesInputs {
       display: flex;
       flex-direction: column;
@@ -275,13 +324,12 @@
     }
 
     .colleagues p {
-      display: grid;
-      grid-template-columns: 200px auto;
+      display: flex;
+      justify-content: space-between;
       align-items: center;
       margin: 5px 0;
       font-size: 1.2rem;
       color: #444;
-      cursor: pointer;
       padding: 8px;
       border-radius: 6px;
       transition: background 0.2s;
@@ -443,13 +491,26 @@
     }
 
     @media (max-width: 768px) {
-      .project-header {
-        grid-template-columns: 1fr;
-        gap: 10px;
+      .project-header h3 {
+        font-size: 1.2rem;
+      }
+
+      .project-controls {
+        flex-direction: column;
+        align-items: stretch;
       }
 
       .progress-compact {
         min-width: auto;
+      }
+
+      .project-header-buttons {
+        margin-left: 0;
+        width: 100%;
+      }
+
+      .project-header-buttons button {
+        flex: 1;
       }
     }
   </style>
@@ -680,25 +741,35 @@
 
       div.innerHTML = `
         <div class="project-header">
-          <h3>${p.name}</h3>
-          <div class="progress-compact">
-            <div class="progress-slider-container-compact">
-              <div class="progress-track-bg"></div>
-              <div class="progress-bar-compact" style="width: ${progress}%"></div>
-              <input type="range" class="progress-slider-compact" min="0" max="100" value="${progress}" data-project-id="${p.id}" />
+          <h3 title="${p.name}">${p.name}</h3>
+          <div class="project-controls">
+            <div class="progress-compact">
+              <div class="progress-slider-container-compact">
+                <div class="progress-track-bg"></div>
+                <div class="progress-bar-compact" style="width: ${progress}%"></div>
+                <input type="range" class="progress-slider-compact" min="0" max="100" value="${progress}" data-project-id="${p.id}" />
+              </div>
+              <span class="progress-percentage-compact">${progress}%</span>
+              <span class="progress-status-compact ${status.class}">${status.text}</span>
             </div>
-            <span class="progress-percentage-compact">${progress}%</span>
-            <span class="progress-status-compact ${status.class}">${status.text}</span>
-          </div>
-          <div class="project-header-buttons">
-            <button class="desc-btn" onclick="window.location.href='description.html?id=${p.id}'">Description</button>
-            <button class="desc-btn edit-btn" data-id="${p.id}" style="background:#16a34a;">Edit</button>
+            <div class="project-header-buttons">
+              <button class="desc-btn" onclick="window.location.href='description.html?id=${p.id}'">Description</button>
+              <button class="desc-btn edit-btn" data-id="${p.id}" style="background:#16a34a;">Edit</button>
+              <button class="desc-btn toggle-colleagues-btn" data-id="${p.id}" style="background:#8b5cf6;">Team</button>
+            </div>
           </div>
         </div>
       `;
 
       div.onclick = (e) => {
         if(e.target.tagName === "BUTTON" || e.target.tagName === "INPUT") return;
+      };
+
+      container.appendChild(div);
+
+      const toggleBtn = div.querySelector('.toggle-colleagues-btn');
+      toggleBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
         const existing = div.querySelector(".colleagues");
         if(existing){
           existing.remove();
@@ -706,25 +777,56 @@
           const colDiv = document.createElement("div");
           colDiv.className = "colleagues";
           
+          let headerHtml = `
+            <div class="colleagues-header">
+              <h4>Team Members</h4>
+              <button class="timeline-btn all-timeline-btn" data-project-id="${p.id}">
+                📅 All Meetings
+              </button>
+            </div>
+          `;
+          
           if (colleagues.length === 0) {
-            colDiv.innerHTML = '<p style="color: #6b7280; font-style: italic;">No team members added yet</p>';
+            colDiv.innerHTML = headerHtml + '<p style="color: #6b7280; font-style: italic;">No team members added yet</p>';
           } else {
-            colleagues.forEach(c => {
-              colDiv.innerHTML += `
-                <p>
-                  <strong>${c.name}</strong>
+            let colleaguesHtml = colleagues.map(c => `
+              <p>
+                <strong>${c.name}</strong>
+                <div class="colleague-actions">
                   <a href="https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(c.email)}" target="_blank" title="Send email to ${c.name}">
                     <img src="https://www.gstatic.com/images/icons/material/product/2x/gmail_48dp.png"
                          alt="Gmail" class="email-icon">
                   </a>
-                </p>`;
-            });
+                  <button class="timeline-btn colleague-timeline-btn" data-email="${c.email}" data-name="${c.name}">
+                    📅 Meetings
+                  </button>
+                </div>
+              </p>
+            `).join('');
+            colDiv.innerHTML = headerHtml + colleaguesHtml;
           }
           div.appendChild(colDiv);
+          
+          const allTimelineBtn = colDiv.querySelector('.all-timeline-btn');
+          if (allTimelineBtn) {
+            allTimelineBtn.addEventListener('click', (e) => {
+              e.stopPropagation();
+              openAllMeetingsModal(colleagues, p.name);
+            });
+          }
+          
+          colDiv.querySelectorAll('.colleague-timeline-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+              e.stopPropagation();
+              const email = btn.dataset.email;
+              const name = btn.dataset.name;
+              currentColleagueEmail = email;
+              meetingsModal.style.display = "flex";
+              loadMeetings(email, name);
+            });
+          });
         }
-      };
-
-      container.appendChild(div);
+      });
     });
 
     document.querySelectorAll(".edit-btn").forEach(btn => {
@@ -1019,19 +1121,56 @@
 
   let currentColleagueEmail = null;
 
-  document.addEventListener("click", e => {
-    if(e.target.tagName === "STRONG" && e.target.closest('.colleagues')) {
-      const name = e.target.textContent;
-      const colP = e.target.closest("p");
-      const emailLink = colP.querySelector("a");
-      if (emailLink) {
-        const email = emailLink.href.replace("https://mail.google.com/mail/?view=cm&fs=1&to=", "");
-        currentColleagueEmail = decodeURIComponent(email);
-        meetingsModal.style.display = "flex";
-        loadMeetings(currentColleagueEmail, name);
-      }
+  async function openAllMeetingsModal(colleagues, projectName) {
+    if (colleagues.length === 0) {
+      alert("No team members in this project yet.");
+      return;
     }
-  });
+    
+    try {
+      meetingsList.innerHTML = '<p style="color: #6b7280; font-style: italic;">Loading all meetings...</p>';
+      meetingsModal.style.display = "flex";
+      
+      const allMeetings = [];
+      for (const colleague of colleagues) {
+        try {
+          const meetings = await apiCall(`/meetings/${encodeURIComponent(colleague.email)}`);
+          meetings.forEach(m => {
+            allMeetings.push({
+              ...m,
+              colleagueName: colleague.name,
+              colleagueEmail: colleague.email
+            });
+          });
+        } catch (error) {
+          console.error(`Failed to load meetings for ${colleague.name}:`, error);
+        }
+      }
+      
+      if (allMeetings.length === 0) {
+        meetingsList.innerHTML = `<p style="color: #6b7280; font-style: italic;">No meetings recorded for ${projectName} yet.</p>`;
+      } else {
+        meetingsList.innerHTML = allMeetings
+          .sort((a, b) => new Date(b.date) - new Date(a.date))
+          .map(m => `
+            <div style="padding: 10px; border-bottom: 1px solid #eee; margin-bottom: 8px;">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <strong>${new Date(m.date).toLocaleDateString()}</strong>
+                <span style="background: #e0e7ff; color: #4338ca; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: 600;">
+                  ${m.colleagueName}
+                </span>
+              </div>
+              <p style="margin: 5px 0 0 0; color: #444;">${m.description}</p>
+            </div>
+          `).join("");
+      }
+      
+      currentColleagueEmail = null;
+    } catch (error) {
+      console.error("Failed to load all meetings:", error);
+      meetingsList.innerHTML = `<p style="color: #ef4444;">Error loading meetings. Please try again.</p>`;
+    }
+  }
 
   closeMeetingsModalBtn.onclick = () => meetingsModal.style.display = "none";
 
@@ -1063,6 +1202,11 @@
     
     if(!date || !desc) {
       alert("Date and description are required");
+      return;
+    }
+
+    if (!currentColleagueEmail) {
+      alert("Please select a specific colleague to add a meeting.");
       return;
     }
 
@@ -1100,7 +1244,7 @@
 
   document.addEventListener("keydown", (e) => {
     if(e.key === "Escape") {
-      document.querySelectorAll(".modal").forEach(m => m.style.display = "none");
+      document.querySelectorAll(".modal").forEach(m => m.style.display = "none";
     }
   });
   </script>
