@@ -417,6 +417,8 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      width: 140px;
+      height: 140px;
     }
 
     .record-button {
@@ -445,6 +447,8 @@
 
     .visualizer-ring {
       position: absolute;
+      width: 80px;
+      height: 80px;
       border-radius: 50%;
       border: 3px solid #10b981;
       opacity: 0;
@@ -470,11 +474,12 @@
 
     .volume-bars {
       display: flex;
-      gap: 4px;
-      align-items: center;
-      height: 40px;
+      gap: 6px;
+      align-items: flex-end;
+      height: 50px;
       opacity: 0;
       transition: opacity 0.3s;
+      justify-content: center;
     }
 
     .volume-bars.active {
@@ -482,16 +487,23 @@
     }
 
     .volume-bar {
-      width: 4px;
+      width: 5px;
+      height: 8px;
       background: linear-gradient(to top, #10b981, #34d399);
       border-radius: 2px;
-      transition: height 0.1s ease;
+      transition: height 0.05s ease;
     }
 
     .recording-status {
       text-align: center;
       color: var(--muted);
       font-size: 1rem;
+      min-height: 60px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      align-items: center;
+      justify-content: center;
     }
 
     .recording-time {
@@ -710,6 +722,8 @@
           <div class="volume-bar"></div>
           <div class="volume-bar"></div>
           <div class="volume-bar"></div>
+          <div class="volume-bar"></div>
+          <div class="volume-bar"></div>
         </div>
         <div class="recording-status">
           <div class="recording-indicator" id="recordingIndicator">
@@ -772,11 +786,11 @@
     let analyser;
     let dataArray;
     let animationId;
-    let currentlyPlayingAudio = null;
+    let mediaStream;
     let audioPlayers = {};
 
     function getCurrentUser() {
-      return sessionStorage.getItem('userEmail');
+      return sessionStorage.getItem('userEmail') || 'demo@user.com';
     }
 
     function isUserLoggedIn() {
@@ -829,11 +843,17 @@
     }
 
     function getVoiceRecordings() {
-      const stored = localStorage.getItem(`voice_recordings_${userEmail}`);
-      return stored ? JSON.parse(stored) : [];
+      try {
+        const stored = localStorage.getItem(`voice_recordings_${userEmail}`);
+        return stored ? JSON.parse(stored) : [];
+      } catch (error) {
+        console.error('Error loading voice recordings:', error);
+        return [];
+      }
     }
 
     function formatTime(seconds) {
+      if (!seconds || isNaN(seconds)) return '00:00';
       const mins = Math.floor(seconds / 60);
       const secs = Math.floor(seconds % 60);
       return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
@@ -882,7 +902,7 @@
               <span class="type-badge type-${note.type}">${isVoice ? 'VOICE' : 'TEXT'}</span>
             </div>
             ${isVoice ? `
-              <div class="audio-player">
+              <div class="audio-player" data-note-id="${note.id}">
                 <div class="audio-controls">
                   <button class="audio-btn play" onclick="togglePlayPause('${note.id}')" id="playBtn_${note.id}" title="Play">▶️</button>
                   <button class="audio-btn stop" onclick="stopAudio('${note.id}')" title="Stop">⏹️</button>
@@ -910,68 +930,91 @@
     }
 
     function initializeAudioPlayer(id, audioData) {
-      if (!audioData) return;
+      if (!audioData) {
+        console.error('No audio data for note:', id);
+        return;
+      }
 
-      const audio = new Audio(audioData);
-      audioPlayers[id] = audio;
+      try {
+        const audio = new Audio();
+        audio.preload = 'metadata';
+        audio.src = audioData;
+        audioPlayers[id] = audio;
 
-      audio.addEventListener('loadedmetadata', () => {
-        const durationEl = document.getElementById(`duration_${id}`);
-        if (durationEl) {
-          durationEl.textContent = formatTime(audio.duration);
-        }
-      });
-
-      audio.addEventListener('timeupdate', () => {
-        const currentTimeEl = document.getElementById(`currentTime_${id}`);
-        const progressEl = document.getElementById(`progress_${id}`);
-        
-        if (currentTimeEl) {
-          currentTimeEl.textContent = formatTime(audio.currentTime);
-        }
-        if (progressEl && audio.duration) {
-          const percentage = (audio.currentTime / audio.duration) * 100;
-          progressEl.style.width = percentage + '%';
-        }
-      });
-
-      audio.addEventListener('ended', () => {
-        const playBtn = document.getElementById(`playBtn_${id}`);
-        if (playBtn) {
-          playBtn.textContent = '▶️';
-        }
-        const progressEl = document.getElementById(`progress_${id}`);
-        if (progressEl) {
-          progressEl.style.width = '0%';
-        }
-      });
-
-      audio.addEventListener('play', () => {
-        // Pause other playing audios
-        Object.entries(audioPlayers).forEach(([otherId, otherAudio]) => {
-          if (otherId !== id && !otherAudio.paused) {
-            otherAudio.pause();
-            const otherPlayBtn = document.getElementById(`playBtn_${otherId}`);
-            if (otherPlayBtn) {
-              otherPlayBtn.textContent = '▶️';
-            }
+        audio.addEventListener('loadedmetadata', () => {
+          const durationEl = document.getElementById(`duration_${id}`);
+          if (durationEl && audio.duration) {
+            durationEl.textContent = formatTime(audio.duration);
           }
         });
-      });
+
+        audio.addEventListener('timeupdate', () => {
+          const currentTimeEl = document.getElementById(`currentTime_${id}`);
+          const progressEl = document.getElementById(`progress_${id}`);
+          
+          if (currentTimeEl) {
+            currentTimeEl.textContent = formatTime(audio.currentTime);
+          }
+          if (progressEl && audio.duration) {
+            const percentage = (audio.currentTime / audio.duration) * 100;
+            progressEl.style.width = percentage + '%';
+          }
+        });
+
+        audio.addEventListener('ended', () => {
+          const playBtn = document.getElementById(`playBtn_${id}`);
+          if (playBtn) {
+            playBtn.textContent = '▶️';
+          }
+          const progressEl = document.getElementById(`progress_${id}`);
+          if (progressEl) {
+            progressEl.style.width = '0%';
+          }
+          const currentTimeEl = document.getElementById(`currentTime_${id}`);
+          if (currentTimeEl) {
+            currentTimeEl.textContent = '00:00';
+          }
+        });
+
+        audio.addEventListener('error', (e) => {
+          console.error('Audio error for note', id, ':', e);
+          showToast('Error loading audio', true);
+        });
+
+        audio.addEventListener('play', () => {
+          // Pause other playing audios
+          Object.entries(audioPlayers).forEach(([otherId, otherAudio]) => {
+            if (otherId !== id && !otherAudio.paused) {
+              otherAudio.pause();
+              const otherPlayBtn = document.getElementById(`playBtn_${otherId}`);
+              if (otherPlayBtn) {
+                otherPlayBtn.textContent = '▶️';
+              }
+            }
+          });
+        });
+      } catch (error) {
+        console.error('Error initializing audio player:', error);
+      }
     }
 
     window.togglePlayPause = (id) => {
       const audio = audioPlayers[id];
       const playBtn = document.getElementById(`playBtn_${id}`);
       
-      if (!audio || !playBtn) return;
+      if (!audio || !playBtn) {
+        console.error('Audio player not found for:', id);
+        showToast('Error: Audio player not available', true);
+        return;
+      }
 
       if (audio.paused) {
-        audio.play().catch(err => {
+        audio.play().then(() => {
+          playBtn.textContent = '⏸️';
+        }).catch(err => {
           console.error('Error playing audio:', err);
           showToast('Error playing recording', true);
         });
-        playBtn.textContent = '⏸️';
       } else {
         audio.pause();
         playBtn.textContent = '▶️';
@@ -984,7 +1027,10 @@
       const progressEl = document.getElementById(`progress_${id}`);
       const currentTimeEl = document.getElementById(`currentTime_${id}`);
       
-      if (!audio) return;
+      if (!audio) {
+        console.error('Audio not found for:', id);
+        return;
+      }
 
       audio.pause();
       audio.currentTime = 0;
@@ -1017,6 +1063,19 @@
 
     function openVoiceModal() {
       document.getElementById('voiceModal').classList.add('active');
+      resetRecordingUI();
+    }
+
+    function resetRecordingUI() {
+      document.getElementById('recordingStatus').textContent = 'Click microphone to start recording';
+      document.getElementById('recordingTime').style.display = 'none';
+      document.getElementById('saveVoiceBtn').disabled = true;
+      document.getElementById('recordingIndicator').classList.remove('active');
+      document.getElementById('volumeBars').classList.remove('active');
+      document.getElementById('visualizerRing').classList.remove('active');
+      const btn = document.getElementById('recordBtn');
+      btn.classList.remove('recording');
+      btn.innerHTML = '🎤';
     }
 
     function closeVoiceModal() {
@@ -1027,21 +1086,28 @@
       // Stop audio visualization
       if (animationId) {
         cancelAnimationFrame(animationId);
+        animationId = null;
       }
-      if (audioContext) {
+      
+      // Close audio context
+      if (audioContext && audioContext.state !== 'closed') {
         audioContext.close();
         audioContext = null;
       }
       
+      // Stop media stream
+      if (mediaStream) {
+        mediaStream.getTracks().forEach(track => track.stop());
+        mediaStream = null;
+      }
+      
+      mediaRecorder = null;
+      audioChunks = [];
+      currentAudioBlob = null;
+      
       document.getElementById('voiceModal').classList.remove('active');
       document.getElementById('voiceForm').reset();
-      document.getElementById('recordingStatus').textContent = 'Click microphone to start recording';
-      document.getElementById('recordingTime').style.display = 'none';
-      document.getElementById('saveVoiceBtn').disabled = true;
-      document.getElementById('recordingIndicator').classList.remove('active');
-      document.getElementById('volumeBars').classList.remove('active');
-      document.getElementById('visualizerRing').classList.remove('active');
-      currentAudioBlob = null;
+      resetRecordingUI();
     }
 
     function openTextModal() {
@@ -1055,61 +1121,91 @@
 
     async function initializeMediaRecorder() {
       try {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        // Request microphone access
+        mediaStream = await navigator.mediaDevices.getUserMedia({ 
+          audio: {
+            echoCancellation: true,
+            noiseSuppression: true,
+            autoGainControl: true
+          } 
+        });
         
         // Initialize audio context for visualization
         audioContext = new (window.AudioContext || window.webkitAudioContext)();
         analyser = audioContext.createAnalyser();
-        const source = audioContext.createMediaStreamSource(stream);
+        const source = audioContext.createMediaStreamSource(mediaStream);
         source.connect(analyser);
         analyser.fftSize = 256;
+        analyser.smoothingTimeConstant = 0.8;
         const bufferLength = analyser.frequencyBinCount;
         dataArray = new Uint8Array(bufferLength);
 
-        mediaRecorder = new MediaRecorder(stream);
+        // Initialize media recorder
+        const options = { mimeType: 'audio/webm' };
+        if (!MediaRecorder.isTypeSupported(options.mimeType)) {
+          options.mimeType = 'audio/mp4';
+          if (!MediaRecorder.isTypeSupported(options.mimeType)) {
+            options.mimeType = '';
+          }
+        }
+
+        mediaRecorder = new MediaRecorder(mediaStream, options.mimeType ? options : undefined);
 
         mediaRecorder.ondataavailable = (event) => {
-          audioChunks.push(event.data);
+          if (event.data.size > 0) {
+            audioChunks.push(event.data);
+          }
         };
 
         mediaRecorder.onstop = () => {
-          currentAudioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+          currentAudioBlob = new Blob(audioChunks, { type: 'audio/webm' });
           audioChunks = [];
           document.getElementById('saveVoiceBtn').disabled = false;
-          
-          // Stop all tracks
-          stream.getTracks().forEach(track => track.stop());
+        };
+
+        mediaRecorder.onerror = (event) => {
+          console.error('MediaRecorder error:', event);
+          showToast('Recording error occurred', true);
         };
 
         return true;
       } catch (error) {
         console.error('Microphone error:', error);
-        showToast('Microphone access denied', true);
+        showToast('Cannot access microphone. Please allow microphone permissions.', true);
         return false;
       }
     }
 
     function visualizeAudio() {
-      if (!isRecording || !analyser) return;
+      if (!isRecording || !analyser) {
+        return;
+      }
 
       animationId = requestAnimationFrame(visualizeAudio);
       analyser.getByteFrequencyData(dataArray);
 
-      // Calculate average volume
-      const average = dataArray.reduce((a, b) => a + b) / dataArray.length;
-      const normalizedVolume = average / 255;
+      // Calculate average volume from frequency data
+      let sum = 0;
+      for (let i = 0; i < dataArray.length; i++) {
+        sum += dataArray[i];
+      }
+      const average = sum / dataArray.length;
+      const normalizedVolume = Math.min(average / 128, 1); // Normalize to 0-1
 
-      // Update volume bars
+      // Update volume bars with different heights
       const volumeBars = document.querySelectorAll('.volume-bar');
       volumeBars.forEach((bar, index) => {
-        const height = Math.max(5, normalizedVolume * 40 * (1 - index * 0.15));
+        // Create a wave effect by using different frequency ranges
+        const freqIndex = Math.floor((index / volumeBars.length) * dataArray.length);
+        const barValue = dataArray[freqIndex] || 0;
+        const height = Math.max(8, (barValue / 255) * 50);
         bar.style.height = height + 'px';
       });
 
-      // Update visualizer ring based on volume
+      // Update visualizer ring opacity based on volume
       const ring = document.getElementById('visualizerRing');
-      if (normalizedVolume > 0.1) {
-        ring.style.opacity = normalizedVolume * 0.8;
+      if (ring && normalizedVolume > 0.05) {
+        ring.style.opacity = Math.min(normalizedVolume * 0.8, 0.8);
       }
     }
 
@@ -1117,6 +1213,8 @@
       if (!mediaRecorder) return;
       
       isRecording = true;
+      audioChunks = [];
+      
       const btn = document.getElementById('recordBtn');
       btn.classList.add('recording');
       btn.innerHTML = '⏹️';
@@ -1128,10 +1226,17 @@
       document.getElementById('visualizerRing').classList.add('active');
       
       recordingStartTime = Date.now();
-      recordingTimer = setInterval(updateRecordingTime, 1000);
+      recordingTimer = setInterval(updateRecordingTime, 100);
       
-      mediaRecorder.start();
-      visualizeAudio();
+      try {
+        mediaRecorder.start(100); // Collect data every 100ms
+        visualizeAudio();
+      } catch (error) {
+        console.error('Error starting recording:', error);
+        showToast('Failed to start recording', true);
+        isRecording = false;
+        resetRecordingUI();
+      }
     }
 
     function stopRecording() {
@@ -1152,9 +1257,16 @@
       
       if (animationId) {
         cancelAnimationFrame(animationId);
+        animationId = null;
       }
       
-      mediaRecorder.stop();
+      try {
+        if (mediaRecorder.state !== 'inactive') {
+          mediaRecorder.stop();
+        }
+      } catch (error) {
+        console.error('Error stopping recording:', error);
+      }
     }
 
     function updateRecordingTime() {
@@ -1179,27 +1291,38 @@
 
     function saveVoiceNote(event) {
       event.preventDefault();
-      if (!currentAudioBlob) return;
+      if (!currentAudioBlob) {
+        showToast('No recording available', true);
+        return;
+      }
 
       const title = document.getElementById('voiceTitle').value.trim() || 
                     `Recording ${new Date().toLocaleString()}`;
       
       const reader = new FileReader();
       reader.onload = () => {
-        const recording = {
-          id: Date.now().toString(),
-          title: title,
-          date: new Date().toISOString(),
-          audioData: reader.result
-        };
+        try {
+          const recording = {
+            id: Date.now().toString(),
+            title: title,
+            date: new Date().toISOString(),
+            audioData: reader.result
+          };
 
-        const recordings = getVoiceRecordings();
-        recordings.unshift(recording);
-        localStorage.setItem(`voice_recordings_${userEmail}`, JSON.stringify(recordings));
-        
-        closeVoiceModal();
-        loadAllNotes();
-        showToast('Voice recording saved successfully!');
+          const recordings = getVoiceRecordings();
+          recordings.unshift(recording);
+          localStorage.setItem(`voice_recordings_${userEmail}`, JSON.stringify(recordings));
+          
+          closeVoiceModal();
+          loadAllNotes();
+          showToast('Voice recording saved successfully!');
+        } catch (error) {
+          console.error('Error saving recording:', error);
+          showToast('Failed to save recording', true);
+        }
+      };
+      reader.onerror = () => {
+        showToast('Failed to process recording', true);
       };
       reader.readAsDataURL(currentAudioBlob);
     }
@@ -1236,10 +1359,10 @@
 
       try {
         if (type === 'voice') {
-          // Stop audio if playing
+          // Stop and cleanup audio if playing
           if (audioPlayers[id]) {
             audioPlayers[id].pause();
-            audioPlayers[id].currentTime = 0;
+            audioPlayers[id].src = '';
             delete audioPlayers[id];
           }
           
@@ -1267,15 +1390,24 @@
 
     // Cleanup on page unload
     window.addEventListener('beforeunload', () => {
+      // Stop all audio players
       Object.values(audioPlayers).forEach(audio => {
         audio.pause();
         audio.src = '';
       });
-      if (audioContext) {
+      
+      // Close audio context
+      if (audioContext && audioContext.state !== 'closed') {
         audioContext.close();
+      }
+      
+      // Stop media stream
+      if (mediaStream) {
+        mediaStream.getTracks().forEach(track => track.stop());
       }
     });
 
+    // Load notes on page load
     loadAllNotes();
   </script>
 </body>
