@@ -616,16 +616,22 @@
 
     // Switch between form and view modes
     function switchToFormMode() {
+      console.log('Switching to FORM mode');
       currentMode = 'form';
       form.style.display = 'block';
       descriptionView.style.display = 'none';
+      console.log('Form display:', form.style.display);
+      console.log('View display:', descriptionView.style.display);
       window.scrollTo(0, 0);
     }
 
     function switchToViewMode() {
+      console.log('Switching to VIEW mode');
       currentMode = 'view';
       form.style.display = 'none';
       descriptionView.style.display = 'block';
+      console.log('Form display:', form.style.display);
+      console.log('View display:', descriptionView.style.display);
       populateDescriptionView();
       window.scrollTo(0, 0);
     }
@@ -707,51 +713,54 @@
         try {
           const description = await apiCall(`/projects/${projectId}/description`);
           
-          console.log('Description received:', description);
+          console.log('Full API Response:', description);
           
-          // IMPORTANT: Ignore project metadata fields (id, name, owner_email, colleagues, progress)
-          // ONLY check actual description form fields
-          const projectMetadataFields = ['id', 'name', 'owner_email', 'colleagues', 'progress'];
+          // Check ONLY the description fields we actually care about
+          // by checking their API field names (snake_case)
+          const descriptionApiFields = [
+            'project_title', 'notes', 'objectives', 'timeline', 'call_action',
+            'primary_audience', 'secondary_audience', 'competition', 'graphics',
+            'photography', 'multimedia', 'other_info', 'colleague_name',
+            'colleague_phone', 'colleague_email', 'colleague_address1',
+            'colleague_address2', 'colleague_address3', 'your_name', 'your_phone',
+            'your_email', 'your_address1', 'your_address2', 'your_address3',
+            'client_name', 'client_comments', 'approval_date', 'approval_signature'
+          ];
           
-          // Check if ANY description field (not metadata) has actual non-null, non-empty content
+          // Check if ANY of these fields has real data
           let hasData = false;
           if (description && typeof description === 'object') {
-            hasData = fields.some(field => {
-              const apiField = fieldMapping[field];
-              
-              // Skip if this is a project metadata field
-              if (projectMetadataFields.includes(apiField)) {
-                return false;
-              }
-              
+            for (const apiField of descriptionApiFields) {
               const value = description[apiField];
-              const hasValue = value !== null && value !== undefined && String(value).trim() !== '' && String(value).trim() !== '[]';
-              if (hasValue) {
-                console.log(`Found data in field ${field} (${apiField}):`, value);
+              if (value !== null && value !== undefined && String(value).trim() !== '' && String(value).trim() !== '[]') {
+                console.log(`Found real description data in ${apiField}:`, value);
+                hasData = true;
+                break;
               }
-              return hasValue;
-            });
+            }
           }
           
-          console.log('Has actual description data:', hasData);
+          console.log('Has actual saved description:', hasData);
           
-          // Always open in form mode on first visit
-descriptionData = description;
-fields.forEach(field => {
-  const element = document.getElementById(field);
-  const apiField = fieldMapping[field];
-  if (element && description[apiField] !== null && description[apiField] !== undefined) {
-    element.value = description[apiField];
-  }
-});
-updateLastSaved();
-
-// Force form mode on initial load
-switchToFormMode();
-
+          if (hasData) {
+            // Load saved data into form fields
+            descriptionData = description;
+            fields.forEach(field => {
+              const element = document.getElementById(field);
+              const apiField = fieldMapping[field];
+              if (element && description[apiField] !== null && description[apiField] !== undefined) {
+                element.value = description[apiField];
+              }
+            });
+            updateLastSaved();
+            switchToViewMode();
+          } else {
+            // No saved data - show empty form
+            console.log('No saved description - showing empty form');
+            switchToFormMode();
+          }
         } catch (error) {
-          // If no description exists yet, show form
-          console.log('Error loading description, showing form:', error);
+          console.log('Error loading description:', error);
           switchToFormMode();
         }
 
@@ -858,4 +867,3 @@ switchToFormMode();
   </script>
 </body>
 </html>
-
