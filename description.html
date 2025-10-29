@@ -504,15 +504,39 @@
     const urlParams = new URLSearchParams(window.location.search);
     const projectId = urlParams.get("id");
 
-    // Form fields mapping
-    const fields = [
-      "projectTitle", "notes", "colleagueName", "colleaguePhone", "colleagueEmail", 
-      "colleagueAddress1", "colleagueAddress2", "colleagueAddress3", "yourName", 
-      "yourPhone", "yourEmail", "yourAddress1", "yourAddress2", "yourAddress3", 
-      "objectives", "timeline", "primaryAudience", "secondaryAudience", "callAction", 
-      "competition", "graphics", "photography", "multimedia", "otherInfo", 
-      "clientName", "clientComments", "approvalDate", "approvalSignature"
-    ];
+    // Form fields mapping - maps camelCase (form) to snake_case (API)
+    const fieldMapping = {
+      "projectTitle": "project_title",
+      "notes": "notes",
+      "colleagueName": "colleague_name",
+      "colleaguePhone": "colleague_phone",
+      "colleagueEmail": "colleague_email",
+      "colleagueAddress1": "colleague_address1",
+      "colleagueAddress2": "colleague_address2",
+      "colleagueAddress3": "colleague_address3",
+      "yourName": "your_name",
+      "yourPhone": "your_phone",
+      "yourEmail": "your_email",
+      "yourAddress1": "your_address1",
+      "yourAddress2": "your_address2",
+      "yourAddress3": "your_address3",
+      "objectives": "objectives",
+      "timeline": "timeline",
+      "primaryAudience": "primary_audience",
+      "secondaryAudience": "secondary_audience",
+      "callAction": "call_action",
+      "competition": "competition",
+      "graphics": "graphics",
+      "photography": "photography",
+      "multimedia": "multimedia",
+      "otherInfo": "other_info",
+      "clientName": "client_name",
+      "clientComments": "client_comments",
+      "approvalDate": "approval_date",
+      "approvalSignature": "approval_signature"
+    };
+
+    const fields = Object.keys(fieldMapping);
 
     // UI elements
     const loadingMessage = document.getElementById("loadingMessage");
@@ -679,17 +703,31 @@
           
           console.log('Description received:', description);
           
-          // Check if description has actual meaningful data (not null or empty)
+          // ONLY check the description form fields (not project fields like name, id, owner_email)
+          // These are the actual description fields we care about
+          const descriptionFields = [
+            "projectTitle", "notes", "colleagueName", "colleaguePhone", "colleagueEmail", 
+            "colleagueAddress1", "colleagueAddress2", "colleagueAddress3", "yourName", 
+            "yourPhone", "yourEmail", "yourAddress1", "yourAddress2", "yourAddress3", 
+            "objectives", "timeline", "primaryAudience", "secondaryAudience", "callAction", 
+            "competition", "graphics", "photography", "multimedia", "otherInfo", 
+            "clientName", "clientComments", "approvalDate", "approvalSignature"
+          ];
+          
+          // Check if ANY description field has actual non-null, non-empty content
           let hasData = false;
           if (description && typeof description === 'object') {
-            // Check if any field has actual non-null, non-empty content
-            hasData = fields.some(field => {
+            hasData = descriptionFields.some(field => {
               const value = description[field];
-              return value !== null && value !== undefined && String(value).trim() !== '';
+              const hasValue = value !== null && value !== undefined && String(value).trim() !== '';
+              if (hasValue) {
+                console.log(`Found data in field ${field}:`, value);
+              }
+              return hasValue;
             });
           }
           
-          console.log('Has actual data:', hasData);
+          console.log('Has actual description data:', hasData);
           
           if (hasData) {
             descriptionData = description;
@@ -704,7 +742,7 @@
             switchToViewMode();
           } else {
             // Show form mode if no data
-            console.log('Showing form - no data found');
+            console.log('Showing form - no description data found');
             switchToFormMode();
           }
         } catch (error) {
