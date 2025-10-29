@@ -677,17 +677,25 @@
         try {
           const description = await apiCall(`/projects/${projectId}/description`);
           
-          // Check if description has actual data (not just empty object)
-          const hasData = description && Object.keys(description).length > 0 && 
-            Object.keys(description).some(key => 
-              description[key] && String(description[key]).trim() !== ''
-            );
+          console.log('Description received:', description);
+          
+          // Check if description has actual meaningful data (not null or empty)
+          let hasData = false;
+          if (description && typeof description === 'object') {
+            // Check if any field has actual non-null, non-empty content
+            hasData = fields.some(field => {
+              const value = description[field];
+              return value !== null && value !== undefined && String(value).trim() !== '';
+            });
+          }
+          
+          console.log('Has actual data:', hasData);
           
           if (hasData) {
             descriptionData = description;
             fields.forEach(field => {
               const element = document.getElementById(field);
-              if (element && description[field]) {
+              if (element && description[field] !== null && description[field] !== undefined) {
                 element.value = description[field];
               }
             });
@@ -696,11 +704,12 @@
             switchToViewMode();
           } else {
             // Show form mode if no data
+            console.log('Showing form - no data found');
             switchToFormMode();
           }
         } catch (error) {
           // If no description exists yet, show form
-          console.log('No description found, showing form');
+          console.log('Error loading description, showing form:', error);
           switchToFormMode();
         }
 
