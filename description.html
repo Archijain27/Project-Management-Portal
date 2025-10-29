@@ -634,45 +634,51 @@
     function populateDescriptionView() {
       if (!descriptionData) return;
 
+      // Helper to get value from API response (using snake_case)
+      const getValue = (field) => {
+        const apiField = fieldMapping[field];
+        return descriptionData[apiField] || '-';
+      };
+
       // Simple fields
-      document.getElementById('view_projectTitle').textContent = descriptionData.projectTitle || '-';
-      document.getElementById('view_notes').textContent = descriptionData.notes || '-';
-      document.getElementById('view_objectives').textContent = descriptionData.objectives || '-';
-      document.getElementById('view_timeline').textContent = descriptionData.timeline || '-';
-      document.getElementById('view_primaryAudience').textContent = descriptionData.primaryAudience || '-';
-      document.getElementById('view_secondaryAudience').textContent = descriptionData.secondaryAudience || '-';
-      document.getElementById('view_callAction').textContent = descriptionData.callAction || '-';
-      document.getElementById('view_competition').textContent = descriptionData.competition || '-';
-      document.getElementById('view_graphics').textContent = descriptionData.graphics || '-';
-      document.getElementById('view_photography').textContent = descriptionData.photography || '-';
-      document.getElementById('view_multimedia').textContent = descriptionData.multimedia || '-';
-      document.getElementById('view_otherInfo').textContent = descriptionData.otherInfo || '-';
-      document.getElementById('view_clientName').textContent = descriptionData.clientName || '-';
-      document.getElementById('view_approvalDate').textContent = descriptionData.approvalDate || '-';
-      document.getElementById('view_clientComments').textContent = descriptionData.clientComments || '-';
-      document.getElementById('view_approvalSignature').textContent = descriptionData.approvalSignature || '-';
+      document.getElementById('view_projectTitle').textContent = getValue('projectTitle');
+      document.getElementById('view_notes').textContent = getValue('notes');
+      document.getElementById('view_objectives').textContent = getValue('objectives');
+      document.getElementById('view_timeline').textContent = getValue('timeline');
+      document.getElementById('view_primaryAudience').textContent = getValue('primaryAudience');
+      document.getElementById('view_secondaryAudience').textContent = getValue('secondaryAudience');
+      document.getElementById('view_callAction').textContent = getValue('callAction');
+      document.getElementById('view_competition').textContent = getValue('competition');
+      document.getElementById('view_graphics').textContent = getValue('graphics');
+      document.getElementById('view_photography').textContent = getValue('photography');
+      document.getElementById('view_multimedia').textContent = getValue('multimedia');
+      document.getElementById('view_otherInfo').textContent = getValue('otherInfo');
+      document.getElementById('view_clientName').textContent = getValue('clientName');
+      document.getElementById('view_approvalDate').textContent = getValue('approvalDate');
+      document.getElementById('view_clientComments').textContent = getValue('clientComments');
+      document.getElementById('view_approvalSignature').textContent = getValue('approvalSignature');
 
       // Contact information
-      document.getElementById('view_colleagueName').textContent = descriptionData.colleagueName || '-';
-      document.getElementById('view_colleaguePhone').textContent = descriptionData.colleaguePhone || '-';
-      document.getElementById('view_colleagueEmail').textContent = descriptionData.colleagueEmail || '-';
+      document.getElementById('view_colleagueName').textContent = getValue('colleagueName');
+      document.getElementById('view_colleaguePhone').textContent = getValue('colleaguePhone');
+      document.getElementById('view_colleagueEmail').textContent = getValue('colleagueEmail');
       
       const colleagueAddress = [
-        descriptionData.colleagueAddress1,
-        descriptionData.colleagueAddress2,
-        descriptionData.colleagueAddress3
-      ].filter(Boolean).join('\n') || '-';
+        getValue('colleagueAddress1'),
+        getValue('colleagueAddress2'),
+        getValue('colleagueAddress3')
+      ].filter(v => v !== '-').join('\n') || '-';
       document.getElementById('view_colleagueAddress').textContent = colleagueAddress;
 
-      document.getElementById('view_yourName').textContent = descriptionData.yourName || '-';
-      document.getElementById('view_yourPhone').textContent = descriptionData.yourPhone || '-';
-      document.getElementById('view_yourEmail').textContent = descriptionData.yourEmail || '-';
+      document.getElementById('view_yourName').textContent = getValue('yourName');
+      document.getElementById('view_yourPhone').textContent = getValue('yourPhone');
+      document.getElementById('view_yourEmail').textContent = getValue('yourEmail');
       
       const yourAddress = [
-        descriptionData.yourAddress1,
-        descriptionData.yourAddress2,
-        descriptionData.yourAddress3
-      ].filter(Boolean).join('\n') || '-';
+        getValue('yourAddress1'),
+        getValue('yourAddress2'),
+        getValue('yourAddress3')
+      ].filter(v => v !== '-').join('\n') || '-';
       document.getElementById('view_yourAddress').textContent = yourAddress;
     }
 
@@ -703,25 +709,25 @@
           
           console.log('Description received:', description);
           
-          // ONLY check the description form fields (not project fields like name, id, owner_email)
-          // These are the actual description fields we care about
-          const descriptionFields = [
-            "projectTitle", "notes", "colleagueName", "colleaguePhone", "colleagueEmail", 
-            "colleagueAddress1", "colleagueAddress2", "colleagueAddress3", "yourName", 
-            "yourPhone", "yourEmail", "yourAddress1", "yourAddress2", "yourAddress3", 
-            "objectives", "timeline", "primaryAudience", "secondaryAudience", "callAction", 
-            "competition", "graphics", "photography", "multimedia", "otherInfo", 
-            "clientName", "clientComments", "approvalDate", "approvalSignature"
-          ];
+          // IMPORTANT: Ignore project metadata fields (id, name, owner_email, colleagues, progress)
+          // ONLY check actual description form fields
+          const projectMetadataFields = ['id', 'name', 'owner_email', 'colleagues', 'progress'];
           
-          // Check if ANY description field has actual non-null, non-empty content
+          // Check if ANY description field (not metadata) has actual non-null, non-empty content
           let hasData = false;
           if (description && typeof description === 'object') {
-            hasData = descriptionFields.some(field => {
-              const value = description[field];
-              const hasValue = value !== null && value !== undefined && String(value).trim() !== '';
+            hasData = fields.some(field => {
+              const apiField = fieldMapping[field];
+              
+              // Skip if this is a project metadata field
+              if (projectMetadataFields.includes(apiField)) {
+                return false;
+              }
+              
+              const value = description[apiField];
+              const hasValue = value !== null && value !== undefined && String(value).trim() !== '' && String(value).trim() !== '[]';
               if (hasValue) {
-                console.log(`Found data in field ${field}:`, value);
+                console.log(`Found data in field ${field} (${apiField}):`, value);
               }
               return hasValue;
             });
@@ -733,8 +739,9 @@
             descriptionData = description;
             fields.forEach(field => {
               const element = document.getElementById(field);
-              if (element && description[field] !== null && description[field] !== undefined) {
-                element.value = description[field];
+              const apiField = fieldMapping[field];
+              if (element && description[apiField] !== null && description[apiField] !== undefined) {
+                element.value = description[apiField];
               }
             });
             updateLastSaved();
@@ -742,7 +749,7 @@
             switchToViewMode();
           } else {
             // Show form mode if no data
-            console.log('Showing form - no description data found');
+            console.log('Showing form - no description data found (all fields are null)');
             switchToFormMode();
           }
         } catch (error) {
@@ -768,7 +775,8 @@
         const element = document.getElementById(field);
         if (element) {
           const value = element.value.trim();
-          formData[field] = value;
+          const apiField = fieldMapping[field];
+          formData[apiField] = value;
           if (value) hasRequiredFields = true;
         }
       });
