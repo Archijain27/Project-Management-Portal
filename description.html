@@ -4,393 +4,342 @@
   <meta charset="UTF-8">
   <title>Project Description</title>
   <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: #f4f4ff;
-      margin: 0;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
       padding: 20px;
     }
+    
     .container {
-      max-width: 1000px;
+      max-width: 1200px;
       margin: auto;
       background: white;
-      padding: 30px 40px;
-      border-radius: 12px;
-      box-shadow: 0 6px 18px rgba(0,0,0,0.1);
+      border-radius: 16px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      overflow: hidden;
     }
-    h1 {
-      color: #4f46e5;
-      margin-bottom: 25px;
-      font-size: 2rem;
-      text-align: center;
-    }
-    h2 {
-      color: #1f2937;
-      margin-top: 25px;
-      margin-bottom: 10px;
-      border-bottom: 2px solid #e0e7ff;
-      padding-bottom: 5px;
-      font-size: 1.2rem;
-    }
-    label {
-      font-weight: bold;
-      display: block;
-      margin: 8px 0 4px;
-      color: #374151;
-    }
-    input, textarea {
-      width: 100%;
-      padding: 10px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-      font-size: 1rem;
-      box-sizing: border-box;
-      transition: border-color 0.2s;
-      background: #f9fafb;
-    }
-    input:focus, textarea:focus {
-      outline: none;
-      border-color: #4f46e5;
-      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
-    }
-    textarea {
-      min-height: 80px;
-      resize: vertical;
-      font-family: inherit;
-    }
-    .row {
-      display: flex;
-      gap: 20px;
-      flex-wrap: wrap;
-    }
-    .col {
-      flex: 1 1 45%;
-    }
-    .full-width {
-      flex: 1 1 100%;
-    }
-    button {
-      margin-top: 20px;
-      padding: 12px 22px;
-      border: none;
-      border-radius: 8px;
-      background: #4f46e5;
+    
+    .header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       color: white;
-      cursor: pointer;
-      font-weight: bold;
-      font-size: 1rem;
-      transition: background-color 0.2s;
-    }
-    button:hover {
-      background: #4338ca;
-    }
-    button:disabled {
-      background: #9ca3af;
-      cursor: not-allowed;
-    }
-    .back-btn {
-      background: #6b7280;
-      margin-right: 10px;
-    }
-    .back-btn:hover {
-      background: #4b5563;
-    }
-    .edit-btn {
-      background: #059669;
-    }
-    .edit-btn:hover {
-      background: #047857;
-    }
-    .cancel-btn {
-      background: #dc2626;
-    }
-    .cancel-btn:hover {
-      background: #b91c1c;
-    }
-    .loading {
-      text-align: center;
-      color: #6b7280;
-      font-style: italic;
-      padding: 20px;
-    }
-    .error {
-      background: #fef2f2;
-      border: 1px solid #fecaca;
-      color: #dc2626;
-      padding: 12px;
-      border-radius: 8px;
-      margin: 10px 0;
-    }
-    .success {
-      background: #f0fdf4;
-      border: 1px solid #bbf7d0;
-      color: #16a34a;
-      padding: 12px;
-      border-radius: 8px;
-      margin: 10px 0;
-    }
-    .nav-header {
+      padding: 30px 40px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 20px;
-      padding-bottom: 15px;
-      border-bottom: 2px solid #e5e7eb;
+      flex-wrap: wrap;
+      gap: 15px;
     }
-    .project-info {
-      background: #f8fafc;
-      padding: 15px;
+    
+    .header h1 {
+      font-size: 2rem;
+      font-weight: 600;
+      margin: 0;
+    }
+    
+    .header-actions {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+    
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 20px;
+      background: rgba(255,255,255,0.2);
+      color: white;
+      text-decoration: none;
       border-radius: 8px;
-      margin-bottom: 20px;
-      border-left: 4px solid #4f46e5;
-    }
-    .last-saved {
-      font-size: 0.9rem;
-      color: #6b7280;
-      text-align: right;
-      margin-top: 10px;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.3);
     }
     
-    /* View mode styles */
-    .view-mode input,
-    .view-mode textarea {
+    .back-btn:hover {
+      background: rgba(255,255,255,0.3);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+    
+    .edit-btn, .save-btn, .cancel-btn {
+      padding: 10px 24px;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 0.95rem;
+    }
+    
+    .edit-btn {
       background: white;
-      border: 1px solid #e5e7eb;
-      cursor: default;
+      color: #667eea;
+    }
+    
+    .edit-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+    
+    .save-btn {
+      background: #10b981;
+      color: white;
+    }
+    
+    .save-btn:hover {
+      background: #059669;
+    }
+    
+    .cancel-btn {
+      background: #ef4444;
+      color: white;
+    }
+    
+    .cancel-btn:hover {
+      background: #dc2626;
+    }
+    
+    .content {
+      padding: 40px;
+    }
+    
+    .loading, .error {
+      text-align: center;
+      padding: 60px 20px;
+      font-size: 1.1rem;
+    }
+    
+    .error {
+      color: #ef4444;
+    }
+    
+    .project-banner {
+      background: linear-gradient(135deg, #f0f9ff 0%, #e0e7ff 100%);
+      padding: 25px;
+      border-radius: 12px;
+      margin-bottom: 35px;
+      border-left: 5px solid #667eea;
+    }
+    
+    .project-banner h2 {
+      color: #667eea;
+      font-size: 1.8rem;
+      margin-bottom: 10px;
+    }
+    
+    .project-banner .meta {
+      color: #6b7280;
+      font-size: 0.95rem;
+    }
+    
+    .section {
+      margin-bottom: 40px;
+    }
+    
+    .section-title {
+      font-size: 1.5rem;
       color: #1f2937;
+      margin-bottom: 15px;
+      padding-bottom: 10px;
+      border-bottom: 3px solid #667eea;
+      display: flex;
+      align-items: center;
+      gap: 10px;
     }
     
-    .view-mode input:focus,
-    .view-mode textarea:focus {
-      border-color: #e5e7eb;
-      box-shadow: none;
+    .section-title::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      background: #667eea;
+      border-radius: 50%;
     }
     
-    .view-value {
-      padding: 10px;
-      border-radius: 6px;
+    .section-content {
+      color: #374151;
+      line-height: 1.8;
+      font-size: 1rem;
+    }
+    
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 25px;
+      margin-top: 15px;
+    }
+    
+    .info-card {
       background: #f9fafb;
+      padding: 20px;
+      border-radius: 10px;
       border: 1px solid #e5e7eb;
-      min-height: 20px;
-      color: #1f2937;
-      white-space: pre-wrap;
-      word-wrap: break-word;
     }
     
-    .view-value.empty {
+    .info-card h3 {
+      color: #667eea;
+      font-size: 1.1rem;
+      margin-bottom: 12px;
+      font-weight: 600;
+    }
+    
+    .info-item {
+      margin-bottom: 12px;
+    }
+    
+    .info-label {
+      font-weight: 600;
+      color: #4b5563;
+      font-size: 0.9rem;
+      display: block;
+      margin-bottom: 4px;
+    }
+    
+    .info-value {
+      color: #1f2937;
+      font-size: 1rem;
+    }
+    
+    .empty-value {
       color: #9ca3af;
       font-style: italic;
     }
     
-    .edit-mode-only {
-      display: none;
+    /* Edit Mode Styles */
+    .edit-mode input,
+    .edit-mode textarea {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #e5e7eb;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-family: inherit;
+      transition: border-color 0.2s;
+      background: white;
     }
     
-    .action-buttons {
-      display: flex;
-      gap: 10px;
-      margin-top: 30px;
-      padding-top: 20px;
-      border-top: 1px solid #e5e7eb;
+    .edit-mode input:focus,
+    .edit-mode textarea:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    
+    .edit-mode textarea {
+      min-height: 100px;
+      resize: vertical;
+    }
+    
+    .edit-mode .info-card {
+      background: white;
+      border: 2px solid #e5e7eb;
+    }
+    
+    .edit-mode .section-content input,
+    .edit-mode .section-content textarea {
+      margin-top: 8px;
+    }
+    
+    .status-bar {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: white;
+      padding: 12px 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      font-size: 0.9rem;
+      color: #6b7280;
+      z-index: 1000;
+    }
+    
+    .notification {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 15px 25px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      z-index: 1000;
+      font-weight: 500;
+      animation: slideIn 0.3s ease;
+    }
+    
+    .notification.success {
+      background: #10b981;
+      color: white;
+    }
+    
+    .notification.error {
+      background: #ef4444;
+      color: white;
+    }
+    
+    @keyframes slideIn {
+      from {
+        transform: translateX(400px);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
     }
     
     @media (max-width: 768px) {
-      .row {
-        flex-direction: column;
-      }
-      .col {
-        flex: 1 1 100%;
-      }
-      .container {
+      .header {
         padding: 20px;
-        margin: 10px;
       }
-      .action-buttons {
-        flex-direction: column;
+      
+      .header h1 {
+        font-size: 1.5rem;
       }
-      button {
-        width: 100%;
+      
+      .content {
+        padding: 20px;
+      }
+      
+      .info-grid {
+        grid-template-columns: 1fr;
       }
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <div class="nav-header">
-      <h1 id="projTitle">Project Description</h1>
-      <a href="projects.html" class="back-btn" style="text-decoration: none; padding: 8px 16px; display: inline-block;">← Back to Projects</a>
-    </div>
-
-    <div id="loadingMessage" class="loading" style="display: none;">
-      Loading project description...
-    </div>
-
-    <div id="errorMessage" class="error" style="display: none;"></div>
-    <div id="successMessage" class="success" style="display: none;"></div>
-
-    <div class="project-info">
-      <h3 style="margin: 0 0 10px 0; color: #4f46e5;">Project Information</h3>
-      <p id="projectInfoText" style="margin: 0; color: #6b7280;">Loading project details...</p>
-    </div>
-
-    <div id="contentArea">
-      <h2>Project Overview</h2>
-      <div class="row">
-        <div class="col">
-          <label for="projectTitle">Project Title</label>
-          <div id="view-projectTitle" class="view-value"></div>
-          <input id="projectTitle" type="text" placeholder="Enter project title" style="display: none;">
-        </div>
-        <div class="col">
-          <label for="notes">Initial Notes</label>
-          <div id="view-notes" class="view-value"></div>
-          <textarea id="notes" placeholder="Project overview and initial thoughts..." style="display: none;"></textarea>
-        </div>
-      </div>
-
-      <div class="row">
-        <div class="col">
-          <h2>Colleague/Client Contact Information</h2>
-          <label for="colleagueName">Contact Name & Title</label>
-          <div id="view-colleagueName" class="view-value"></div>
-          <input id="colleagueName" type="text" placeholder="Full name and title" style="display: none;">
-          
-          <label for="colleaguePhone">Phone Number</label>
-          <div id="view-colleaguePhone" class="view-value"></div>
-          <input id="colleaguePhone" type="tel" placeholder="Phone number" style="display: none;">
-          
-          <label for="colleagueEmail">Email Address</label>
-          <div id="view-colleagueEmail" class="view-value"></div>
-          <input id="colleagueEmail" type="email" placeholder="Email address" style="display: none;">
-          
-          <label for="colleagueAddress1">Mailing Address Line 1</label>
-          <div id="view-colleagueAddress1" class="view-value"></div>
-          <input id="colleagueAddress1" type="text" placeholder="Street address" style="display: none;">
-          
-          <label for="colleagueAddress2">Mailing Address Line 2</label>
-          <div id="view-colleagueAddress2" class="view-value"></div>
-          <input id="colleagueAddress2" type="text" placeholder="Apartment, suite, etc." style="display: none;">
-          
-          <label for="colleagueAddress3">City, State, ZIP</label>
-          <div id="view-colleagueAddress3" class="view-value"></div>
-          <input id="colleagueAddress3" type="text" placeholder="City, State, ZIP" style="display: none;">
-        </div>
-        <div class="col">
-          <h2>Your Contact Information</h2>
-          <label for="yourName">Your Name & Title</label>
-          <div id="view-yourName" class="view-value"></div>
-          <input id="yourName" type="text" placeholder="Your full name and title" style="display: none;">
-          
-          <label for="yourPhone">Phone Number</label>
-          <div id="view-yourPhone" class="view-value"></div>
-          <input id="yourPhone" type="tel" placeholder="Your phone number" style="display: none;">
-          
-          <label for="yourEmail">Email Address</label>
-          <div id="view-yourEmail" class="view-value"></div>
-          <input id="yourEmail" type="email" placeholder="Your email address" style="display: none;">
-          
-          <label for="yourAddress1">Mailing Address Line 1</label>
-          <div id="view-yourAddress1" class="view-value"></div>
-          <input id="yourAddress1" type="text" placeholder="Street address" style="display: none;">
-          
-          <label for="yourAddress2">Mailing Address Line 2</label>
-          <div id="view-yourAddress2" class="view-value"></div>
-          <input id="yourAddress2" type="text" placeholder="Apartment, suite, etc." style="display: none;">
-          
-          <label for="yourAddress3">City, State, ZIP</label>
-          <div id="view-yourAddress3" class="view-value"></div>
-          <input id="yourAddress3" type="text" placeholder="City, State, ZIP" style="display: none;">
-        </div>
-      </div>
-
-      <h2>Project Objectives</h2>
-      <div id="view-objectives" class="view-value"></div>
-      <textarea id="objectives" class="full-width" placeholder="What are the main goals and objectives of this project?" style="display: none;"></textarea>
-
-      <div class="row">
-        <div class="col">
-          <h2>Timeline & Milestones</h2>
-          <div id="view-timeline" class="view-value"></div>
-          <textarea id="timeline" placeholder="Project timeline, key milestones, and deadlines..." style="display: none;"></textarea>
-        </div>
-        <div class="col">
-          <h2>Target Audience</h2>
-          <label for="primaryAudience">Primary Demographic</label>
-          <div id="view-primaryAudience" class="view-value"></div>
-          <input id="primaryAudience" type="text" placeholder="Primary target audience" style="display: none;">
-          
-          <label for="secondaryAudience">Secondary Demographic</label>
-          <div id="view-secondaryAudience" class="view-value"></div>
-          <input id="secondaryAudience" type="text" placeholder="Secondary target audience" style="display: none;">
-        </div>
-      </div>
-
-      <h2>Call To Action</h2>
-      <div id="view-callAction" class="view-value"></div>
-      <textarea id="callAction" class="full-width" placeholder="What action do you want the audience to take?" style="display: none;"></textarea>
-
-      <h2>Competitive Analysis</h2>
-      <div id="view-competition" class="view-value"></div>
-      <textarea id="competition" class="full-width" placeholder="Analysis of competitors, market positioning, differentiators..." style="display: none;"></textarea>
-
-      <h2>Visual & Media Requirements</h2>
-      <div class="row">
-        <div class="col">
-          <label for="graphics">Graphics & Design</label>
-          <div id="view-graphics" class="view-value"></div>
-          <textarea id="graphics" placeholder="Logo, branding, design requirements..." style="display: none;"></textarea>
-        </div>
-        <div class="col">
-          <label for="photography">Photography</label>
-          <div id="view-photography" class="view-value"></div>
-          <textarea id="photography" placeholder="Photo requirements, style, subjects..." style="display: none;"></textarea>
-        </div>
-      </div>
-      <label for="multimedia">Multimedia & Interactive Elements</label>
-      <div id="view-multimedia" class="view-value"></div>
-      <textarea id="multimedia" placeholder="Videos, animations, interactive features..." style="display: none;"></textarea>
-
-      <h2>Additional Information</h2>
-      <div id="view-otherInfo" class="view-value"></div>
-      <textarea id="otherInfo" class="full-width" placeholder="Any other relevant information, special requirements, constraints..." style="display: none;"></textarea>
-
-      <h2>Review & Approval</h2>
-      <div class="row">
-        <div class="col">
-          <label for="clientName">Reviewer Name & Title</label>
-          <div id="view-clientName" class="view-value"></div>
-          <input id="clientName" type="text" placeholder="Name of person reviewing/approving" style="display: none;">
-        </div>
-        <div class="col">
-          <label for="approvalDate">Review Date</label>
-          <div id="view-approvalDate" class="view-value"></div>
-          <input id="approvalDate" type="date" style="display: none;">
-        </div>
-      </div>
-      <label for="clientComments">Review Comments</label>
-      <div id="view-clientComments" class="view-value"></div>
-      <textarea id="clientComments" placeholder="Feedback, suggestions, approval notes..." style="display: none;"></textarea>
-      
-      <label for="approvalSignature">Digital Signature</label>
-      <div id="view-approvalSignature" class="view-value"></div>
-      <input id="approvalSignature" type="text" placeholder="Type name for digital signature" style="display: none;">
-
-      <div class="action-buttons">
-        <button type="button" class="back-btn" onclick="window.location.href='projects.html'">← Back to Projects</button>
-        <button type="button" id="editBtn" class="edit-btn">✏️ Edit Description</button>
-        <button type="button" id="saveBtn" class="edit-mode-only">💾 Save Changes</button>
-        <button type="button" id="cancelBtn" class="cancel-btn edit-mode-only">✖ Cancel</button>
-        <button type="button" id="autoSaveBtn" class="edit-mode-only" style="background: #059669;">⚡ Enable Auto-Save</button>
+    <div class="header">
+      <h1 id="pageTitle">Project Description</h1>
+      <div class="header-actions">
+        <a href="projects.html" class="back-btn">
+          <span>←</span>
+          <span>Back to Projects</span>
+        </a>
+        <button class="edit-btn" id="editBtn" onclick="toggleEditMode()">✏️ Edit</button>
+        <button class="save-btn" id="saveBtn" style="display: none;" onclick="saveChanges()">💾 Save Changes</button>
+        <button class="cancel-btn" id="cancelBtn" style="display: none;" onclick="cancelEdit()">✕ Cancel</button>
       </div>
     </div>
 
-    <div class="last-saved" id="lastSaved"></div>
+    <div class="content" id="content">
+      <div class="loading" id="loading">Loading project description...</div>
+    </div>
   </div>
 
+  <div class="status-bar" id="statusBar" style="display: none;"></div>
+
   <script>
-    // API Configuration
     const API_BASE = window.location.origin;
-   
+    let isEditMode = false;
+    let originalData = {};
+    
     // Authentication check
     function getCurrentUser() {
       return sessionStorage.getItem('userEmail');
@@ -405,7 +354,6 @@
       window.location.href = '/';
     }
 
-    // Check authentication
     if (!isUserLoggedIn()) {
       redirectToLogin();
     }
@@ -415,44 +363,46 @@
       redirectToLogin();
     }
 
-    // Get project ID from URL
     const urlParams = new URLSearchParams(window.location.search);
     const projectId = urlParams.get("id");
 
-    // Form fields mapping
-    const fields = [
-      "projectTitle", "notes", "colleagueName", "colleaguePhone", "colleagueEmail",
-      "colleagueAddress1", "colleagueAddress2", "colleagueAddress3", "yourName",
-      "yourPhone", "yourEmail", "yourAddress1", "yourAddress2", "yourAddress3",
-      "objectives", "timeline", "primaryAudience", "secondaryAudience", "callAction",
-      "competition", "graphics", "photography", "multimedia", "otherInfo",
-      "clientName", "clientComments", "approvalDate", "approvalSignature"
-    ];
-
-    // UI elements
-    const loadingMessage = document.getElementById("loadingMessage");
-    const errorMessage = document.getElementById("errorMessage");
-    const successMessage = document.getElementById("successMessage");
-    const editBtn = document.getElementById("editBtn");
-    const saveBtn = document.getElementById("saveBtn");
-    const cancelBtn = document.getElementById("cancelBtn");
-    const autoSaveBtn = document.getElementById("autoSaveBtn");
-    const lastSaved = document.getElementById("lastSaved");
-    const contentArea = document.getElementById("contentArea");
-
-    let isEditMode = false;
-    let autoSaveEnabled = false;
-    let autoSaveInterval = null;
-    let hasUnsavedChanges = false;
-    let originalData = {};
-
-    // Validation
     if (!projectId) {
-      showError("No project selected. Redirecting to Projects page.");
+      showNotification("No project selected. Redirecting...", "error");
       setTimeout(() => window.location.href = "projects.html", 2000);
     }
 
-    // API helper function
+    // Form fields mapping
+    const fields = {
+      projectTitle: "Project Title",
+      notes: "Initial Notes",
+      colleagueName: "Contact Name & Title",
+      colleaguePhone: "Phone Number",
+      colleagueEmail: "Email Address",
+      colleagueAddress1: "Address Line 1",
+      colleagueAddress2: "Address Line 2",
+      colleagueAddress3: "City, State, ZIP",
+      yourName: "Your Name & Title",
+      yourPhone: "Phone Number",
+      yourEmail: "Email Address",
+      yourAddress1: "Address Line 1",
+      yourAddress2: "Address Line 2",
+      yourAddress3: "City, State, ZIP",
+      objectives: "Project Objectives",
+      timeline: "Timeline & Milestones",
+      primaryAudience: "Primary Demographic",
+      secondaryAudience: "Secondary Demographic",
+      callAction: "Call To Action",
+      competition: "Competitive Analysis",
+      graphics: "Graphics & Design",
+      photography: "Photography",
+      multimedia: "Multimedia & Interactive",
+      otherInfo: "Additional Information",
+      clientName: "Reviewer Name & Title",
+      approvalDate: "Review Date",
+      clientComments: "Review Comments",
+      approvalSignature: "Digital Signature"
+    };
+
     async function apiCall(endpoint, options = {}) {
       try {
         const response = await fetch(`${API_BASE}${endpoint}`, {
@@ -462,11 +412,11 @@
           },
           ...options
         });
-       
+        
         if (!response.ok) {
           throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }
-       
+        
         return await response.json();
       } catch (error) {
         console.error('API Error:', error);
@@ -474,266 +424,515 @@
       }
     }
 
-    // UI helper functions
-    function showLoading(show = true) {
-      loadingMessage.style.display = show ? 'block' : 'none';
-      contentArea.style.display = show ? 'none' : 'block';
-    }
-
-    function showError(message) {
-      errorMessage.textContent = message;
-      errorMessage.style.display = 'block';
-      successMessage.style.display = 'none';
+    function showNotification(message, type = 'success') {
+      const notification = document.createElement('div');
+      notification.className = `notification ${type}`;
+      notification.textContent = message;
+      document.body.appendChild(notification);
+      
       setTimeout(() => {
-        errorMessage.style.display = 'none';
-      }, 5000);
-    }
-
-    function showSuccess(message) {
-      successMessage.textContent = message;
-      successMessage.style.display = 'block';
-      errorMessage.style.display = 'none';
-      setTimeout(() => {
-        successMessage.style.display = 'none';
+        notification.remove();
       }, 3000);
     }
 
-    function updateLastSaved() {
-      const now = new Date();
-      lastSaved.textContent = `Last saved: ${now.toLocaleString()}`;
-      hasUnsavedChanges = false;
-    }
-
-    // Toggle between view and edit mode
-    function toggleEditMode(enable) {
-      isEditMode = enable;
+    function updateStatusBar(text) {
+      const statusBar = document.getElementById('statusBar');
+      statusBar.textContent = text;
+      statusBar.style.display = 'block';
       
-      fields.forEach(field => {
-        const input = document.getElementById(field);
-        const viewDiv = document.getElementById(`view-${field}`);
-        
-        if (input && viewDiv) {
-          if (enable) {
-            input.style.display = 'block';
-            viewDiv.style.display = 'none';
-            input.removeAttribute('readonly');
-          } else {
-            input.style.display = 'none';
-            viewDiv.style.display = 'block';
-            updateViewDisplay(field);
-          }
-        }
-      });
-
-      // Toggle buttons
-      editBtn.style.display = enable ? 'none' : 'inline-block';
-      document.querySelectorAll('.edit-mode-only').forEach(el => {
-        el.style.display = enable ? 'inline-block' : 'none';
-      });
-
-      if (enable) {
-        // Store original data for cancel
-        originalData = {};
-        fields.forEach(field => {
-          const input = document.getElementById(field);
-          if (input) {
-            originalData[field] = input.value;
-          }
-        });
-      }
+      setTimeout(() => {
+        statusBar.style.display = 'none';
+      }, 3000);
     }
 
-    // Update view display for a field
-    function updateViewDisplay(field) {
-      const input = document.getElementById(field);
-      const viewDiv = document.getElementById(`view-${field}`);
+    function renderViewMode(data, projectName) {
+      const content = document.getElementById('content');
       
-      if (input && viewDiv) {
-        const value = input.value.trim();
-        if (value) {
-          viewDiv.textContent = value;
-          viewDiv.classList.remove('empty');
-        } else {
-          viewDiv.textContent = 'Not provided';
-          viewDiv.classList.add('empty');
-        }
+      const html = `
+        <div class="project-banner">
+          <h2>${data.projectTitle || projectName || 'Untitled Project'}</h2>
+          <div class="meta">
+            <strong>Owner:</strong> ${userEmail}
+            ${data.approvalDate ? ` • <strong>Last Review:</strong> ${new Date(data.approvalDate).toLocaleDateString()}` : ''}
+          </div>
+        </div>
+
+        ${data.notes ? `
+        <div class="section">
+          <div class="section-title">Project Overview</div>
+          <div class="section-content">
+            <p>${data.notes}</p>
+          </div>
+        </div>
+        ` : ''}
+
+        ${data.objectives ? `
+        <div class="section">
+          <div class="section-title">Project Objectives</div>
+          <div class="section-content">
+            <p>${data.objectives}</p>
+          </div>
+        </div>
+        ` : ''}
+
+        <div class="section">
+          <div class="section-title">Contact Information</div>
+          <div class="info-grid">
+            <div class="info-card">
+              <h3>Client/Colleague Contact</h3>
+              <div class="info-item">
+                <span class="info-label">Name & Title</span>
+                <span class="info-value">${data.colleagueName || '<span class="empty-value">Not provided</span>'}</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">Email</span>
+                <span class="info-value">${data.colleagueEmail || '<span class="empty-value">Not provided</span>'}</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">Phone</span>
+                <span class="info-value">${data.colleaguePhone || '<span class="empty-value">Not provided</span>'}</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">Address</span>
+                <span class="info-value">
+                  ${data.colleagueAddress1 || ''}<br>
+                  ${data.colleagueAddress2 || ''}<br>
+                  ${data.colleagueAddress3 || '<span class="empty-value">Not provided</span>'}
+                </span>
+              </div>
+            </div>
+
+            <div class="info-card">
+              <h3>Your Contact Information</h3>
+              <div class="info-item">
+                <span class="info-label">Name & Title</span>
+                <span class="info-value">${data.yourName || '<span class="empty-value">Not provided</span>'}</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">Email</span>
+                <span class="info-value">${data.yourEmail || userEmail}</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">Phone</span>
+                <span class="info-value">${data.yourPhone || '<span class="empty-value">Not provided</span>'}</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">Address</span>
+                <span class="info-value">
+                  ${data.yourAddress1 || ''}<br>
+                  ${data.yourAddress2 || ''}<br>
+                  ${data.yourAddress3 || '<span class="empty-value">Not provided</span>'}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        ${data.timeline || data.primaryAudience || data.secondaryAudience ? `
+        <div class="section">
+          <div class="section-title">Timeline & Audience</div>
+          <div class="info-grid">
+            ${data.timeline ? `
+            <div class="info-card">
+              <h3>Timeline & Milestones</h3>
+              <p>${data.timeline}</p>
+            </div>
+            ` : ''}
+            ${data.primaryAudience || data.secondaryAudience ? `
+            <div class="info-card">
+              <h3>Target Audience</h3>
+              ${data.primaryAudience ? `
+              <div class="info-item">
+                <span class="info-label">Primary Demographic</span>
+                <span class="info-value">${data.primaryAudience}</span>
+              </div>
+              ` : ''}
+              ${data.secondaryAudience ? `
+              <div class="info-item">
+                <span class="info-label">Secondary Demographic</span>
+                <span class="info-value">${data.secondaryAudience}</span>
+              </div>
+              ` : ''}
+            </div>
+            ` : ''}
+          </div>
+        </div>
+        ` : ''}
+
+        ${data.callAction ? `
+        <div class="section">
+          <div class="section-title">Call To Action</div>
+          <div class="section-content">
+            <p>${data.callAction}</p>
+          </div>
+        </div>
+        ` : ''}
+
+        ${data.competition ? `
+        <div class="section">
+          <div class="section-title">Competitive Analysis</div>
+          <div class="section-content">
+            <p>${data.competition}</p>
+          </div>
+        </div>
+        ` : ''}
+
+        ${data.graphics || data.photography || data.multimedia ? `
+        <div class="section">
+          <div class="section-title">Visual & Media Requirements</div>
+          <div class="info-grid">
+            ${data.graphics ? `
+            <div class="info-card">
+              <h3>Graphics & Design</h3>
+              <p>${data.graphics}</p>
+            </div>
+            ` : ''}
+            ${data.photography ? `
+            <div class="info-card">
+              <h3>Photography</h3>
+              <p>${data.photography}</p>
+            </div>
+            ` : ''}
+            ${data.multimedia ? `
+            <div class="info-card">
+              <h3>Multimedia & Interactive</h3>
+              <p>${data.multimedia}</p>
+            </div>
+            ` : ''}
+          </div>
+        </div>
+        ` : ''}
+
+        ${data.otherInfo ? `
+        <div class="section">
+          <div class="section-title">Additional Information</div>
+          <div class="section-content">
+            <p>${data.otherInfo}</p>
+          </div>
+        </div>
+        ` : ''}
+
+        ${data.clientName || data.clientComments || data.approvalSignature ? `
+        <div class="section">
+          <div class="section-title">Review & Approval</div>
+          <div class="info-card">
+            ${data.clientName ? `
+            <div class="info-item">
+              <span class="info-label">Reviewer</span>
+              <span class="info-value">${data.clientName}</span>
+            </div>
+            ` : ''}
+            ${data.approvalDate ? `
+            <div class="info-item">
+              <span class="info-label">Review Date</span>
+              <span class="info-value">${new Date(data.approvalDate).toLocaleDateString()}</span>
+            </div>
+            ` : ''}
+            ${data.clientComments ? `
+            <div class="info-item">
+              <span class="info-label">Comments</span>
+              <span class="info-value">${data.clientComments}</span>
+            </div>
+            ` : ''}
+            ${data.approvalSignature ? `
+            <div class="info-item">
+              <span class="info-label">Digital Signature</span>
+              <span class="info-value">${data.approvalSignature}</span>
+            </div>
+            ` : ''}
+          </div>
+        </div>
+        ` : ''}
+      `;
+      
+      content.innerHTML = html;
+    }
+
+    function renderEditMode(data) {
+      const content = document.getElementById('content');
+      content.classList.add('edit-mode');
+      
+      const html = `
+        <div class="project-banner">
+          <input type="text" id="edit-projectTitle" value="${data.projectTitle || ''}" placeholder="Project Title">
+          <div class="meta">Owner: ${userEmail}</div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">Project Overview</div>
+          <div class="section-content">
+            <textarea id="edit-notes" placeholder="Project overview and initial thoughts...">${data.notes || ''}</textarea>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">Project Objectives</div>
+          <div class="section-content">
+            <textarea id="edit-objectives" placeholder="Main goals and objectives...">${data.objectives || ''}</textarea>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">Contact Information</div>
+          <div class="info-grid">
+            <div class="info-card">
+              <h3>Client/Colleague Contact</h3>
+              <div class="info-item">
+                <span class="info-label">Name & Title</span>
+                <input type="text" id="edit-colleagueName" value="${data.colleagueName || ''}" placeholder="Full name and title">
+              </div>
+              <div class="info-item">
+                <span class="info-label">Email</span>
+                <input type="email" id="edit-colleagueEmail" value="${data.colleagueEmail || ''}" placeholder="Email address">
+              </div>
+              <div class="info-item">
+                <span class="info-label">Phone</span>
+                <input type="tel" id="edit-colleaguePhone" value="${data.colleaguePhone || ''}" placeholder="Phone number">
+              </div>
+              <div class="info-item">
+                <span class="info-label">Address Line 1</span>
+                <input type="text" id="edit-colleagueAddress1" value="${data.colleagueAddress1 || ''}" placeholder="Street address">
+              </div>
+              <div class="info-item">
+                <span class="info-label">Address Line 2</span>
+                <input type="text" id="edit-colleagueAddress2" value="${data.colleagueAddress2 || ''}" placeholder="Apt, suite, etc.">
+              </div>
+              <div class="info-item">
+                <span class="info-label">City, State, ZIP</span>
+                <input type="text" id="edit-colleagueAddress3" value="${data.colleagueAddress3 || ''}" placeholder="City, State, ZIP">
+              </div>
+            </div>
+
+            <div class="info-card">
+              <h3>Your Contact Information</h3>
+              <div class="info-item">
+                <span class="info-label">Name & Title</span>
+                <input type="text" id="edit-yourName" value="${data.yourName || ''}" placeholder="Your name and title">
+              </div>
+              <div class="info-item">
+                <span class="info-label">Email</span>
+                <input type="email" id="edit-yourEmail" value="${data.yourEmail || userEmail}" placeholder="Your email">
+              </div>
+              <div class="info-item">
+                <span class="info-label">Phone</span>
+                <input type="tel" id="edit-yourPhone" value="${data.yourPhone || ''}" placeholder="Your phone">
+              </div>
+              <div class="info-item">
+                <span class="info-label">Address Line 1</span>
+                <input type="text" id="edit-yourAddress1" value="${data.yourAddress1 || ''}" placeholder="Street address">
+              </div>
+              <div class="info-item">
+                <span class="info-label">Address Line 2</span>
+                <input type="text" id="edit-yourAddress2" value="${data.yourAddress2 || ''}" placeholder="Apt, suite, etc.">
+              </div>
+              <div class="info-item">
+                <span class="info-label">City, State, ZIP</span>
+                <input type="text" id="edit-yourAddress3" value="${data.yourAddress3 || ''}" placeholder="City, State, ZIP">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">Timeline & Audience</div>
+          <div class="info-grid">
+            <div class="info-card">
+              <h3>Timeline & Milestones</h3>
+              <textarea id="edit-timeline" placeholder="Project timeline and key milestones...">${data.timeline || ''}</textarea>
+            </div>
+            <div class="info-card">
+              <h3>Target Audience</h3>
+              <div class="info-item">
+                <span class="info-label">Primary Demographic</span>
+                <input type="text" id="edit-primaryAudience" value="${data.primaryAudience || ''}" placeholder="Primary audience">
+              </div>
+              <div class="info-item">
+                <span class="info-label">Secondary Demographic</span>
+                <input type="text" id="edit-secondaryAudience" value="${data.secondaryAudience || ''}" placeholder="Secondary audience">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">Call To Action</div>
+          <div class="section-content">
+            <textarea id="edit-callAction" placeholder="What action should the audience take?">${data.callAction || ''}</textarea>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">Competitive Analysis</div>
+          <div class="section-content">
+            <textarea id="edit-competition" placeholder="Competitor analysis and market positioning...">${data.competition || ''}</textarea>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">Visual & Media Requirements</div>
+          <div class="info-grid">
+            <div class="info-card">
+              <h3>Graphics & Design</h3>
+              <textarea id="edit-graphics" placeholder="Logo, branding requirements...">${data.graphics || ''}</textarea>
+            </div>
+            <div class="info-card">
+              <h3>Photography</h3>
+              <textarea id="edit-photography" placeholder="Photo requirements and style...">${data.photography || ''}</textarea>
+            </div>
+            <div class="info-card">
+              <h3>Multimedia & Interactive</h3>
+              <textarea id="edit-multimedia" placeholder="Videos, animations, interactive features...">${data.multimedia || ''}</textarea>
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">Additional Information</div>
+          <div class="section-content">
+            <textarea id="edit-otherInfo" placeholder="Any other relevant information...">${data.otherInfo || ''}</textarea>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">Review & Approval</div>
+          <div class="info-card">
+            <div class="info-item">
+              <span class="info-label">Reviewer Name & Title</span>
+              <input type="text" id="edit-clientName" value="${data.clientName || ''}" placeholder="Reviewer name">
+            </div>
+            <div class="info-item">
+              <span class="info-label">Review Date</span>
+              <input type="date" id="edit-approvalDate" value="${data.approvalDate || ''}">
+            </div>
+            <div class="info-item">
+              <span class="info-label">Review Comments</span>
+              <textarea id="edit-clientComments" placeholder="Feedback and approval notes...">${data.clientComments || ''}</textarea>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Digital Signature</span>
+              <input type="text" id="edit-approvalSignature" value="${data.approvalSignature || ''}" placeholder="Type name for signature">
+            </div>
+          </div>
+        </div>
+      `;
+      
+      content.innerHTML = html;
+    }
+
+    function toggleEditMode() {
+      isEditMode = !isEditMode;
+      
+      if (isEditMode) {
+        document.getElementById('editBtn').style.display = 'none';
+        document.getElementById('saveBtn').style.display = 'inline-block';
+        document.getElementById('cancelBtn').style.display = 'inline-block';
+        renderEditMode(originalData);
+      } else {
+        document.getElementById('editBtn').style.display = 'inline-block';
+        document.getElementById('saveBtn').style.display = 'none';
+        document.getElementById('cancelBtn').style.display = 'none';
+        document.getElementById('content').classList.remove('edit-mode');
+        loadProjectData();
       }
     }
 
-    // Load project info and description
-    async function loadProjectData() {
-      showLoading(true);
-     
-      try {
-        // Load basic project info
-        const projects = await apiCall(`/projects/${encodeURIComponent(userEmail)}`);
-        const project = projects.find(p => p.id == projectId);
-       
-        if (!project) {
-          throw new Error("Project not found");
-        }
-
-        // Update UI with project info
-        document.getElementById("projTitle").textContent = `${project.name} - Description`;
-        document.getElementById("projectInfoText").innerHTML =
-          `<strong>${project.name}</strong><br>Owner: ${project.owner_email}`;
-
-        // Pre-fill user email
-        document.getElementById("yourEmail").value = userEmail;
-
-        // Load description data
-        try {
-          const description = await apiCall(`/projects/${projectId}/description`);
-         
-          if (description) {
-            fields.forEach(field => {
-              const element = document.getElementById(field);
-              if (element && description[field]) {
-                element.value = description[field];
-              }
-            });
-            updateLastSaved();
-          }
-        } catch (error) {
-          console.log("No existing description found, starting fresh.");
-        }
-
-        // Initialize view mode
-        fields.forEach(field => updateViewDisplay(field));
-        toggleEditMode(false);
-
-      } catch (error) {
-        console.error("Failed to load project data:", error);
-        showError("Failed to load project data. Please try refreshing the page.");
-      } finally {
-        showLoading(false);
+    function cancelEdit() {
+      if (confirm('Discard all changes?')) {
+        toggleEditMode();
       }
     }
 
-    // Save description
-    async function saveDescription() {
+    async function saveChanges() {
       const formData = {};
-      let hasRequiredFields = false;
-
-      fields.forEach(field => {
-        const element = document.getElementById(field);
+      
+      Object.keys(fields).forEach(field => {
+        const element = document.getElementById(`edit-${field}`);
         if (element) {
-          const value = element.value.trim();
-          formData[field] = value;
-          if (value) hasRequiredFields = true;
+          formData[field] = element.value.trim();
         }
       });
 
-      if (!hasRequiredFields) {
-        showError("Please fill in at least one field before saving.");
-        return;
-      }
-
       try {
-        saveBtn.textContent = '💾 Saving...';
-        saveBtn.disabled = true;
+        document.getElementById('saveBtn').textContent = '💾 Saving...';
+        document.getElementById('saveBtn').disabled = true;
 
         await apiCall(`/projects/${projectId}/description`, {
           method: "PUT",
           body: JSON.stringify(formData)
         });
 
-        showSuccess("Project description saved successfully!");
-        updateLastSaved();
-        toggleEditMode(false);
-       
+        originalData = formData;
+        showNotification("Project description saved successfully!", "success");
+        updateStatusBar(`Last saved: ${new Date().toLocaleString()}`);
+        
+        // Exit edit mode and show updated view
+        isEditMode = false;
+        document.getElementById('editBtn').style.display = 'inline-block';
+        document.getElementById('saveBtn').style.display = 'none';
+        document.getElementById('cancelBtn').style.display = 'none';
+        document.getElementById('content').classList.remove('edit-mode');
+        
+        loadProjectData();
+        
       } catch (error) {
         console.error("Failed to save description:", error);
-        showError("Failed to save description. Please try again.");
+        showNotification("Failed to save description. Please try again.", "error");
       } finally {
-        saveBtn.textContent = '💾 Save Changes';
-        saveBtn.disabled = false;
+        document.getElementById('saveBtn').textContent = '💾 Save Changes';
+        document.getElementById('saveBtn').disabled = false;
       }
     }
 
-    // Cancel editing
-    function cancelEdit() {
-      if (hasUnsavedChanges) {
-        if (!confirm('You have unsaved changes. Are you sure you want to cancel?')) {
-          return;
-        }
-      }
+    async function loadProjectData() {
+      const loading = document.getElementById('loading');
+      loading.style.display = 'block';
       
-      // Restore original data
-      fields.forEach(field => {
-        const input = document.getElementById(field);
-        if (input && originalData[field] !== undefined) {
-          input.value = originalData[field];
+      try {
+        // Load basic project info
+        const projects = await apiCall(`/projects/${encodeURIComponent(userEmail)}`);
+        const project = projects.find(p => p.id == projectId);
+        
+        if (!project) {
+          throw new Error("Project not found");
         }
-      });
-      
-      hasUnsavedChanges = false;
-      toggleEditMode(false);
-      
-      // Disable auto-save if it was enabled
-      if (autoSaveEnabled) {
-        toggleAutoSave();
-      }
-    }
 
-    // Auto-save functionality
-    function toggleAutoSave() {
-      autoSaveEnabled = !autoSaveEnabled;
-     
-      if (autoSaveEnabled) {
-        autoSaveBtn.textContent = '⚡ Auto-Save ON';
-        autoSaveBtn.style.background = '#dc2626';
-        autoSaveInterval = setInterval(() => {
-          if (hasUnsavedChanges && isEditMode) {
-            saveDescription();
-          }
-        }, 30000); // Auto-save every 30 seconds
-        showSuccess("Auto-save enabled! Changes will be saved automatically every 30 seconds.");
-      } else {
-        autoSaveBtn.textContent = '⚡ Enable Auto-Save';
-        autoSaveBtn.style.background = '#059669';
-        if (autoSaveInterval) {
-          clearInterval(autoSaveInterval);
-          autoSaveInterval = null;
+        document.getElementById('pageTitle').textContent = `${project.name} - Description`;
+
+        // Load description data
+        const description = await apiCall(`/projects/${projectId}/description`);
+        
+        // Store original data
+        originalData = description || {};
+        
+        // Pre-fill user email if not set
+        if (!originalData.yourEmail) {
+          originalData.yourEmail = userEmail;
         }
-        showSuccess("Auto-save disabled.");
+
+        // Render view mode
+        renderViewMode(originalData, project.name);
+        
+        loading.style.display = 'none';
+
+      } catch (error) {
+        console.error("Failed to load project data:", error);
+        const content = document.getElementById('content');
+        content.innerHTML = `
+          <div class="error">
+            <p>Failed to load project data. Please try refreshing the page.</p>
+            <p style="font-size: 0.9rem; margin-top: 10px;">${error.message}</p>
+          </div>
+        `;
       }
     }
-
-    // Track changes
-    function trackChanges() {
-      hasUnsavedChanges = true;
-    }
-
-    // Event listeners
-    editBtn.addEventListener('click', () => toggleEditMode(true));
-    saveBtn.addEventListener('click', saveDescription);
-    cancelBtn.addEventListener('click', cancelEdit);
-    autoSaveBtn.addEventListener('click', toggleAutoSave);
-
-    // Track changes on all form inputs
-    fields.forEach(field => {
-      const element = document.getElementById(field);
-      if (element) {
-        element.addEventListener('input', trackChanges);
-        element.addEventListener('change', trackChanges);
-      }
-    });
-
-    // Warn about unsaved changes
-    window.addEventListener('beforeunload', (e) => {
-      if (hasUnsavedChanges && isEditMode) {
-        e.preventDefault();
-        e.returnValue = '';
-        return 'You have unsaved changes. Are you sure you want to leave?';
-      }
-    });
 
     // Keyboard shortcuts
     document.addEventListener('keydown', (e) => {
-      if ((e.ctrlKey || e.metaKey) && e.key === 's' && isEditMode) {
+      if ((e.ctrlKey || e.metaKey) && e.key === 's') {
         e.preventDefault();
-        saveDescription();
+        if (isEditMode) {
+          saveChanges();
+        }
       }
       if (e.key === 'Escape' && isEditMode) {
         cancelEdit();
