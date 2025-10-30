@@ -176,7 +176,7 @@
     }
 
     .goal-card.completed {
-      opacity: 0.8;
+      opacity: 0.95;
       border-left-color: var(--success);
     }
 
@@ -193,6 +193,22 @@
       font-weight: 600;
       color: #1f2937;
       flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .completion-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      background: var(--success);
+      border-radius: 50%;
+      color: white;
+      font-size: 1rem;
+      flex-shrink: 0;
     }
 
     .goal-actions {
@@ -304,6 +320,26 @@
       font-size: 0.9rem;
       font-weight: 600;
       color: var(--accent);
+    }
+
+    .history-btn {
+      background: #f3f4f6;
+      border: 1px solid #e5e7eb;
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      color: #374151;
+      font-weight: 500;
+    }
+
+    .history-btn:hover {
+      background: #e5e7eb;
+      border-color: #d1d5db;
     }
 
     .progress-bar {
@@ -564,6 +600,83 @@
       color: #4b5563;
     }
 
+    /* Stage History Modal Styles */
+    .history-modal-content {
+      max-width: 700px;
+    }
+
+    .history-timeline {
+      position: relative;
+      padding: 20px 0;
+    }
+
+    .history-item {
+      position: relative;
+      padding-left: 40px;
+      padding-bottom: 30px;
+      border-left: 2px solid #e5e7eb;
+    }
+
+    .history-item:last-child {
+      padding-bottom: 0;
+      border-left: none;
+    }
+
+    .history-item::before {
+      content: '';
+      position: absolute;
+      left: -8px;
+      top: 0;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: var(--accent);
+      border: 3px solid white;
+      box-shadow: 0 0 0 2px var(--accent);
+    }
+
+    .history-item.completed::before {
+      background: var(--success);
+      box-shadow: 0 0 0 2px var(--success);
+    }
+
+    .history-stage-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #1f2937;
+      margin-bottom: 5px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .history-date {
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .history-description {
+      font-size: 0.95rem;
+      color: #4b5563;
+      line-height: 1.6;
+      background: #f9fafb;
+      padding: 12px;
+      border-radius: 8px;
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+      white-space: pre-wrap;
+    }
+
+    .no-history {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--muted);
+    }
+
     @media (max-width: 768px) {
       .header {
         flex-direction: column;
@@ -661,6 +774,7 @@
     </div>
   </div>
 
+  <!-- Goal Edit Modal -->
   <div class="modal" id="goalModal">
     <div class="modal-content">
       <div class="modal-header">
@@ -731,10 +845,26 @@
     </div>
   </div>
 
+  <!-- Stage History Modal -->
+  <div class="modal" id="historyModal">
+    <div class="modal-content history-modal-content">
+      <div class="modal-header">
+        <h2>📊 Stage History</h2>
+        <button class="close-btn" onclick="closeHistoryModal()">×</button>
+      </div>
+      <div id="historyContent">
+        <div class="no-history">
+          <p>Loading history...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script>
     const API_BASE = window.location.origin;
     let allGoals = [];
     let editingId = null;
+    let previousStage = 0;
 
     function getCurrentUser() {
       return sessionStorage.getItem('userEmail');
@@ -818,7 +948,10 @@
         return `
           <div class="goal-card ${isCompleted ? 'completed' : ''}">
             <div class="goal-header">
-              <div class="goal-title">${goal.title}</div>
+              <div class="goal-title">
+                ${goal.title}
+                ${isCompleted ? '<span class="completion-badge">✓</span>' : ''}
+              </div>
               <div class="goal-actions">
                 <button class="icon-btn" onclick="editGoal(${goal.id})" title="Edit">✏️</button>
                 <button class="icon-btn delete" onclick="deleteGoal(${goal.id})" title="Delete">🗑️</button>
@@ -833,7 +966,12 @@
             <div class="progress-section">
               <div class="progress-header">
                 <span class="progress-label">Progress (${totalStages} Stages)</span>
-                <span class="progress-value">Stage ${currentStage} of ${totalStages}</span>
+                <div style="display: flex; gap: 10px; align-items: center;">
+                  <button class="history-btn" onclick="viewHistory(${goal.id})" title="View stage history">
+                    📜 History
+                  </button>
+                  <span class="progress-value">Stage ${currentStage} of ${totalStages}</span>
+                </div>
               </div>
               <div class="progress-bar">
                 <div class="progress-fill" style="width: ${progressPercent}%"></div>
@@ -852,6 +990,70 @@
           </div>
         `;
       }).join('');
+    }
+
+    async function viewHistory(goalId) {
+      try {
+        const response = await fetch(`${API_BASE}/career_goals/${goalId}/history`);
+        const history = await response.json();
+        
+        const goal = allGoals.find(g => g.id === goalId);
+        const historyContent = document.getElementById('historyContent');
+        
+        if (!history || history.length === 0) {
+          historyContent.innerHTML = `
+            <div class="no-history">
+              <p>No stage history available yet.</p>
+              <p style="margin-top: 10px; font-size: 0.9rem;">History will be recorded as you progress through stages.</p>
+            </div>
+          `;
+        } else {
+          historyContent.innerHTML = `
+            <div class="history-timeline">
+              ${history.map(item => {
+                const date = new Date(item.updated_date).toLocaleDateString('en-US', { 
+                  month: 'short', 
+                  day: 'numeric', 
+                  year: 'numeric',
+                  hour: '2-digit',
+                  minute: '2-digit'
+                });
+                const isCompleted = item.stage === goal.total_stages;
+                
+                return `
+                  <div class="history-item ${isCompleted ? 'completed' : ''}">
+                    <div class="history-stage-title">
+                      Stage ${item.stage}
+                      ${isCompleted ? '<span style="color: var(--success);">✓ Completed</span>' : ''}
+                    </div>
+                    <div class="history-date">
+                      🕐 ${date}
+                    </div>
+                    ${item.description ? `
+                      <div class="history-description">
+                        ${item.description}
+                      </div>
+                    ` : `
+                      <div class="history-description" style="font-style: italic; color: var(--muted);">
+                        No description provided for this stage.
+                      </div>
+                    `}
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          `;
+        }
+        
+        document.getElementById('historyModal').classList.add('active');
+      } catch (error) {
+        console.error('Error loading history:', error);
+        alert('Failed to load stage history');
+      }
+    }
+
+    function closeHistoryModal() {
+      document.getElementById('historyModal').classList.remove('active');
     }
 
     function applyFilters() {
@@ -924,6 +1126,7 @@
 
     function openAddModal() {
       editingId = null;
+      previousStage = 0;
       document.getElementById('modalTitle').textContent = 'Add Career Goal';
       document.getElementById('goalForm').reset();
       document.getElementById('stagesInput').value = 5;
@@ -939,6 +1142,7 @@
       if (!goal) return;
 
       editingId = id;
+      previousStage = goal.current_stage || 0;
       document.getElementById('modalTitle').textContent = 'Edit Career Goal';
       document.getElementById('titleInput').value = goal.title;
       document.getElementById('typeInput').value = goal.goal_type;
@@ -958,6 +1162,7 @@
       document.getElementById('goalModal').classList.remove('active');
       document.getElementById('goalForm').reset();
       editingId = null;
+      previousStage = 0;
     }
 
     function updateProgressDisplay() {
@@ -970,16 +1175,19 @@
     async function saveGoal(event) {
       event.preventDefault();
 
+      const currentStage = parseInt(document.getElementById('progressInput').value);
+      const stageDescription = document.getElementById('stageDescriptionInput').value.trim();
+
       const data = {
         user_email: userEmail,
         title: document.getElementById('titleInput').value.trim(),
         goal_type: document.getElementById('typeInput').value,
         total_stages: parseInt(document.getElementById('stagesInput').value),
-        current_stage: parseInt(document.getElementById('progressInput').value),
+        current_stage: currentStage,
         start_date: document.getElementById('startDateInput').value || null,
         target_date: document.getElementById('targetDateInput').value || null,
         description: document.getElementById('descriptionInput').value.trim(),
-        stage_description: document.getElementById('stageDescriptionInput').value.trim()
+        stage_description: stageDescription
       };
 
       try {
@@ -989,12 +1197,37 @@
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data)
           });
+
+          // Save history if stage changed
+          if (currentStage !== previousStage && currentStage > 0) {
+            await fetch(`${API_BASE}/career_goals/${editingId}/history`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                stage: currentStage,
+                description: stageDescription
+              })
+            });
+          }
         } else {
-          await fetch(`${API_BASE}/career_goals`, {
+          const response = await fetch(`${API_BASE}/career_goals`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data)
           });
+          
+          // If initial stage > 0, create history entry
+          if (currentStage > 0) {
+            const result = await response.json();
+            await fetch(`${API_BASE}/career_goals/${result.id}/history`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                stage: currentStage,
+                description: stageDescription
+              })
+            });
+          }
         }
 
         closeModal();
@@ -1006,7 +1239,7 @@
     }
 
     async function deleteGoal(id) {
-      if (!confirm('Are you sure you want to delete this goal?')) return;
+      if (!confirm('Are you sure you want to delete this goal? This will also delete all stage history.')) return;
 
       try {
         await fetch(`${API_BASE}/career_goals/${id}`, {
@@ -1022,6 +1255,12 @@
     document.getElementById('goalModal').addEventListener('click', (e) => {
       if (e.target.id === 'goalModal') {
         closeModal();
+      }
+    });
+
+    document.getElementById('historyModal').addEventListener('click', (e) => {
+      if (e.target.id === 'historyModal') {
+        closeHistoryModal();
       }
     });
 
