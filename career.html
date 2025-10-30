@@ -273,7 +273,7 @@
       color: #374151;
     }
 
-   .goal-description {
+    .goal-description {
       color: #4b5563;
       line-height: 1.6;
       margin-bottom: 15px;
@@ -282,7 +282,7 @@
       word-break: break-all;
       white-space: pre-wrap;
     }
-    
+
     .progress-section {
       margin-top: 15px;
     }
@@ -348,6 +348,8 @@
       background: #f9fafb;
       border-radius: 8px;
       border-left: 3px solid var(--accent);
+      word-wrap: break-word;
+      overflow-wrap: break-word;
     }
 
     .stage-description-label {
@@ -361,6 +363,10 @@
       font-size: 0.9rem;
       color: #4b5563;
       line-height: 1.5;
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+      word-break: break-all;
+      white-space: pre-wrap;
     }
 
     .target-date {
@@ -511,11 +517,7 @@
     }
 
     .stage-labels {
-      display: flex;
-      justify-content: space-between;
-      margin-top: 5px;
-      font-size: 0.75rem;
-      color: var(--muted);
+      display: none;
     }
 
     .form-actions {
@@ -659,7 +661,6 @@
     </div>
   </div>
 
-  <!-- Add/Edit Modal -->
   <div class="modal" id="goalModal">
     <div class="modal-content">
       <div class="modal-header">
@@ -809,7 +810,6 @@
           : null;
         const createdDate = new Date(goal.created_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 
-        // Generate stage markers
         let stageMarkersHtml = '';
         for (let i = 1; i < totalStages; i++) {
           stageMarkersHtml += '<div class="stage-marker"></div>';
@@ -878,7 +878,6 @@
         }
       }
 
-      // Sort
       if (sortFilter === 'date') {
         filtered.sort((a, b) => new Date(b.created_date) - new Date(a.created_date));
       } else if (sortFilter === 'progress') {
@@ -945,7 +944,7 @@
       document.getElementById('typeInput').value = goal.goal_type;
       document.getElementById('stagesInput').value = goal.total_stages || 5;
       document.getElementById('startDateInput').value = goal.start_date || '';
-document.getElementById('targetDateInput').value = goal.target_date || '';
+      document.getElementById('targetDateInput').value = goal.target_date || '';
       document.getElementById('descriptionInput').value = goal.description || '';
       document.getElementById('stageDescriptionInput').value = goal.stage_description || '';
       document.getElementById('progressInput').max = goal.total_stages || 5;
@@ -1020,18 +1019,13 @@ document.getElementById('targetDateInput').value = goal.target_date || '';
       }
     }
 
-    // Close modal on outside click
     document.getElementById('goalModal').addEventListener('click', (e) => {
       if (e.target.id === 'goalModal') {
         closeModal();
       }
     });
 
-    // Load goals on page load
     loadGoals();
   </script>
 </body>
 </html>
-
-
-
