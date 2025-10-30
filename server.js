@@ -194,6 +194,16 @@ db.serialize(() => {
     FOREIGN KEY(user_email) REFERENCES users(email)
   )`);
 
+  // ===================== STAGE HISTORY TABLE =====================
+  db.run(`CREATE TABLE IF NOT EXISTS career_stage_history (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    goal_id INTEGER,
+    stage INTEGER,
+    description TEXT,
+    updated_date TEXT,
+    FOREIGN KEY(goal_id) REFERENCES career_goals(id) ON DELETE CASCADE
+  )`);
+
   db.run(`CREATE TABLE IF NOT EXISTS future_work (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_email TEXT,
@@ -325,27 +335,26 @@ db.serialize(() => {
       }
     }
   );
-  // Add after the career_goals table creation
-const careerGoalsColumns = [
-  "total_stages INTEGER DEFAULT 5",
-  "current_stage INTEGER DEFAULT 0",
-  "start_date TEXT",
-  "stage_description TEXT"
-];
 
-careerGoalsColumns.forEach((columnDef) => {
-  const columnName = columnDef.split(' ')[0];
-  db.run(
-    `ALTER TABLE career_goals ADD COLUMN ${columnDef}`,
-    (err) => {
-      if (err && !err.message.includes('duplicate') && err.code !== '42701') {
-        console.error(`Error adding column ${columnName} to career_goals:`, err);
+  // ===================== ADD STAGE COLUMNS TO CAREER GOALS =====================
+  const careerGoalsColumns = [
+    "total_stages INTEGER DEFAULT 5",
+    "current_stage INTEGER DEFAULT 0",
+    "start_date TEXT",
+    "stage_description TEXT"
+  ];
+
+  careerGoalsColumns.forEach((columnDef) => {
+    const columnName = columnDef.split(' ')[0];
+    db.run(
+      `ALTER TABLE career_goals ADD COLUMN ${columnDef}`,
+      (err) => {
+        if (err && !err.message.includes('duplicate') && err.code !== '42701') {
+          console.error(`Error adding column ${columnName} to career_goals:`, err);
+        }
       }
-    }
-  );
-});
-
-
+    );
+  });
 });
 
 // ===================== AUTH API WITH PASSWORD HASHING =====================
@@ -470,7 +479,6 @@ app.post("/login", (req, res) => {
     }
   );
 });
-
 
 // ===================== PROJECTS API WITH PROGRESS =====================
 app.post("/projects", (req, res) => {
@@ -662,7 +670,7 @@ app.delete("/notes/:id", (req, res) => {
   });
 });
 
-// ===================== CAREER GOALS API =====================
+// ===================== CAREER GOALS API WITH STAGE HISTORY =====================
 app.get("/career_goals/:email", (req, res) => {
   db.all("SELECT * FROM career_goals WHERE user_email = ? ORDER BY created_date DESC", [req.params.email], (err, rows) => {
     if (err) return res.status(500).json({ error: "Error fetching career goals." });
@@ -690,8 +698,6 @@ app.post("/career_goals", (req, res) => {
   );
 });
 
-
-
 app.put("/career_goals/:id", (req, res) => {
   const { title, description, progress, goal_type, target_date, total_stages, current_stage, start_date, stage_description } = req.body;
   db.run(
@@ -704,12 +710,76 @@ app.put("/career_goals/:id", (req, res) => {
   );
 });
 
-
 app.delete("/career_goals/:id", (req, res) => {
-  db.run("DELETE FROM career_goals WHERE id = ?", [req.params.id], function (err) {
-    if (err) return res.status(500).json({ error: "Error deleting career goal." });
-    res.json({ deleted: this.changes });
+  // First delete all history entries
+  db.run("DELETE FROM career_stage_history WHERE goal_id = ?", [req.params.id], function (err) {
+    if (err) {
+      console.error('Error deleting stage history:', err);
+      return res.status(500).json({ error: "Error deleting career goal." });
+    }
+    
+    // Then delete the goal itself
+    db.run("DELETE FROM career_goals WHERE id = ?", [req.params.id], function (err) {
+      if (err) return res.status(500).json({ error: "Error deleting career goal." });
+      res.json({ deleted: this.changes });
+    });
   });
+});
+
+// ===================== STAGE HISTORY API =====================
+
+// Get stage history for a specific goal
+app.get("/career_goals/:id/history", (req, res) => {
+  db.all(
+    "SELECT * FROM career_stage_history WHERE goal_id = ? ORDER BY stage ASC, updated_date DESC",
+    [req.params.id],
+    (err, rows) => {
+      if (err) {
+        console.error('Error fetching stage history:', err);
+        return res.status(500).json({ error: "Error fetching stage history." });
+      }
+      res.json(rows);
+    }
+  );
+});
+
+// Add a stage to history
+app.post("/career_goals/:id/history", (req, res) => {
+  const { stage, description } = req.body;
+  const updated_date = new Date().toISOString();
+  
+  db.run(
+    "INSERT INTO career_stage_history (goal_id, stage, description, updated_date) VALUES (?, ?, ?, ?)",
+    [req.params.id, stage, description, updated_date],
+    function (err) {
+      if (err) {
+        console.error('Error adding stage history:', err);
+        return res.status(500).json({ error: "Error adding stage history." });
+      }
+      res.json({ 
+        id: this.lastID, 
+        goal_id: req.params.id, 
+        stage, 
+        description, 
+        updated_date 
+      });
+    }
+  );
+});
+
+// Delete a specific history entry
+app.delete("/career_goals/:goalId/history/:historyId", (req, res) => {
+  db.run(
+    "DELETE FROM career_stage_history WHERE id = ? AND goal_id = ?",
+    [req.params.historyId, req.params.goalId],
+    function (err) {
+      if (err) {
+        console.error('Error deleting history entry:', err);
+        return res.status(500).json({ error: "Error deleting history entry." });
+      }
+      res.json({ deleted: this.changes });
+    }
+  );
 });
 
 // ===================== FUTURE WORK API =====================
@@ -1458,6 +1528,7 @@ app.listen(port, () => {
 // ===================== PROCESS ERROR HANDLERS =====================
 process.on('unhandledRejection', (reason, promise) => { console.error('Unhandled Rejection at:', promise, 'reason:', reason); });
 process.on('uncaughtException', (error) => { console.error('Uncaught Exception:', error); });
+
 
 
 
