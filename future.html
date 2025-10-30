@@ -1,6 +1,3 @@
-
-
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -304,9 +301,65 @@
       overflow-y: auto;
     }
 
-    .modal-content h2 {
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
       margin-bottom: 20px;
+    }
+
+    .modal-header h2 {
       color: #333;
+      margin: 0;
+    }
+
+    .btn-edit {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 8px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      color: white;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.9rem;
+      transition: opacity 0.3s;
+    }
+
+    .btn-edit:hover {
+      opacity: 0.9;
+    }
+
+    .view-mode {
+      display: block;
+    }
+
+    .edit-mode {
+      display: none;
+    }
+
+    .view-field {
+      margin-bottom: 20px;
+    }
+
+    .view-field-label {
+      font-size: 0.85rem;
+      color: #9ca3af;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .view-field-value {
+      color: #333;
+      font-size: 1rem;
+      line-height: 1.6;
+      white-space: pre-wrap;
+    }
+
+    .view-field-value.empty {
+      color: var(--muted);
+      font-style: italic;
     }
 
     .form-group {
@@ -438,8 +491,43 @@
   <!-- Modal -->
   <div class="modal" id="itemModal">
     <div class="modal-content">
-      <h2 id="modalTitle">New Future Work</h2>
-      <form id="itemForm">
+      <div class="modal-header">
+        <h2 id="modalTitle">Future Work Details</h2>
+        <button class="btn-edit" id="editBtn" style="display: none;">✏️ Edit</button>
+      </div>
+
+      <!-- View Mode -->
+      <div id="viewMode" class="view-mode">
+        <div class="view-field">
+          <div class="view-field-label">Title</div>
+          <div class="view-field-value" id="viewTitle"></div>
+        </div>
+        <div class="view-field">
+          <div class="view-field-label">Description</div>
+          <div class="view-field-value" id="viewDescription"></div>
+        </div>
+        <div class="view-field">
+          <div class="view-field-label">Priority</div>
+          <div class="view-field-value">
+            <span id="viewPriorityBadge" class="badge"></span>
+          </div>
+        </div>
+        <div class="view-field">
+          <div class="view-field-label">Timeline</div>
+          <div class="view-field-value" id="viewTimeline"></div>
+        </div>
+        <div class="view-field">
+          <div class="view-field-label">Created Date</div>
+          <div class="view-field-value" id="viewCreatedDate"></div>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" id="closeViewBtn">Close</button>
+          <button type="button" class="btn" style="background: #dc2626;" id="deleteViewBtn">🗑️ Delete</button>
+        </div>
+      </div>
+
+      <!-- Edit Mode -->
+      <form id="itemForm" class="edit-mode">
         <div class="form-group">
           <label for="itemTitle">Title *</label>
           <input type="text" id="itemTitle" required>
@@ -507,6 +595,7 @@
     // State
     let items = [];
     let editingId = null;
+    let isEditMode = false;
 
     // DOM Elements
     const itemsGrid = document.getElementById('itemsGrid');
@@ -519,6 +608,10 @@
     const searchBox = document.getElementById('searchBox');
     const priorityFilter = document.getElementById('priorityFilter');
     const sortBy = document.getElementById('sortBy');
+    const editBtn = document.getElementById('editBtn');
+    const viewMode = document.getElementById('viewMode');
+    const closeViewBtn = document.getElementById('closeViewBtn');
+    const deleteViewBtn = document.getElementById('deleteViewBtn');
 
     // API Functions
     async function loadItems() {
@@ -565,6 +658,7 @@
         if (!response.ok) throw new Error('Failed to delete');
         
         await loadItems();
+        closeModal();
       } catch (error) {
         console.error('Error deleting future work:', error);
         alert('Failed to delete future work');
@@ -615,7 +709,7 @@
       emptyState.style.display = 'none';
 
       itemsGrid.innerHTML = filteredItems.map(item => `
-        <div class="card" onclick="editItem(${item.id})">
+        <div class="card" onclick="viewItem(${item.id})">
           <div class="card-header">
             <div>
               <div class="card-title">${escapeHtml(item.title)}</div>
@@ -631,26 +725,75 @@
               <span class="date-label">Added</span>
               <span>${formatDate(item.created_date)}</span>
             </div>
-            <div class="card-actions">
-              <button class="icon-btn delete" onclick="event.stopPropagation(); deleteItem(${item.id})" title="Delete">
-                🗑️
-              </button>
-            </div>
           </div>
         </div>
       `).join('');
     }
 
     // Modal Functions
-    function openModal(item = null) {
-      editingId = item ? item.id : null;
-      modalTitle.textContent = item ? 'Edit Future Work' : 'New Future Work';
+    function showViewMode() {
+      isEditMode = false;
+      viewMode.style.display = 'block';
+      itemForm.style.display = 'none';
+      editBtn.style.display = 'inline-block';
+    }
+
+    function showEditMode() {
+      isEditMode = true;
+      viewMode.style.display = 'none';
+      itemForm.style.display = 'block';
+      editBtn.style.display = 'none';
+    }
+
+    function viewItem(id) {
+      const item = items.find(i => i.id === id);
+      if (!item) return;
+
+      editingId = item.id;
+      modalTitle.textContent = 'Future Work Details';
       
-      document.getElementById('itemTitle').value = item ? item.title : '';
-      document.getElementById('itemDescription').value = item ? (item.description || '') : '';
-      document.getElementById('itemPriority').value = item ? item.priority : 'medium';
-      document.getElementById('itemTimeline').value = item ? (item.timeline || '') : '';
+      // Populate view mode
+      document.getElementById('viewTitle').textContent = item.title;
       
+      const descElement = document.getElementById('viewDescription');
+      if (item.description) {
+        descElement.textContent = item.description;
+        descElement.classList.remove('empty');
+      } else {
+        descElement.textContent = 'No description provided';
+        descElement.classList.add('empty');
+      }
+
+      const priorityBadge = document.getElementById('viewPriorityBadge');
+      priorityBadge.textContent = item.priority.toUpperCase();
+      priorityBadge.className = `badge priority-${item.priority}`;
+
+      const timelineElement = document.getElementById('viewTimeline');
+      if (item.timeline) {
+        timelineElement.textContent = item.timeline;
+        timelineElement.classList.remove('empty');
+      } else {
+        timelineElement.textContent = 'No timeline set';
+        timelineElement.classList.add('empty');
+      }
+
+      document.getElementById('viewCreatedDate').textContent = new Date(item.created_date).toLocaleString();
+
+      // Populate edit form (for when user clicks edit)
+      document.getElementById('itemTitle').value = item.title;
+      document.getElementById('itemDescription').value = item.description || '';
+      document.getElementById('itemPriority').value = item.priority;
+      document.getElementById('itemTimeline').value = item.timeline || '';
+
+      showViewMode();
+      itemModal.style.display = 'flex';
+    }
+
+    function openNewItemModal() {
+      editingId = null;
+      modalTitle.textContent = 'New Future Work';
+      itemForm.reset();
+      showEditMode();
       itemModal.style.display = 'flex';
       document.getElementById('itemTitle').focus();
     }
@@ -659,16 +802,33 @@
       itemModal.style.display = 'none';
       itemForm.reset();
       editingId = null;
-    }
-
-    function editItem(id) {
-      const item = items.find(i => i.id === id);
-      if (item) openModal(item);
+      isEditMode = false;
     }
 
     // Event Listeners
-    newItemBtn.onclick = () => openModal();
-    cancelBtn.onclick = closeModal;
+    newItemBtn.onclick = openNewItemModal;
+    
+    editBtn.onclick = () => {
+      modalTitle.textContent = 'Edit Future Work';
+      showEditMode();
+      document.getElementById('itemTitle').focus();
+    };
+
+    cancelBtn.onclick = () => {
+      if (editingId) {
+        // If editing existing item, go back to view mode
+        viewItem(editingId);
+      } else {
+        // If creating new item, close modal
+        closeModal();
+      }
+    };
+
+    closeViewBtn.onclick = closeModal;
+
+    deleteViewBtn.onclick = () => {
+      deleteItem(editingId);
+    };
     
     itemModal.onclick = (e) => {
       if (e.target === itemModal) closeModal();
