@@ -3,363 +3,258 @@ const bodyParser = require("body-parser");
 const cors = require("cors");
 const path = require("path");
 const bcrypt = require("bcryptjs");
+const { Pool } = require('pg');
 
 const app = express();
 const port = process.env.PORT || 10000;
-const isProduction = process.env.NODE_ENV === 'production';
 
-// Database setup - supports both SQLite (dev) and PostgreSQL (production)
-let db;
+// PostgreSQL Database Connection
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: false
+  }
+});
 
-if (isProduction && process.env.DATABASE_URL) {
-  // Production - PostgreSQL
-  const { Pool } = require('pg');
-  const pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
-    ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
-  });
-  
-  console.log('Using PostgreSQL database in production');
-  
-  // Wrapper to make PostgreSQL work like SQLite
-  db = {
-    serialize: (callback) => callback(),
-    run: (query, params = [], callback) => {
-      let pgQuery = query;
-      let paramIndex = 1;
-      pgQuery = pgQuery.replace(/\?/g, () => `$${paramIndex++}`);
-      pgQuery = pgQuery.replace(/INTEGER PRIMARY KEY AUTOINCREMENT/g, 'SERIAL PRIMARY KEY');
-      pgQuery = pgQuery.replace(/AUTOINCREMENT/g, '');
-      
-      if (pgQuery.includes('ALTER TABLE') && pgQuery.includes('ADD COLUMN')) {
-        return pool.query(pgQuery, params)
-          .then(result => {
-            if (callback) callback.call({ 
-              lastID: result.rows && result.rows[0] ? result.rows[0].id : null,
-              changes: result.rowCount || 0
-            }, null);
-          })
-          .catch(err => {
-            if (err.code === '42701' || err.message.includes('already exists')) {
-              if (callback) callback.call({ lastID: null, changes: 0 }, null);
-            } else {
-              console.error('Database error:', err);
-              if (callback) callback.call({ lastID: null, changes: 0 }, err);
-            }
-          });
-      } else {
-        return pool.query(pgQuery, params)
-          .then(result => {
-            if (callback) callback.call({ 
-              lastID: result.rows && result.rows[0] ? result.rows[0].id : null,
-              changes: result.rowCount || 0
-            }, null);
-          })
-          .catch(err => {
-            console.error('Database error:', err);
-            if (callback) callback.call({ lastID: null, changes: 0 }, err);
-          });
-      }
-    },
-    get: (query, params = [], callback) => {
-      let pgQuery = query;
-      let paramIndex = 1;
-      pgQuery = pgQuery.replace(/\?/g, () => `$${paramIndex++}`);
-      
-      return pool.query(pgQuery, params)
-        .then(result => callback(null, result.rows[0] || null))
-        .catch(err => {
-          console.error('Database error:', err);
-          callback(err, null);
-        });
-    },
-    all: (query, params = [], callback) => {
-      let pgQuery = query;
-      let paramIndex = 1;
-      pgQuery = pgQuery.replace(/\?/g, () => `$${paramIndex++}`);
-      
-      return pool.query(pgQuery, params)
-        .then(result => callback(null, result.rows || []))
-        .catch(err => {
-          console.error('Database error:', err);
-          callback(err, []);
-        });
-    }
-  };
-} else {
-  // Development - SQLite
-  const sqlite3 = require("sqlite3").verbose();
-  db = new sqlite3.Database("app.db");
-  console.log('Using SQLite database in development');
-}
+// Test database connection
+pool.connect((err, client, release) => {
+  if (err) {
+    console.error('Error connecting to PostgreSQL database:', err.stack);
+  } else {
+    console.log('Successfully connected to PostgreSQL database');
+    release();
+  }
+});
 
 // Middleware
 app.use(bodyParser.json());
 app.use(cors());
 app.use(express.static(path.join(__dirname)));
 
-// Database initialization
-db.serialize(() => {
-  // ===================== BASE TABLES =====================
-  db.run(
-    "CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, email TEXT UNIQUE, password TEXT)"
-  );
+// Database initialization function
+async function initializeDatabase() {
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
 
-  db.run(
-    `CREATE TABLE IF NOT EXISTS projects (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      name TEXT,
-      owner_email TEXT,
-      colleagues TEXT DEFAULT '[]',
-      progress INTEGER DEFAULT 0,
-      project_title TEXT,
-      notes TEXT,
-      colleague_name TEXT,
-      colleague_phone TEXT,
-      colleague_email TEXT,
-      colleague_address1 TEXT,
-      colleague_address2 TEXT,
-      colleague_address3 TEXT,
-      your_name TEXT,
-      your_phone TEXT,
-      your_email TEXT,
-      your_address1 TEXT,
-      your_address2 TEXT,
-      your_address3 TEXT,
-      objectives TEXT,
-      timeline TEXT,
-      primary_audience TEXT,
-      secondary_audience TEXT,
-      call_action TEXT,
-      competition TEXT,
-      graphics TEXT,
-      photography TEXT,
-      multimedia TEXT,
-      other_info TEXT,
-      client_name TEXT,
-      client_comments TEXT,
-      approval_date TEXT,
-      approval_signature TEXT
-    )`
-  );
+    // ===================== BASE TABLES =====================
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS users (
+        id SERIAL PRIMARY KEY,
+        email TEXT UNIQUE,
+        password TEXT
+      )
+    `);
 
-  db.run(
-    `CREATE TABLE IF NOT EXISTS colleagues (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      project_id INTEGER,
-      name TEXT,
-      email TEXT,
-      FOREIGN KEY(project_id) REFERENCES projects(id)
-    )`
-  );
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS projects (
+        id SERIAL PRIMARY KEY,
+        name TEXT,
+        owner_email TEXT,
+        colleagues TEXT DEFAULT '[]',
+        progress INTEGER DEFAULT 0,
+        project_title TEXT,
+        notes TEXT,
+        colleague_name TEXT,
+        colleague_phone TEXT,
+        colleague_email TEXT,
+        colleague_address1 TEXT,
+        colleague_address2 TEXT,
+        colleague_address3 TEXT,
+        your_name TEXT,
+        your_phone TEXT,
+        your_email TEXT,
+        your_address1 TEXT,
+        your_address2 TEXT,
+        your_address3 TEXT,
+        objectives TEXT,
+        timeline TEXT,
+        primary_audience TEXT,
+        secondary_audience TEXT,
+        call_action TEXT,
+        competition TEXT,
+        graphics TEXT,
+        photography TEXT,
+        multimedia TEXT,
+        other_info TEXT,
+        client_name TEXT,
+        client_comments TEXT,
+        approval_date TEXT,
+        approval_signature TEXT,
+        idea TEXT,
+        career_goals TEXT,
+        future_work TEXT,
+        deadlines TEXT
+      )
+    `);
 
-  db.run(
-    `CREATE TABLE IF NOT EXISTS meetings (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      colleague_email TEXT,
-      date TEXT,
-      description TEXT
-    )`
-  );
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS colleagues (
+        id SERIAL PRIMARY KEY,
+        project_id INTEGER REFERENCES projects(id),
+        name TEXT,
+        email TEXT
+      )
+    `);
 
-  // ===================== ADDITIONAL TABLES =====================
-  db.run(`CREATE TABLE IF NOT EXISTS ideas (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_email TEXT,
-    title TEXT,
-    content TEXT,
-    category TEXT DEFAULT 'general',
-    created_date TEXT,
-    FOREIGN KEY(user_email) REFERENCES users(email)
-  )`);
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS meetings (
+        id SERIAL PRIMARY KEY,
+        colleague_email TEXT,
+        date TEXT,
+        description TEXT
+      )
+    `);
 
-  db.run(`CREATE TABLE IF NOT EXISTS notes (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_email TEXT,
-    title TEXT,
-    content TEXT,
-    created_date TEXT,
-    FOREIGN KEY(user_email) REFERENCES users(email)
-  )`);
+    // ===================== ADDITIONAL TABLES =====================
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS ideas (
+        id SERIAL PRIMARY KEY,
+        user_email TEXT REFERENCES users(email),
+        title TEXT,
+        content TEXT,
+        category TEXT DEFAULT 'general',
+        created_date TEXT
+      )
+    `);
 
-  db.run(`CREATE TABLE IF NOT EXISTS career_goals (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_email TEXT,
-    title TEXT,
-    description TEXT,
-    progress INTEGER DEFAULT 0,
-    goal_type TEXT DEFAULT 'general',
-    target_date TEXT,
-    created_date TEXT,
-    FOREIGN KEY(user_email) REFERENCES users(email)
-  )`);
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS notes (
+        id SERIAL PRIMARY KEY,
+        user_email TEXT REFERENCES users(email),
+        title TEXT,
+        content TEXT,
+        created_date TEXT
+      )
+    `);
 
-  // ===================== STAGE HISTORY TABLE =====================
-  db.run(`CREATE TABLE IF NOT EXISTS career_stage_history (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    goal_id INTEGER,
-    stage INTEGER,
-    description TEXT,
-    updated_date TEXT,
-    FOREIGN KEY(goal_id) REFERENCES career_goals(id) ON DELETE CASCADE
-  )`);
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS career_goals (
+        id SERIAL PRIMARY KEY,
+        user_email TEXT REFERENCES users(email),
+        title TEXT,
+        description TEXT,
+        progress INTEGER DEFAULT 0,
+        goal_type TEXT DEFAULT 'general',
+        target_date TEXT,
+        created_date TEXT,
+        total_stages INTEGER DEFAULT 5,
+        current_stage INTEGER DEFAULT 0,
+        start_date TEXT,
+        stage_description TEXT
+      )
+    `);
 
-  db.run(`CREATE TABLE IF NOT EXISTS future_work (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_email TEXT,
-    title TEXT,
-    description TEXT,
-    priority TEXT DEFAULT 'medium',
-    timeline TEXT,
-    created_date TEXT,
-    FOREIGN KEY(user_email) REFERENCES users(email)
-  )`);
+    // ===================== STAGE HISTORY TABLE =====================
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS career_stage_history (
+        id SERIAL PRIMARY KEY,
+        goal_id INTEGER REFERENCES career_goals(id) ON DELETE CASCADE,
+        stage INTEGER,
+        description TEXT,
+        updated_date TEXT
+      )
+    `);
 
-  db.run(`CREATE TABLE IF NOT EXISTS deadlines (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_email TEXT,
-    title TEXT,
-    description TEXT,
-    due_date TEXT,
-    priority TEXT DEFAULT 'medium',
-    status TEXT DEFAULT 'pending',
-    created_date TEXT,
-    FOREIGN KEY(user_email) REFERENCES users(email)
-  )`);
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS future_work (
+        id SERIAL PRIMARY KEY,
+        user_email TEXT REFERENCES users(email),
+        title TEXT,
+        description TEXT,
+        priority TEXT DEFAULT 'medium',
+        timeline TEXT,
+        created_date TEXT
+      )
+    `);
 
-  // ===================== ENHANCED CALENDAR EVENTS TABLE =====================
-  db.run(`CREATE TABLE IF NOT EXISTS calendar_events (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_email TEXT,
-    title TEXT,
-    description TEXT,
-    event_date TEXT,
-    start_time TEXT,
-    end_time TEXT,
-    location TEXT,
-    category TEXT DEFAULT 'Work',
-    attendees TEXT,
-    reminder INTEGER DEFAULT 15,
-    is_all_day INTEGER DEFAULT 0,
-    recurrence TEXT DEFAULT 'none',
-    recurrence_end TEXT,
-    show_as TEXT DEFAULT 'busy',
-    priority TEXT DEFAULT 'normal',
-    is_online INTEGER DEFAULT 0,
-    meeting_link TEXT,
-    attachments TEXT,
-    repeat_weekly INTEGER DEFAULT 0,
-    created_date TEXT,
-    modified_date TEXT,
-    FOREIGN KEY(user_email) REFERENCES users(email)
-  )`);
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS deadlines (
+        id SERIAL PRIMARY KEY,
+        user_email TEXT REFERENCES users(email),
+        title TEXT,
+        description TEXT,
+        due_date TEXT,
+        priority TEXT DEFAULT 'medium',
+        status TEXT DEFAULT 'pending',
+        created_date TEXT
+      )
+    `);
 
-  // ===================== PROFILE TABLE =====================
-  db.run(`CREATE TABLE IF NOT EXISTS profiles (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_email TEXT UNIQUE,
-    full_name TEXT,
-    designation TEXT,
-    department TEXT,
-    institution TEXT,
-    office_address TEXT,
-    official_email TEXT,
-    alternate_email TEXT,
-    phone TEXT,
-    website TEXT,
-    degrees TEXT,
-    employment TEXT,
-    research_keywords TEXT,
-    research_description TEXT,
-    scholar_link TEXT,
-    courses TEXT,
-    grants TEXT,
-    professional_activities TEXT,
-    awards TEXT,
-    skills TEXT,
-    outreach_service TEXT,
-    created_date TEXT,
-    modified_date TEXT,
-    FOREIGN KEY(user_email) REFERENCES users(email)
-  )`);
+    // ===================== ENHANCED CALENDAR EVENTS TABLE =====================
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS calendar_events (
+        id SERIAL PRIMARY KEY,
+        user_email TEXT REFERENCES users(email),
+        title TEXT,
+        description TEXT,
+        event_date TEXT,
+        start_time TEXT,
+        end_time TEXT,
+        location TEXT,
+        category TEXT DEFAULT 'Work',
+        attendees TEXT,
+        reminder INTEGER DEFAULT 15,
+        is_all_day INTEGER DEFAULT 0,
+        recurrence TEXT DEFAULT 'none',
+        recurrence_end TEXT,
+        show_as TEXT DEFAULT 'busy',
+        priority TEXT DEFAULT 'normal',
+        is_online INTEGER DEFAULT 0,
+        meeting_link TEXT,
+        attachments TEXT,
+        repeat_weekly INTEGER DEFAULT 0,
+        created_date TEXT,
+        modified_date TEXT
+      )
+    `);
 
-  // Add new columns to existing calendar_events table
-  const calendarColumns = [
-    "location TEXT",
-    "category TEXT DEFAULT 'Work'",
-    "attendees TEXT",
-    "reminder INTEGER DEFAULT 15",
-    "is_all_day INTEGER DEFAULT 0",
-    "recurrence TEXT DEFAULT 'none'",
-    "recurrence_end TEXT",
-    "show_as TEXT DEFAULT 'busy'",
-    "priority TEXT DEFAULT 'normal'",
-    "is_online INTEGER DEFAULT 0",
-    "meeting_link TEXT",
-    "attachments TEXT",
-    "modified_date TEXT"
-  ];
+    // ===================== PROFILE TABLE =====================
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS profiles (
+        id SERIAL PRIMARY KEY,
+        user_email TEXT UNIQUE REFERENCES users(email),
+        full_name TEXT,
+        designation TEXT,
+        department TEXT,
+        institution TEXT,
+        office_address TEXT,
+        official_email TEXT,
+        alternate_email TEXT,
+        phone TEXT,
+        website TEXT,
+        degrees TEXT,
+        employment TEXT,
+        research_keywords TEXT,
+        research_description TEXT,
+        scholar_link TEXT,
+        courses TEXT,
+        grants TEXT,
+        professional_activities TEXT,
+        awards TEXT,
+        skills TEXT,
+        outreach_service TEXT,
+        created_date TEXT,
+        modified_date TEXT
+      )
+    `);
 
-  calendarColumns.forEach((columnDef) => {
-    const columnName = columnDef.split(' ')[0];
-    db.run(
-      `ALTER TABLE calendar_events ADD COLUMN ${columnDef}`,
-      (err) => {
-        if (err && !err.message.includes('duplicate') && err.code !== '42701') {
-          console.error(`Error adding column ${columnName}:`, err);
-        }
-      }
-    );
-  });
+    await client.query('COMMIT');
+    console.log('Database tables initialized successfully');
+  } catch (error) {
+    await client.query('ROLLBACK');
+    console.error('Error initializing database:', error);
+  } finally {
+    client.release();
+  }
+}
 
-  // ===================== PROJECT DESCRIPTION EXTRA COLUMNS =====================
-  const descriptionColumns = ["idea", "notes", "career_goals", "future_work", "deadlines"];
-
-  descriptionColumns.forEach((column) => {
-    db.run(
-      `ALTER TABLE projects ADD COLUMN ${column} TEXT`,
-      (err) => {
-        if (err && !err.message.includes('duplicate') && err.code !== '42701') {
-          console.error(`Error adding column ${column}:`, err);
-        }
-      }
-    );
-  });
-
-  // ===================== ADD PROGRESS COLUMN TO PROJECTS =====================
-  db.run(
-    `ALTER TABLE projects ADD COLUMN progress INTEGER DEFAULT 0`,
-    (err) => {
-      if (err && !err.message.includes('duplicate') && err.code !== '42701') {
-        console.error('Error adding progress column:', err);
-      }
-    }
-  );
-
-  // ===================== ADD STAGE COLUMNS TO CAREER GOALS =====================
-  const careerGoalsColumns = [
-    "total_stages INTEGER DEFAULT 5",
-    "current_stage INTEGER DEFAULT 0",
-    "start_date TEXT",
-    "stage_description TEXT"
-  ];
-
-  careerGoalsColumns.forEach((columnDef) => {
-    const columnName = columnDef.split(' ')[0];
-    db.run(
-      `ALTER TABLE career_goals ADD COLUMN ${columnDef}`,
-      (err) => {
-        if (err && !err.message.includes('duplicate') && err.code !== '42701') {
-          console.error(`Error adding column ${columnName} to career_goals:`, err);
-        }
-      }
-    );
-  });
-});
+// Initialize database on startup
+initializeDatabase();
 
 // ===================== AUTH API WITH PASSWORD HASHING =====================
 
-// REGISTER endpoint (for frontend compatibility)
+// REGISTER endpoint
 app.post("/register", async (req, res) => {
   const { name, email, password } = req.body;
  
@@ -375,31 +270,27 @@ app.post("/register", async (req, res) => {
     const saltRounds = 10;
     const hashedPassword = await bcrypt.hash(password, saltRounds);
    
-    db.run(
-      "INSERT INTO users (email, password) VALUES (?, ?)",
-      [email.toLowerCase().trim(), hashedPassword],
-      function (err) {
-        if (err) {
-          if (err.message.includes('UNIQUE constraint failed') || err.code === '23505') {
-            return res.status(400).json({ success: false, message: "User already exists." });
-          }
-          return res.status(500).json({ success: false, message: "Failed to create user." });
-        }
-        res.json({
-          success: true,
-          id: this.lastID,
-          email: email.toLowerCase().trim(),
-          message: "Account created successfully!"
-        });
-      }
+    const result = await pool.query(
+      "INSERT INTO users (email, password) VALUES ($1, $2) RETURNING id, email",
+      [email.toLowerCase().trim(), hashedPassword]
     );
+    
+    res.json({
+      success: true,
+      id: result.rows[0].id,
+      email: result.rows[0].email,
+      message: "Account created successfully!"
+    });
   } catch (error) {
     console.error('Signup error:', error);
+    if (error.code === '23505') { // Unique constraint violation
+      return res.status(400).json({ success: false, message: "User already exists." });
+    }
     res.status(500).json({ success: false, message: "Server error during signup." });
   }
 });
 
-// SIGNUP endpoint (keep for backward compatibility)
+// SIGNUP endpoint (backward compatibility)
 app.post("/signup", async (req, res) => {
   const { email, password } = req.body;
  
@@ -415,654 +306,767 @@ app.post("/signup", async (req, res) => {
     const saltRounds = 10;
     const hashedPassword = await bcrypt.hash(password, saltRounds);
    
-    db.run(
-      "INSERT INTO users (email, password) VALUES (?, ?)",
-      [email.toLowerCase().trim(), hashedPassword],
-      function (err) {
-        if (err) {
-          if (err.message.includes('UNIQUE constraint failed') || err.code === '23505') {
-            return res.status(400).json({ success: false, message: "User already exists." });
-          }
-          return res.status(500).json({ success: false, message: "Failed to create user." });
-        }
-        res.json({
-          success: true,
-          id: this.lastID,
-          email: email.toLowerCase().trim(),
-          message: "Account created successfully!"
-        });
-      }
+    const result = await pool.query(
+      "INSERT INTO users (email, password) VALUES ($1, $2) RETURNING id, email",
+      [email.toLowerCase().trim(), hashedPassword]
     );
+    
+    res.json({
+      success: true,
+      id: result.rows[0].id,
+      email: result.rows[0].email,
+      message: "Account created successfully!"
+    });
   } catch (error) {
     console.error('Signup error:', error);
+    if (error.code === '23505') {
+      return res.status(400).json({ success: false, message: "User already exists." });
+    }
     res.status(500).json({ success: false, message: "Server error during signup." });
   }
 });
 
 // LOGIN endpoint
-app.post("/login", (req, res) => {
+app.post("/login", async (req, res) => {
   const { email, password } = req.body;
  
   if (!email || !password) {
     return res.status(400).json({ success: false, message: "Email and password are required." });
   }
 
-  db.get(
-    "SELECT * FROM users WHERE email = ?",
-    [email.toLowerCase().trim()],
-    async (err, row) => {
-      if (err) {
-        console.error('Login database error:', err);
-        return res.status(500).json({ success: false, message: "Login failed." });
-      }
-     
-      if (!row) {
-        return res.status(400).json({ success: false, message: "Invalid credentials." });
-      }
-
-      try {
-        const passwordMatch = await bcrypt.compare(password, row.password);
-       
-        if (!passwordMatch) {
-          return res.status(400).json({ success: false, message: "Invalid credentials." });
-        }
-       
-        res.json({
-          success: true,
-          email: row.email,
-          message: "Login successful!"
-        });
-      } catch (error) {
-        console.error('Password comparison error:', error);
-        res.status(500).json({ success: false, message: "Login failed." });
-      }
+  try {
+    const result = await pool.query(
+      "SELECT * FROM users WHERE email = $1",
+      [email.toLowerCase().trim()]
+    );
+   
+    if (result.rows.length === 0) {
+      return res.status(400).json({ success: false, message: "Invalid credentials." });
     }
-  );
+
+    const user = result.rows[0];
+    const passwordMatch = await bcrypt.compare(password, user.password);
+   
+    if (!passwordMatch) {
+      return res.status(400).json({ success: false, message: "Invalid credentials." });
+    }
+   
+    res.json({
+      success: true,
+      email: user.email,
+      message: "Login successful!"
+    });
+  } catch (error) {
+    console.error('Login error:', error);
+    res.status(500).json({ success: false, message: "Login failed." });
+  }
 });
 
 // ===================== PROJECTS API WITH PROGRESS =====================
-app.post("/projects", (req, res) => {
+app.post("/projects", async (req, res) => {
   const { name, owner_email, colleagues, progress } = req.body;
  
   if (!name || !owner_email) {
     return res.status(400).json({ error: "Project name and owner email are required." });
   }
  
-  db.run(
-    "INSERT INTO projects (name, owner_email, colleagues, progress) VALUES (?, ?, ?, ?)",
-    [name, owner_email, colleagues || "[]", progress || 0],
-    function (err) {
-      if (err) {
-        console.error('Project creation error:', err);
-        return res.status(500).json({ error: "Error creating project." });
-      }
-      res.json({ id: this.lastID, name, owner_email, colleagues, progress: progress || 0 });
-    }
-  );
+  try {
+    const result = await pool.query(
+      "INSERT INTO projects (name, owner_email, colleagues, progress) VALUES ($1, $2, $3, $4) RETURNING *",
+      [name, owner_email, colleagues || "[]", progress || 0]
+    );
+    res.json(result.rows[0]);
+  } catch (error) {
+    console.error('Project creation error:', error);
+    res.status(500).json({ error: "Error creating project." });
+  }
 });
 
-app.get("/projects/:email", (req, res) => {
-  db.all(
-    "SELECT * FROM projects WHERE owner_email = ?",
-    [req.params.email],
-    (err, rows) => {
-      if (err) return res.status(500).json({ error: "Error fetching projects." });
-      res.json(rows);
-    }
-  );
+app.get("/projects/:email", async (req, res) => {
+  try {
+    const result = await pool.query(
+      "SELECT * FROM projects WHERE owner_email = $1",
+      [req.params.email]
+    );
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Error fetching projects:', error);
+    res.status(500).json({ error: "Error fetching projects." });
+  }
 });
 
-app.put("/projects/:id", (req, res) => {
+app.put("/projects/:id", async (req, res) => {
   const { name, colleagues, progress } = req.body;
-  db.run(
-    "UPDATE projects SET name = ?, colleagues = ?, progress = ? WHERE id = ?",
-    [name, colleagues, progress !== undefined ? progress : 0, req.params.id],
-    function (err) {
-      if (err) return res.status(500).json({ error: "Error updating project." });
-      res.json({ updated: this.changes });
-    }
-  );
+  try {
+    const result = await pool.query(
+      "UPDATE projects SET name = $1, colleagues = $2, progress = $3 WHERE id = $4",
+      [name, colleagues, progress !== undefined ? progress : 0, req.params.id]
+    );
+    res.json({ updated: result.rowCount });
+  } catch (error) {
+    console.error('Error updating project:', error);
+    res.status(500).json({ error: "Error updating project." });
+  }
 });
 
-app.delete("/projects/:id", (req, res) => {
-  db.run("DELETE FROM projects WHERE id = ?", [req.params.id], function (err) {
-    if (err) return res.status(500).json({ error: "Error deleting project." });
-    res.json({ deleted: this.changes });
-  });
+app.delete("/projects/:id", async (req, res) => {
+  try {
+    const result = await pool.query("DELETE FROM projects WHERE id = $1", [req.params.id]);
+    res.json({ deleted: result.rowCount });
+  } catch (error) {
+    console.error('Error deleting project:', error);
+    res.status(500).json({ error: "Error deleting project." });
+  }
 });
 
 // ===================== MEETINGS API =====================
-app.post("/meetings", (req, res) => {
+app.post("/meetings", async (req, res) => {
   const { colleague_email, date, description } = req.body;
-  db.run(
-    "INSERT INTO meetings (colleague_email, date, description) VALUES (?, ?, ?)",
-    [colleague_email, date, description],
-    function (err) {
-      if (err) return res.status(500).json({ error: "Error creating meeting." });
-      res.json({ id: this.lastID, colleague_email, date, description });
-    }
-  );
+  try {
+    const result = await pool.query(
+      "INSERT INTO meetings (colleague_email, date, description) VALUES ($1, $2, $3) RETURNING *",
+      [colleague_email, date, description]
+    );
+    res.json(result.rows[0]);
+  } catch (error) {
+    console.error('Error creating meeting:', error);
+    res.status(500).json({ error: "Error creating meeting." });
+  }
 });
 
-app.get("/meetings/:email", (req, res) => {
-  db.all(
-    "SELECT * FROM meetings WHERE colleague_email = ?",
-    [req.params.email],
-    (err, rows) => {
-      if (err) return res.status(500).json({ error: "Error fetching meetings." });
-      res.json(rows);
-    }
-  );
+app.get("/meetings/:email", async (req, res) => {
+  try {
+    const result = await pool.query(
+      "SELECT * FROM meetings WHERE colleague_email = $1",
+      [req.params.email]
+    );
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Error fetching meetings:', error);
+    res.status(500).json({ error: "Error fetching meetings." });
+  }
 });
 
 // ===================== PROJECT DESCRIPTION API =====================
-app.get("/projects/:id/description", (req, res) => {
-  db.get(
-    "SELECT * FROM projects WHERE id = ?",
-    [req.params.id],
-    (err, row) => {
-      if (err) return res.status(500).json({ error: "Error fetching description." });
-      res.json(row || {});
-    }
-  );
+app.get("/projects/:id/description", async (req, res) => {
+  try {
+    const result = await pool.query(
+      "SELECT * FROM projects WHERE id = $1",
+      [req.params.id]
+    );
+    res.json(result.rows[0] || {});
+  } catch (error) {
+    console.error('Error fetching description:', error);
+    res.status(500).json({ error: "Error fetching description." });
+  }
 });
 
-app.put("/projects/:id/description", (req, res) => {
-  const { projectTitle, notes, colleagueName, colleaguePhone, colleagueEmail, colleagueAddress1, colleagueAddress2, colleagueAddress3, yourName, yourPhone, yourEmail, yourAddress1, yourAddress2, yourAddress3, objectives, timeline, primaryAudience, secondaryAudience, callAction, competition, graphics, photography, multimedia, otherInfo, clientName, clientComments, approvalDate, approvalSignature } = req.body;
+app.put("/projects/:id/description", async (req, res) => {
+  const { 
+    projectTitle, notes, colleagueName, colleaguePhone, colleagueEmail, 
+    colleagueAddress1, colleagueAddress2, colleagueAddress3, yourName, 
+    yourPhone, yourEmail, yourAddress1, yourAddress2, yourAddress3, 
+    objectives, timeline, primaryAudience, secondaryAudience, callAction, 
+    competition, graphics, photography, multimedia, otherInfo, clientName, 
+    clientComments, approvalDate, approvalSignature 
+  } = req.body;
  
-  db.run(
-    `UPDATE projects SET
-      project_title = ?, notes = ?, colleague_name = ?, colleague_phone = ?, colleague_email = ?,
-      colleague_address1 = ?, colleague_address2 = ?, colleague_address3 = ?,
-      your_name = ?, your_phone = ?, your_email = ?, your_address1 = ?, your_address2 = ?, your_address3 = ?,
-      objectives = ?, timeline = ?, primary_audience = ?, secondary_audience = ?, call_action = ?,
-      competition = ?, graphics = ?, photography = ?, multimedia = ?, other_info = ?,
-      client_name = ?, client_comments = ?, approval_date = ?, approval_signature = ?
-      WHERE id = ?`,
-    [projectTitle, notes, colleagueName, colleaguePhone, colleagueEmail, colleagueAddress1, colleagueAddress2, colleagueAddress3, yourName, yourPhone, yourEmail, yourAddress1, yourAddress2, yourAddress3, objectives, timeline, primaryAudience, secondaryAudience, callAction, competition, graphics, photography, multimedia, otherInfo, clientName, clientComments, approvalDate, approvalSignature, req.params.id],
-    function (err) {
-      if (err) {
-        console.error('Update error:', err);
-        return res.status(500).json({ error: "Error updating description." });
-      }
-      res.json({ updated: this.changes });
-    }
-  );
+  try {
+    const result = await pool.query(
+      `UPDATE projects SET
+        project_title = $1, notes = $2, colleague_name = $3, colleague_phone = $4, colleague_email = $5,
+        colleague_address1 = $6, colleague_address2 = $7, colleague_address3 = $8,
+        your_name = $9, your_phone = $10, your_email = $11, your_address1 = $12, your_address2 = $13, your_address3 = $14,
+        objectives = $15, timeline = $16, primary_audience = $17, secondary_audience = $18, call_action = $19,
+        competition = $20, graphics = $21, photography = $22, multimedia = $23, other_info = $24,
+        client_name = $25, client_comments = $26, approval_date = $27, approval_signature = $28
+        WHERE id = $29`,
+      [
+        projectTitle, notes, colleagueName, colleaguePhone, colleagueEmail, 
+        colleagueAddress1, colleagueAddress2, colleagueAddress3, yourName, 
+        yourPhone, yourEmail, yourAddress1, yourAddress2, yourAddress3, 
+        objectives, timeline, primaryAudience, secondaryAudience, callAction, 
+        competition, graphics, photography, multimedia, otherInfo, clientName, 
+        clientComments, approvalDate, approvalSignature, req.params.id
+      ]
+    );
+    res.json({ updated: result.rowCount });
+  } catch (error) {
+    console.error('Update error:', error);
+    res.status(500).json({ error: "Error updating description." });
+  }
 });
 
 // ===================== IDEAS API =====================
-app.get("/ideas/:email", (req, res) => {
-  db.all("SELECT * FROM ideas WHERE user_email = ? ORDER BY created_date DESC", [req.params.email], (err, rows) => {
-    if (err) return res.status(500).json({ error: "Error fetching ideas." });
-    res.json(rows);
-  });
+app.get("/ideas/:email", async (req, res) => {
+  try {
+    const result = await pool.query(
+      "SELECT * FROM ideas WHERE user_email = $1 ORDER BY created_date DESC", 
+      [req.params.email]
+    );
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Error fetching ideas:', error);
+    res.status(500).json({ error: "Error fetching ideas." });
+  }
 });
 
-app.post("/ideas", (req, res) => {
+app.post("/ideas", async (req, res) => {
   const { user_email, title, content, category, created_date } = req.body;
   const date = created_date || new Date().toISOString();
-  db.run(
-    "INSERT INTO ideas (user_email, title, content, category, created_date) VALUES (?, ?, ?, ?, ?)",
-    [user_email, title, content, category || 'general', date],
-    function (err) {
-      if (err) return res.status(500).json({ error: "Error creating idea." });
-      res.json({ id: this.lastID, user_email, title, content, category, created_date: date });
-    }
-  );
+  try {
+    const result = await pool.query(
+      "INSERT INTO ideas (user_email, title, content, category, created_date) VALUES ($1, $2, $3, $4, $5) RETURNING *",
+      [user_email, title, content, category || 'general', date]
+    );
+    res.json(result.rows[0]);
+  } catch (error) {
+    console.error('Error creating idea:', error);
+    res.status(500).json({ error: "Error creating idea." });
+  }
 });
 
-app.put("/ideas/:id", (req, res) => {
+app.put("/ideas/:id", async (req, res) => {
   const { title, content, category } = req.body;
-  db.run(
-    "UPDATE ideas SET title = ?, content = ?, category = ? WHERE id = ?",
-    [title, content, category, req.params.id],
-    function (err) {
-      if (err) return res.status(500).json({ error: "Error updating idea." });
-      res.json({ updated: this.changes });
-    }
-  );
+  try {
+    const result = await pool.query(
+      "UPDATE ideas SET title = $1, content = $2, category = $3 WHERE id = $4",
+      [title, content, category, req.params.id]
+    );
+    res.json({ updated: result.rowCount });
+  } catch (error) {
+    console.error('Error updating idea:', error);
+    res.status(500).json({ error: "Error updating idea." });
+  }
 });
 
-app.delete("/ideas/:id", (req, res) => {
-  db.run("DELETE FROM ideas WHERE id = ?", [req.params.id], function (err) {
-    if (err) return res.status(500).json({ error: "Error deleting idea." });
-    res.json({ deleted: this.changes });
-  });
+app.delete("/ideas/:id", async (req, res) => {
+  try {
+    const result = await pool.query("DELETE FROM ideas WHERE id = $1", [req.params.id]);
+    res.json({ deleted: result.rowCount });
+  } catch (error) {
+    console.error('Error deleting idea:', error);
+    res.status(500).json({ error: "Error deleting idea." });
+  }
 });
 
 // ===================== NOTES API =====================
-app.get("/notes/:email", (req, res) => {
-  db.all("SELECT * FROM notes WHERE user_email = ? ORDER BY created_date DESC", [req.params.email], (err, rows) => {
-    if (err) return res.status(500).json({ error: "Error fetching notes." });
-    res.json(rows);
-  });
+app.get("/notes/:email", async (req, res) => {
+  try {
+    const result = await pool.query(
+      "SELECT * FROM notes WHERE user_email = $1 ORDER BY created_date DESC", 
+      [req.params.email]
+    );
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Error fetching notes:', error);
+    res.status(500).json({ error: "Error fetching notes." });
+  }
 });
 
-app.post("/notes", (req, res) => {
+app.post("/notes", async (req, res) => {
   const { user_email, title, content, created_date } = req.body;
   const date = created_date || new Date().toISOString();
-  db.run(
-    "INSERT INTO notes (user_email, title, content, created_date) VALUES (?, ?, ?, ?)",
-    [user_email, title, content, date],
-    function (err) {
-      if (err) return res.status(500).json({ error: "Error creating note." });
-      res.json({ id: this.lastID, user_email, title, content, created_date: date });
-    }
-  );
+  try {
+    const result = await pool.query(
+      "INSERT INTO notes (user_email, title, content, created_date) VALUES ($1, $2, $3, $4) RETURNING *",
+      [user_email, title, content, date]
+    );
+    res.json(result.rows[0]);
+  } catch (error) {
+    console.error('Error creating note:', error);
+    res.status(500).json({ error: "Error creating note." });
+  }
 });
 
-app.put("/notes/:id", (req, res) => {
+app.put("/notes/:id", async (req, res) => {
   const { title, content } = req.body;
-  db.run(
-    "UPDATE notes SET title = ?, content = ? WHERE id = ?",
-    [title, content, req.params.id],
-    function (err) {
-      if (err) return res.status(500).json({ error: "Error updating note." });
-      res.json({ updated: this.changes });
-    }
-  );
+  try {
+    const result = await pool.query(
+      "UPDATE notes SET title = $1, content = $2 WHERE id = $3",
+      [title, content, req.params.id]
+    );
+    res.json({ updated: result.rowCount });
+  } catch (error) {
+    console.error('Error updating note:', error);
+    res.status(500).json({ error: "Error updating note." });
+  }
 });
 
-app.delete("/notes/:id", (req, res) => {
-  db.run("DELETE FROM notes WHERE id = ?", [req.params.id], function (err) {
-    if (err) return res.status(500).json({ error: "Error deleting note." });
-    res.json({ deleted: this.changes });
-  });
+app.delete("/notes/:id", async (req, res) => {
+  try {
+    const result = await pool.query("DELETE FROM notes WHERE id = $1", [req.params.id]);
+    res.json({ deleted: result.rowCount });
+  } catch (error) {
+    console.error('Error deleting note:', error);
+    res.status(500).json({ error: "Error deleting note." });
+  }
 });
 
 // ===================== CAREER GOALS API WITH STAGE HISTORY =====================
-app.get("/career_goals/:email", (req, res) => {
-  db.all("SELECT * FROM career_goals WHERE user_email = ? ORDER BY created_date DESC", [req.params.email], (err, rows) => {
-    if (err) return res.status(500).json({ error: "Error fetching career goals." });
-    res.json(rows);
-  });
+app.get("/career_goals/:email", async (req, res) => {
+  try {
+    const result = await pool.query(
+      "SELECT * FROM career_goals WHERE user_email = $1 ORDER BY created_date DESC", 
+      [req.params.email]
+    );
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Error fetching career goals:', error);
+    res.status(500).json({ error: "Error fetching career goals." });
+  }
 });
 
-app.get("/career/:email", (req, res) => {
-  db.all("SELECT * FROM career_goals WHERE user_email = ? ORDER BY created_date DESC", [req.params.email], (err, rows) => {
-    if (err) return res.status(500).json({ error: "Error fetching career goals." });
-    res.json(rows);
-  });
+app.get("/career/:email", async (req, res) => {
+  try {
+    const result = await pool.query(
+      "SELECT * FROM career_goals WHERE user_email = $1 ORDER BY created_date DESC", 
+      [req.params.email]
+    );
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Error fetching career goals:', error);
+    res.status(500).json({ error: "Error fetching career goals." });
+  }
 });
 
-app.post("/career_goals", (req, res) => {
-  const { user_email, title, description, progress, goal_type, target_date, total_stages, current_stage, start_date, stage_description, created_date } = req.body;
+app.post("/career_goals", async (req, res) => {
+  const { 
+    user_email, title, description, progress, goal_type, target_date, 
+    total_stages, current_stage, start_date, stage_description, created_date 
+  } = req.body;
   const date = created_date || new Date().toISOString();
-  db.run(
-    "INSERT INTO career_goals (user_email, title, description, progress, goal_type, target_date, total_stages, current_stage, start_date, stage_description, created_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-    [user_email, title, description, progress || 0, goal_type || 'general', target_date, total_stages || 5, current_stage || 0, start_date, stage_description, date],
-    function (err) {
-      if (err) return res.status(500).json({ error: "Error creating career goal." });
-      res.json({ id: this.lastID, user_email, title, description, progress, goal_type, target_date, total_stages, current_stage, start_date, stage_description, created_date: date });
-    }
-  );
+  
+  try {
+    const result = await pool.query(
+      `INSERT INTO career_goals (
+        user_email, title, description, progress, goal_type, target_date, 
+        total_stages, current_stage, start_date, stage_description, created_date
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING *`,
+      [
+        user_email, title, description, progress || 0, goal_type || 'general', 
+        target_date, total_stages || 5, current_stage || 0, start_date, 
+        stage_description, date
+      ]
+    );
+    res.json(result.rows[0]);
+  } catch (error) {
+    console.error('Error creating career goal:', error);
+    res.status(500).json({ error: "Error creating career goal." });
+  }
 });
 
-app.put("/career_goals/:id", (req, res) => {
-  const { title, description, progress, goal_type, target_date, total_stages, current_stage, start_date, stage_description } = req.body;
-  db.run(
-    "UPDATE career_goals SET title = ?, description = ?, progress = ?, goal_type = ?, target_date = ?, total_stages = ?, current_stage = ?, start_date = ?, stage_description = ? WHERE id = ?",
-    [title, description, progress, goal_type, target_date, total_stages, current_stage, start_date, stage_description, req.params.id],
-    function (err) {
-      if (err) return res.status(500).json({ error: "Error updating career goal." });
-      res.json({ updated: this.changes });
-    }
-  );
+app.put("/career_goals/:id", async (req, res) => {
+  const { 
+    title, description, progress, goal_type, target_date, 
+    total_stages, current_stage, start_date, stage_description 
+  } = req.body;
+  
+  try {
+    const result = await pool.query(
+      `UPDATE career_goals SET 
+        title = $1, description = $2, progress = $3, goal_type = $4, 
+        target_date = $5, total_stages = $6, current_stage = $7, 
+        start_date = $8, stage_description = $9 
+      WHERE id = $10`,
+      [
+        title, description, progress, goal_type, target_date, 
+        total_stages, current_stage, start_date, stage_description, 
+        req.params.id
+      ]
+    );
+    res.json({ updated: result.rowCount });
+  } catch (error) {
+    console.error('Error updating career goal:', error);
+    res.status(500).json({ error: "Error updating career goal." });
+  }
 });
 
-app.delete("/career_goals/:id", (req, res) => {
-  // First delete all history entries
-  db.run("DELETE FROM career_stage_history WHERE goal_id = ?", [req.params.id], function (err) {
-    if (err) {
-      console.error('Error deleting stage history:', err);
-      return res.status(500).json({ error: "Error deleting career goal." });
-    }
+app.delete("/career_goals/:id", async (req, res) => {
+  try {
+    // Delete history entries first (CASCADE should handle this, but being explicit)
+    await pool.query("DELETE FROM career_stage_history WHERE goal_id = $1", [req.params.id]);
     
-    // Then delete the goal itself
-    db.run("DELETE FROM career_goals WHERE id = ?", [req.params.id], function (err) {
-      if (err) return res.status(500).json({ error: "Error deleting career goal." });
-      res.json({ deleted: this.changes });
-    });
-  });
+    // Delete the goal
+    const result = await pool.query("DELETE FROM career_goals WHERE id = $1", [req.params.id]);
+    res.json({ deleted: result.rowCount });
+  } catch (error) {
+    console.error('Error deleting career goal:', error);
+    res.status(500).json({ error: "Error deleting career goal." });
+  }
 });
 
 // ===================== STAGE HISTORY API =====================
-
-// Get stage history for a specific goal
-app.get("/career_goals/:id/history", (req, res) => {
-  db.all(
-    "SELECT * FROM career_stage_history WHERE goal_id = ? ORDER BY stage ASC, updated_date DESC",
-    [req.params.id],
-    (err, rows) => {
-      if (err) {
-        console.error('Error fetching stage history:', err);
-        return res.status(500).json({ error: "Error fetching stage history." });
-      }
-      res.json(rows);
-    }
-  );
+app.get("/career_goals/:id/history", async (req, res) => {
+  try {
+    const result = await pool.query(
+      "SELECT * FROM career_stage_history WHERE goal_id = $1 ORDER BY stage ASC, updated_date DESC",
+      [req.params.id]
+    );
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Error fetching stage history:', error);
+    res.status(500).json({ error: "Error fetching stage history." });
+  }
 });
 
-// Add a stage to history
-app.post("/career_goals/:id/history", (req, res) => {
+app.post("/career_goals/:id/history", async (req, res) => {
   const { stage, description } = req.body;
   const updated_date = new Date().toISOString();
   
-  db.run(
-    "INSERT INTO career_stage_history (goal_id, stage, description, updated_date) VALUES (?, ?, ?, ?)",
-    [req.params.id, stage, description, updated_date],
-    function (err) {
-      if (err) {
-        console.error('Error adding stage history:', err);
-        return res.status(500).json({ error: "Error adding stage history." });
-      }
-      res.json({ 
-        id: this.lastID, 
-        goal_id: req.params.id, 
-        stage, 
-        description, 
-        updated_date 
-      });
-    }
-  );
+  try {
+    const result = await pool.query(
+      "INSERT INTO career_stage_history (goal_id, stage, description, updated_date) VALUES ($1, $2, $3, $4) RETURNING *",
+      [req.params.id, stage, description, updated_date]
+    );
+    res.json(result.rows[0]);
+  } catch (error) {
+    console.error('Error adding stage history:', error);
+    res.status(500).json({ error: "Error adding stage history." });
+  }
 });
 
-// Delete a specific history entry
-app.delete("/career_goals/:goalId/history/:historyId", (req, res) => {
-  db.run(
-    "DELETE FROM career_stage_history WHERE id = ? AND goal_id = ?",
-    [req.params.historyId, req.params.goalId],
-    function (err) {
-      if (err) {
-        console.error('Error deleting history entry:', err);
-        return res.status(500).json({ error: "Error deleting history entry." });
-      }
-      res.json({ deleted: this.changes });
-    }
-  );
+app.delete("/career_goals/:goalId/history/:historyId", async (req, res) => {
+  try {
+    const result = await pool.query(
+      "DELETE FROM career_stage_history WHERE id = $1 AND goal_id = $2",
+      [req.params.historyId, req.params.goalId]
+    );
+    res.json({ deleted: result.rowCount });
+  } catch (error) {
+    console.error('Error deleting history entry:', error);
+    res.status(500).json({ error: "Error deleting history entry." });
+  }
 });
 
 // ===================== FUTURE WORK API =====================
-app.get("/future_work/:email", (req, res) => {
-  db.all("SELECT * FROM future_work WHERE user_email = ? ORDER BY created_date DESC", [req.params.email], (err, rows) => {
-    if (err) return res.status(500).json({ error: "Error fetching future work." });
-    res.json(rows);
-  });
+app.get("/future_work/:email", async (req, res) => {
+  try {
+    const result = await pool.query(
+      "SELECT * FROM future_work WHERE user_email = $1 ORDER BY created_date DESC", 
+      [req.params.email]
+    );
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Error fetching future work:', error);
+    res.status(500).json({ error: "Error fetching future work." });
+  }
 });
 
-app.get("/future/:email", (req, res) => {
-  db.all("SELECT * FROM future_work WHERE user_email = ? ORDER BY created_date DESC", [req.params.email], (err, rows) => {
-    if (err) return res.status(500).json({ error: "Error fetching future work." });
-    res.json(rows);
-  });
+app.get("/future/:email", async (req, res) => {
+  try {
+    const result = await pool.query(
+      "SELECT * FROM future_work WHERE user_email = $1 ORDER BY created_date DESC", 
+      [req.params.email]
+    );
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Error fetching future work:', error);
+    res.status(500).json({ error: "Error fetching future work." });
+  }
 });
 
-app.post("/future_work", (req, res) => {
+app.post("/future_work", async (req, res) => {
   const { user_email, title, description, priority, timeline, created_date } = req.body;
   const date = created_date || new Date().toISOString();
-  db.run(
-    "INSERT INTO future_work (user_email, title, description, priority, timeline, created_date) VALUES (?, ?, ?, ?, ?, ?)",
-    [user_email, title, description, priority || 'medium', timeline, date],
-    function (err) {
-      if (err) return res.status(500).json({ error: "Error creating future work." });
-      res.json({ id: this.lastID, user_email, title, description, priority, timeline, created_date: date });
-    }
-  );
+  
+  try {
+    const result = await pool.query(
+      "INSERT INTO future_work (user_email, title, description, priority, timeline, created_date) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *",
+      [user_email, title, description, priority || 'medium', timeline, date]
+    );
+    res.json(result.rows[0]);
+  } catch (error) {
+    console.error('Error creating future work:', error);
+    res.status(500).json({ error: "Error creating future work." });
+  }
 });
 
-app.put("/future_work/:id", (req, res) => {
+app.put("/future_work/:id", async (req, res) => {
   const { title, description, priority, timeline } = req.body;
-  db.run(
-    "UPDATE future_work SET title = ?, description = ?, priority = ?, timeline = ? WHERE id = ?",
-    [title, description, priority, timeline, req.params.id],
-    function (err) {
-      if (err) return res.status(500).json({ error: "Error updating future work." });
-      res.json({ updated: this.changes });
-    }
-  );
+  try {
+    const result = await pool.query(
+      "UPDATE future_work SET title = $1, description = $2, priority = $3, timeline = $4 WHERE id = $5",
+      [title, description, priority, timeline, req.params.id]
+    );
+    res.json({ updated: result.rowCount });
+  } catch (error) {
+    console.error('Error updating future work:', error);
+    res.status(500).json({ error: "Error updating future work." });
+  }
 });
 
-app.delete("/future_work/:id", (req, res) => {
-  db.run("DELETE FROM future_work WHERE id = ?", [req.params.id], function (err) {
-    if (err) return res.status(500).json({ error: "Error deleting future work." });
-    res.json({ deleted: this.changes });
-  });
+app.delete("/future_work/:id", async (req, res) => {
+  try {
+    const result = await pool.query("DELETE FROM future_work WHERE id = $1", [req.params.id]);
+    res.json({ deleted: result.rowCount });
+  } catch (error) {
+    console.error('Error deleting future work:', error);
+    res.status(500).json({ error: "Error deleting future work." });
+  }
 });
 
 // ===================== DEADLINES API =====================
-app.get("/deadlines/:email", (req, res) => {
-  db.all("SELECT * FROM deadlines WHERE user_email = ? ORDER BY due_date ASC", [req.params.email], (err, rows) => {
-    if (err) return res.status(500).json({ error: "Error fetching deadlines." });
-    res.json(rows);
-  });
+app.get("/deadlines/:email", async (req, res) => {
+  try {
+    const result = await pool.query(
+      "SELECT * FROM deadlines WHERE user_email = $1 ORDER BY due_date ASC", 
+      [req.params.email]
+    );
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Error fetching deadlines:', error);
+    res.status(500).json({ error: "Error fetching deadlines." });
+  }
 });
 
-app.post("/deadlines", (req, res) => {
+app.post("/deadlines", async (req, res) => {
   const { user_email, title, description, due_date, priority, status, created_date } = req.body;
   const date = created_date || new Date().toISOString();
-  db.run(
-    "INSERT INTO deadlines (user_email, title, description, due_date, priority, status, created_date) VALUES (?, ?, ?, ?, ?, ?, ?)",
-    [user_email, title, description, due_date, priority || 'medium', status || 'pending', date],
-    function (err) {
-      if (err) return res.status(500).json({ error: "Error creating deadline." });
-      res.json({ id: this.lastID, user_email, title, description, due_date, priority, status, created_date: date });
-    }
-  );
+  
+  try {
+    const result = await pool.query(
+      "INSERT INTO deadlines (user_email, title, description, due_date, priority, status, created_date) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *",
+      [user_email, title, description, due_date, priority || 'medium', status || 'pending', date]
+    );
+    res.json(result.rows[0]);
+  } catch (error) {
+    console.error('Error creating deadline:', error);
+    res.status(500).json({ error: "Error creating deadline." });
+  }
 });
 
-app.put("/deadlines/:id", (req, res) => {
+app.put("/deadlines/:id", async (req, res) => {
   const { title, description, due_date, priority, status } = req.body;
-  db.run(
-    "UPDATE deadlines SET title = ?, description = ?, due_date = ?, priority = ?, status = ? WHERE id = ?",
-    [title, description, due_date, priority, status, req.params.id],
-    function (err) {
-      if (err) return res.status(500).json({ error: "Error updating deadline." });
-      res.json({ updated: this.changes });
-    }
-  );
+  try {
+    const result = await pool.query(
+      "UPDATE deadlines SET title = $1, description = $2, due_date = $3, priority = $4, status = $5 WHERE id = $6",
+      [title, description, due_date, priority, status, req.params.id]
+    );
+    res.json({ updated: result.rowCount });
+  } catch (error) {
+    console.error('Error updating deadline:', error);
+    res.status(500).json({ error: "Error updating deadline." });
+  }
 });
 
-app.delete("/deadlines/:id", (req, res) => {
-  db.run("DELETE FROM deadlines WHERE id = ?", [req.params.id], function (err) {
-    if (err) return res.status(500).json({ error: "Error deleting deadline." });
-    res.json({ deleted: this.changes });
-  });
+app.delete("/deadlines/:id", async (req, res) => {
+  try {
+    const result = await pool.query("DELETE FROM deadlines WHERE id = $1", [req.params.id]);
+    res.json({ deleted: result.rowCount });
+  } catch (error) {
+    console.error('Error deleting deadline:', error);
+    res.status(500).json({ error: "Error deleting deadline." });
+  }
 });
 
 // ===================== ENHANCED CALENDAR EVENTS API =====================
-app.get("/events/:email", (req, res) => {
-  db.all(
-    `SELECT 
-      id, title, description, event_date as date, start_time as start, end_time as end, 
-      location, category, attendees, reminder, is_all_day as isAllDay, recurrence,
-      recurrence_end as recurrenceEnd, show_as as showAs, priority, is_online as isOnline,
-      meeting_link as meetingLink, attachments, repeat_weekly as repeatWeekly,
-      created_date as createdDate, modified_date as modifiedDate
-    FROM calendar_events WHERE user_email = ? ORDER BY event_date ASC, start_time ASC`,
-    [req.params.email],
-    (err, rows) => {
-      if (err) {
-        console.error('Error fetching events:', err);
-        return res.status(500).json({ error: "Error fetching events." });
-      }
-      const events = rows.map(row => ({
-        ...row,
-        isAllDay: Boolean(row.isAllDay),
-        isOnline: Boolean(row.isOnline),
-        repeatWeekly: Boolean(row.repeatWeekly)
-      }));
-      res.json(events);
-    }
-  );
+app.get("/events/:email", async (req, res) => {
+  try {
+    const result = await pool.query(
+      `SELECT 
+        id, title, description, event_date as date, start_time as start, end_time as end, 
+        location, category, attendees, reminder, is_all_day as isAllDay, recurrence,
+        recurrence_end as recurrenceEnd, show_as as showAs, priority, is_online as isOnline,
+        meeting_link as meetingLink, attachments, repeat_weekly as repeatWeekly,
+        created_date as createdDate, modified_date as modifiedDate
+      FROM calendar_events WHERE user_email = $1 ORDER BY event_date ASC, start_time ASC`,
+      [req.params.email]
+    );
+    
+    const events = result.rows.map(row => ({
+      ...row,
+      isAllDay: Boolean(row.isallday),
+      isOnline: Boolean(row.isonline),
+      repeatWeekly: Boolean(row.repeatweekly)
+    }));
+    res.json(events);
+  } catch (error) {
+    console.error('Error fetching events:', error);
+    res.status(500).json({ error: "Error fetching events." });
+  }
 });
 
-app.post("/events", (req, res) => {
-  const { userEmail, title, description, date, start, end, location, category, attendees, reminder, isAllDay, recurrence, recurrenceEnd, showAs, priority, isOnline, meetingLink, attachments, repeatWeekly } = req.body;
+app.post("/events", async (req, res) => {
+  const { 
+    userEmail, title, description, date, start, end, location, category, 
+    attendees, reminder, isAllDay, recurrence, recurrenceEnd, showAs, 
+    priority, isOnline, meetingLink, attachments, repeatWeekly 
+  } = req.body;
   
   const created_date = new Date().toISOString();
   const modified_date = created_date;
   
-  db.run(
-    `INSERT INTO calendar_events (
-      user_email, title, description, event_date, start_time, end_time, location, category, 
-      attendees, reminder, is_all_day, recurrence, recurrence_end, show_as, priority, 
-      is_online, meeting_link, attachments, repeat_weekly, created_date, modified_date
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-    [userEmail, title, description, date, start, end, location, category || 'Work', attendees, reminder || 15, isAllDay ? 1 : 0, recurrence || 'none', recurrenceEnd, showAs || 'busy', priority || 'normal', isOnline ? 1 : 0, meetingLink, attachments, repeatWeekly ? 1 : 0, created_date, modified_date],
-    function (err) {
-      if (err) {
-        console.error('Error creating event:', err);
-        return res.status(500).json({ error: "Error creating event." });
-      }
-      res.json({ id: this.lastID, title, description, date, start, end, location, category, created_date });
-    }
-  );
+  try {
+    const result = await pool.query(
+      `INSERT INTO calendar_events (
+        user_email, title, description, event_date, start_time, end_time, location, category, 
+        attendees, reminder, is_all_day, recurrence, recurrence_end, show_as, priority, 
+        is_online, meeting_link, attachments, repeat_weekly, created_date, modified_date
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21) RETURNING *`,
+      [
+        userEmail, title, description, date, start, end, location, category || 'Work', 
+        attendees, reminder || 15, isAllDay ? 1 : 0, recurrence || 'none', recurrenceEnd, 
+        showAs || 'busy', priority || 'normal', isOnline ? 1 : 0, meetingLink, 
+        attachments, repeatWeekly ? 1 : 0, created_date, modified_date
+      ]
+    );
+    res.json(result.rows[0]);
+  } catch (error) {
+    console.error('Error creating event:', error);
+    res.status(500).json({ error: "Error creating event." });
+  }
 });
 
-app.put("/events/:id", (req, res) => {
-  const { title, description, date, start, end, location, category, attendees, reminder, isAllDay, recurrence, recurrenceEnd, showAs, priority, isOnline, meetingLink, attachments, repeatWeekly } = req.body;
+app.put("/events/:id", async (req, res) => {
+  const { 
+    title, description, date, start, end, location, category, attendees, 
+    reminder, isAllDay, recurrence, recurrenceEnd, showAs, priority, 
+    isOnline, meetingLink, attachments, repeatWeekly 
+  } = req.body;
   
   const modified_date = new Date().toISOString();
   
-  db.run(
-    `UPDATE calendar_events SET 
-      title = ?, description = ?, event_date = ?, start_time = ?, end_time = ?, location = ?, 
-      category = ?, attendees = ?, reminder = ?, is_all_day = ?, recurrence = ?, 
-      recurrence_end = ?, show_as = ?, priority = ?, is_online = ?, meeting_link = ?, 
-      attachments = ?, repeat_weekly = ?, modified_date = ?
-    WHERE id = ?`,
-    [title, description, date, start, end, location, category, attendees, reminder, isAllDay ? 1 : 0, recurrence, recurrenceEnd, showAs, priority, isOnline ? 1 : 0, meetingLink, attachments, repeatWeekly ? 1 : 0, modified_date, req.params.id],
-    function (err) {
-      if (err) {
-        console.error('Error updating event:', err);
-        return res.status(500).json({ error: "Error updating event." });
-      }
-      res.json({ updated: this.changes });
-    }
-  );
+  try {
+    const result = await pool.query(
+      `UPDATE calendar_events SET 
+        title = $1, description = $2, event_date = $3, start_time = $4, end_time = $5, 
+        location = $6, category = $7, attendees = $8, reminder = $9, is_all_day = $10, 
+        recurrence = $11, recurrence_end = $12, show_as = $13, priority = $14, 
+        is_online = $15, meeting_link = $16, attachments = $17, repeat_weekly = $18, 
+        modified_date = $19
+      WHERE id = $20`,
+      [
+        title, description, date, start, end, location, category, attendees, 
+        reminder, isAllDay ? 1 : 0, recurrence, recurrenceEnd, showAs, priority, 
+        isOnline ? 1 : 0, meetingLink, attachments, repeatWeekly ? 1 : 0, 
+        modified_date, req.params.id
+      ]
+    );
+    res.json({ updated: result.rowCount });
+  } catch (error) {
+    console.error('Error updating event:', error);
+    res.status(500).json({ error: "Error updating event." });
+  }
 });
 
-app.delete("/events/:id", (req, res) => {
-  db.run("DELETE FROM calendar_events WHERE id = ?", [req.params.id], function (err) {
-    if (err) {
-      console.error('Error deleting event:', err);
-      return res.status(500).json({ error: "Error deleting event." });
-    }
-    res.json({ deleted: this.changes });
-  });
+app.delete("/events/:id", async (req, res) => {
+  try {
+    const result = await pool.query("DELETE FROM calendar_events WHERE id = $1", [req.params.id]);
+    res.json({ deleted: result.rowCount });
+  } catch (error) {
+    console.error('Error deleting event:', error);
+    res.status(500).json({ error: "Error deleting event." });
+  }
 });
 
 // ===================== LEGACY CALENDAR EVENTS API (backward compatibility) =====================
-app.get("/calendar_events/:email", (req, res) => {
-  db.all("SELECT * FROM calendar_events WHERE user_email = ? ORDER BY event_date ASC", [req.params.email], (err, rows) => {
-    if (err) return res.status(500).json({ error: "Error fetching events." });
-    res.json(rows);
-  });
+app.get("/calendar_events/:email", async (req, res) => {
+  try {
+    const result = await pool.query(
+      "SELECT * FROM calendar_events WHERE user_email = $1 ORDER BY event_date ASC", 
+      [req.params.email]
+    );
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Error fetching events:', error);
+    res.status(500).json({ error: "Error fetching events." });
+  }
 });
 
-app.post("/calendar_events", (req, res) => {
+app.post("/calendar_events", async (req, res) => {
   const { user_email, title, description, event_date, start_time, end_time, repeat_weekly, created_date } = req.body;
   const date = created_date || new Date().toISOString();
-  db.run(
-    "INSERT INTO calendar_events (user_email, title, description, event_date, start_time, end_time, repeat_weekly, created_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-    [user_email, title, description, event_date, start_time, end_time, repeat_weekly, date],
-    function (err) {
-      if (err) return res.status(500).json({ error: "Error creating event." });
-      res.json({ id: this.lastID, user_email, title, description, event_date, start_time, end_time, repeat_weekly, created_date: date });
-    }
-  );
+  
+  try {
+    const result = await pool.query(
+      "INSERT INTO calendar_events (user_email, title, description, event_date, start_time, end_time, repeat_weekly, created_date) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *",
+      [user_email, title, description, event_date, start_time, end_time, repeat_weekly, date]
+    );
+    res.json(result.rows[0]);
+  } catch (error) {
+    console.error('Error creating event:', error);
+    res.status(500).json({ error: "Error creating event." });
+  }
 });
 
-app.put("/calendar_events/:id", (req, res) => {
+app.put("/calendar_events/:id", async (req, res) => {
   const { title, description, event_date, start_time, end_time, repeat_weekly } = req.body;
-  db.run(
-    "UPDATE calendar_events SET title = ?, description = ?, event_date = ?, start_time = ?, end_time = ?, repeat_weekly = ? WHERE id = ?",
-    [title, description, event_date, start_time, end_time, repeat_weekly, req.params.id],
-    function (err) {
-      if (err) return res.status(500).json({ error: "Error updating event." });
-      res.json({ updated: this.changes });
-    }
-  );
+  try {
+    const result = await pool.query(
+      "UPDATE calendar_events SET title = $1, description = $2, event_date = $3, start_time = $4, end_time = $5, repeat_weekly = $6 WHERE id = $7",
+      [title, description, event_date, start_time, end_time, repeat_weekly, req.params.id]
+    );
+    res.json({ updated: result.rowCount });
+  } catch (error) {
+    console.error('Error updating event:', error);
+    res.status(500).json({ error: "Error updating event." });
+  }
 });
 
-app.delete("/calendar_events/:id", (req, res) => {
-  db.run("DELETE FROM calendar_events WHERE id = ?", [req.params.id], function (err) {
-    if (err) return res.status(500).json({ error: "Error deleting event." });
-    res.json({ deleted: this.changes });
-  });
+app.delete("/calendar_events/:id", async (req, res) => {
+  try {
+    const result = await pool.query("DELETE FROM calendar_events WHERE id = $1", [req.params.id]);
+    res.json({ deleted: result.rowCount });
+  } catch (error) {
+    console.error('Error deleting event:', error);
+    res.status(500).json({ error: "Error deleting event." });
+  }
 });
 
 // ===================== PROFILE API ENDPOINTS =====================
-
-// GET profile by email
-app.get("/profile/:email", (req, res) => {
-  db.get(
-    "SELECT * FROM profiles WHERE user_email = ?",
-    [req.params.email],
-    (err, row) => {
-      if (err) {
-        console.error('Error fetching profile:', err);
-        return res.status(500).json({ error: "Error fetching profile." });
-      }
-      
-      if (!row) {
-        return res.json(null);
-      }
-      
-      // Convert snake_case to camelCase for frontend
-      const profile = {
-        userEmail: row.user_email,
-        fullName: row.full_name,
-        designation: row.designation,
-        department: row.department,
-        institution: row.institution,
-        officeAddress: row.office_address,
-        officialEmail: row.official_email,
-        alternateEmail: row.alternate_email,
-        phone: row.phone,
-        website: row.website,
-        degrees: row.degrees ? JSON.parse(row.degrees) : [],
-        employment: row.employment ? JSON.parse(row.employment) : [],
-        researchKeywords: row.research_keywords,
-        researchDescription: row.research_description,
-        scholarLink: row.scholar_link,
-        courses: row.courses ? JSON.parse(row.courses) : [],
-        grants: row.grants ? JSON.parse(row.grants) : [],
-        professionalActivities: row.professional_activities,
-        awards: row.awards ? JSON.parse(row.awards) : [],
-        skills: row.skills,
-        outreachService: row.outreach_service
-      };
-      
-      res.json(profile);
+app.get("/profile/:email", async (req, res) => {
+  try {
+    const result = await pool.query(
+      "SELECT * FROM profiles WHERE user_email = $1",
+      [req.params.email]
+    );
+    
+    if (result.rows.length === 0) {
+      return res.json(null);
     }
-  );
+    
+    const row = result.rows[0];
+    
+    // Convert snake_case to camelCase for frontend
+    const profile = {
+      userEmail: row.user_email,
+      fullName: row.full_name,
+      designation: row.designation,
+      department: row.department,
+      institution: row.institution,
+      officeAddress: row.office_address,
+      officialEmail: row.official_email,
+      alternateEmail: row.alternate_email,
+      phone: row.phone,
+      website: row.website,
+      degrees: row.degrees ? JSON.parse(row.degrees) : [],
+      employment: row.employment ? JSON.parse(row.employment) : [],
+      researchKeywords: row.research_keywords,
+      researchDescription: row.research_description,
+      scholarLink: row.scholar_link,
+      courses: row.courses ? JSON.parse(row.courses) : [],
+      grants: row.grants ? JSON.parse(row.grants) : [],
+      professionalActivities: row.professional_activities,
+      awards: row.awards ? JSON.parse(row.awards) : [],
+      skills: row.skills,
+      outreachService: row.outreach_service
+    };
+    
+    res.json(profile);
+  } catch (error) {
+    console.error('Error fetching profile:', error);
+    res.status(500).json({ error: "Error fetching profile." });
+  }
 });
 
-// POST/UPDATE profile
-app.post("/profile", (req, res) => {
+app.post("/profile", async (req, res) => {
   const {
-    userEmail,
-    fullName,
-    designation,
-    department,
-    institution,
-    officeAddress,
-    officialEmail,
-    alternateEmail,
-    phone,
-    website,
-    degrees,
-    employment,
-    researchKeywords,
-    researchDescription,
-    scholarLink,
-    courses,
-    grants,
-    professionalActivities,
-    awards,
-    skills,
-    outreachService
+    userEmail, fullName, designation, department, institution,
+    officeAddress, officialEmail, alternateEmail, phone, website,
+    degrees, employment, researchKeywords, researchDescription,
+    scholarLink, courses, grants, professionalActivities,
+    awards, skills, outreachService
   } = req.body;
 
   if (!userEmail) {
@@ -1070,112 +1074,89 @@ app.post("/profile", (req, res) => {
   }
 
   const modifiedDate = new Date().toISOString();
+  const degreesJson = JSON.stringify(degrees || []);
+  const employmentJson = JSON.stringify(employment || []);
+  const coursesJson = JSON.stringify(courses || []);
+  const grantsJson = JSON.stringify(grants || []);
+  const awardsJson = JSON.stringify(awards || []);
 
-  // Check if profile exists
-  db.get(
-    "SELECT id FROM profiles WHERE user_email = ?",
-    [userEmail],
-    (err, row) => {
-      if (err) {
-        console.error('Error checking profile:', err);
-        return res.status(500).json({ error: "Error saving profile." });
-      }
+  try {
+    // Check if profile exists
+    const checkResult = await pool.query(
+      "SELECT id FROM profiles WHERE user_email = $1",
+      [userEmail]
+    );
 
-      const degreesJson = JSON.stringify(degrees || []);
-      const employmentJson = JSON.stringify(employment || []);
-      const coursesJson = JSON.stringify(courses || []);
-      const grantsJson = JSON.stringify(grants || []);
-      const awardsJson = JSON.stringify(awards || []);
-
-      if (row) {
-        // Update existing profile
-        db.run(
-          `UPDATE profiles SET 
-            full_name = ?, designation = ?, department = ?, institution = ?,
-            office_address = ?, official_email = ?, alternate_email = ?, phone = ?,
-            website = ?, degrees = ?, employment = ?, research_keywords = ?,
-            research_description = ?, scholar_link = ?, courses = ?, grants = ?,
-            professional_activities = ?, awards = ?, skills = ?, outreach_service = ?,
-            modified_date = ?
-          WHERE user_email = ?`,
-          [
-            fullName, designation, department, institution,
-            officeAddress, officialEmail, alternateEmail, phone,
-            website, degreesJson, employmentJson, researchKeywords,
-            researchDescription, scholarLink, coursesJson, grantsJson,
-            professionalActivities, awardsJson, skills, outreachService,
-            modifiedDate, userEmail
-          ],
-          function(err) {
-            if (err) {
-              console.error('Error updating profile:', err);
-              return res.status(500).json({ error: "Error updating profile." });
-            }
-            res.json({ message: "Profile updated successfully", updated: this.changes });
-          }
-        );
-      } else {
-        // Create new profile
-        const createdDate = new Date().toISOString();
-        db.run(
-          `INSERT INTO profiles (
-            user_email, full_name, designation, department, institution,
-            office_address, official_email, alternate_email, phone, website,
-            degrees, employment, research_keywords, research_description,
-            scholar_link, courses, grants, professional_activities, awards,
-            skills, outreach_service, created_date, modified_date
-          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-          [
-            userEmail, fullName, designation, department, institution,
-            officeAddress, officialEmail, alternateEmail, phone, website,
-            degreesJson, employmentJson, researchKeywords, researchDescription,
-            scholarLink, coursesJson, grantsJson, professionalActivities,
-            awardsJson, skills, outreachService, createdDate, modifiedDate
-          ],
-          function(err) {
-            if (err) {
-              console.error('Error creating profile:', err);
-              return res.status(500).json({ error: "Error creating profile." });
-            }
-            res.json({ message: "Profile created successfully", id: this.lastID });
-          }
-        );
-      }
+    if (checkResult.rows.length > 0) {
+      // Update existing profile
+      await pool.query(
+        `UPDATE profiles SET 
+          full_name = $1, designation = $2, department = $3, institution = $4,
+          office_address = $5, official_email = $6, alternate_email = $7, phone = $8,
+          website = $9, degrees = $10, employment = $11, research_keywords = $12,
+          research_description = $13, scholar_link = $14, courses = $15, grants = $16,
+          professional_activities = $17, awards = $18, skills = $19, outreach_service = $20,
+          modified_date = $21
+        WHERE user_email = $22`,
+        [
+          fullName, designation, department, institution,
+          officeAddress, officialEmail, alternateEmail, phone,
+          website, degreesJson, employmentJson, researchKeywords,
+          researchDescription, scholarLink, coursesJson, grantsJson,
+          professionalActivities, awardsJson, skills, outreachService,
+          modifiedDate, userEmail
+        ]
+      );
+      res.json({ message: "Profile updated successfully" });
+    } else {
+      // Create new profile
+      const createdDate = new Date().toISOString();
+      const result = await pool.query(
+        `INSERT INTO profiles (
+          user_email, full_name, designation, department, institution,
+          office_address, official_email, alternate_email, phone, website,
+          degrees, employment, research_keywords, research_description,
+          scholar_link, courses, grants, professional_activities, awards,
+          skills, outreach_service, created_date, modified_date
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23) RETURNING id`,
+        [
+          userEmail, fullName, designation, department, institution,
+          officeAddress, officialEmail, alternateEmail, phone, website,
+          degreesJson, employmentJson, researchKeywords, researchDescription,
+          scholarLink, coursesJson, grantsJson, professionalActivities,
+          awardsJson, skills, outreachService, createdDate, modifiedDate
+        ]
+      );
+      res.json({ message: "Profile created successfully", id: result.rows[0].id });
     }
-  );
+  } catch (error) {
+    console.error('Error saving profile:', error);
+    res.status(500).json({ error: "Error saving profile." });
+  }
 });
 
-// DELETE profile
-app.delete("/profile/:email", (req, res) => {
-  db.run(
-    "DELETE FROM profiles WHERE user_email = ?",
-    [req.params.email],
-    function(err) {
-      if (err) {
-        console.error('Error deleting profile:', err);
-        return res.status(500).json({ error: "Error deleting profile." });
-      }
-      res.json({ deleted: this.changes, message: "Profile deleted successfully" });
-    }
-  );
+app.delete("/profile/:email", async (req, res) => {
+  try {
+    const result = await pool.query(
+      "DELETE FROM profiles WHERE user_email = $1",
+      [req.params.email]
+    );
+    res.json({ deleted: result.rowCount, message: "Profile deleted successfully" });
+  } catch (error) {
+    console.error('Error deleting profile:', error);
+    res.status(500).json({ error: "Error deleting profile." });
+  }
 });
 
 // ===================== RESUME GENERATION API =====================
-
 app.get("/generate-resume/:email", async (req, res) => {
   try {
-    const profile = await new Promise((resolve, reject) => {
-      db.get(
-        "SELECT * FROM profiles WHERE user_email = ?",
-        [req.params.email],
-        (err, row) => {
-          if (err) reject(err);
-          else resolve(row);
-        }
-      );
-    });
+    const result = await pool.query(
+      "SELECT * FROM profiles WHERE user_email = $1",
+      [req.params.email]
+    );
 
-    if (!profile) {
+    if (result.rows.length === 0) {
       return res.status(404).send(`
         <!DOCTYPE html>
         <html>
@@ -1194,6 +1175,8 @@ app.get("/generate-resume/:email", async (req, res) => {
         </html>
       `);
     }
+
+    const profile = result.rows[0];
 
     // Parse JSON fields
     const degrees = profile.degrees ? JSON.parse(profile.degrees) : [];
@@ -1514,22 +1497,24 @@ app.get("*", (req, res) => {
 });
 
 // ===================== ERROR HANDLING =====================
-app.use((err, req, res, next) => { console.error('Unhandled error:', err);
-res.status(500).json({ error: 'Internal server error' }); });
-
+app.use((err, req, res, next) => {
+  console.error('Unhandled error:', err);
+  res.status(500).json({ error: 'Internal server error' });
+});
 
 // Start server
 app.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`);
   console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
-  console.log(`Database: ${isProduction && process.env.DATABASE_URL ? 'PostgreSQL' : 'SQLite'}`);
+  console.log(`Database: PostgreSQL`);
 });
 
 // ===================== PROCESS ERROR HANDLERS =====================
-process.on('unhandledRejection', (reason, promise) => { console.error('Unhandled Rejection at:', promise, 'reason:', reason); });
-process.on('uncaughtException', (error) => { console.error('Uncaught Exception:', error); });
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+});
 
-
-
-
-
+process.on('uncaughtException', (error) => {
+  console.error('Uncaught Exception:', error);
+  process.exit(1);
+});
