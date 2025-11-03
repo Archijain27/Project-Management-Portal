@@ -99,6 +99,11 @@
       background: #059669;
     }
     
+    .save-btn:disabled {
+      background: #9ca3af;
+      cursor: not-allowed;
+    }
+    
     .cancel-btn {
       background: #ef4444;
       color: white;
@@ -168,6 +173,7 @@
       color: #374151;
       line-height: 1.8;
       font-size: 1rem;
+      white-space: pre-wrap;
     }
     
     .info-grid {
@@ -323,7 +329,7 @@
           <span>Back to Projects</span>
         </a>
         <button class="edit-btn" id="editBtn" onclick="toggleEditMode()">✏️ Edit</button>
-        <button class="save-btn" id="saveBtn" style="display: none;" onclick="saveChanges()">💾 Save Changes</button>
+        <button class="save-btn" id="saveBtn" style="display: none;" onclick="saveChanges()">Save Changes</button>
         <button class="cancel-btn" id="cancelBtn" style="display: none;" onclick="cancelEdit()">✕ Cancel</button>
       </div>
     </div>
@@ -339,6 +345,7 @@
     const API_BASE = window.location.origin;
     let isEditMode = false;
     let originalData = {};
+    let projectName = '';
     
     // Authentication check
     function getCurrentUser() {
@@ -370,38 +377,6 @@
       showNotification("No project selected. Redirecting...", "error");
       setTimeout(() => window.location.href = "projects.html", 2000);
     }
-
-    // Form fields mapping
-    const fields = {
-      projectTitle: "Project Title",
-      notes: "Initial Notes",
-      colleagueName: "Contact Name & Title",
-      colleaguePhone: "Phone Number",
-      colleagueEmail: "Email Address",
-      colleagueAddress1: "Address Line 1",
-      colleagueAddress2: "Address Line 2",
-      colleagueAddress3: "City, State, ZIP",
-      yourName: "Your Name & Title",
-      yourPhone: "Phone Number",
-      yourEmail: "Email Address",
-      yourAddress1: "Address Line 1",
-      yourAddress2: "Address Line 2",
-      yourAddress3: "City, State, ZIP",
-      objectives: "Project Objectives",
-      timeline: "Timeline & Milestones",
-      primaryAudience: "Primary Demographic",
-      secondaryAudience: "Secondary Demographic",
-      callAction: "Call To Action",
-      competition: "Competitive Analysis",
-      graphics: "Graphics & Design",
-      photography: "Photography",
-      multimedia: "Multimedia & Interactive",
-      otherInfo: "Additional Information",
-      clientName: "Reviewer Name & Title",
-      approvalDate: "Review Date",
-      clientComments: "Review Comments",
-      approvalSignature: "Digital Signature"
-    };
 
     async function apiCall(endpoint, options = {}) {
       try {
@@ -445,14 +420,21 @@
       }, 3000);
     }
 
-    function renderViewMode(data, projectName) {
+    function escapeHtml(text) {
+      if (!text) return '';
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    function renderViewMode(data) {
       const content = document.getElementById('content');
       
       const html = `
         <div class="project-banner">
-          <h2>${data.projectTitle || projectName || 'Untitled Project'}</h2>
+          <h2>${escapeHtml(projectName) || 'Untitled Project'}</h2>
           <div class="meta">
-            <strong>Owner:</strong> ${userEmail}
+            <strong>Owner:</strong> ${escapeHtml(userEmail)}
             ${data.approvalDate ? ` • <strong>Last Review:</strong> ${new Date(data.approvalDate).toLocaleDateString()}` : ''}
           </div>
         </div>
@@ -460,18 +442,14 @@
         ${data.notes ? `
         <div class="section">
           <div class="section-title">Project Overview</div>
-          <div class="section-content">
-            <p>${data.notes}</p>
-          </div>
+          <div class="section-content">${escapeHtml(data.notes)}</div>
         </div>
         ` : ''}
 
         ${data.objectives ? `
         <div class="section">
           <div class="section-title">Project Objectives</div>
-          <div class="section-content">
-            <p>${data.objectives}</p>
-          </div>
+          <div class="section-content">${escapeHtml(data.objectives)}</div>
         </div>
         ` : ''}
 
@@ -482,22 +460,22 @@
               <h3>Client Contact</h3>
               <div class="info-item">
                 <span class="info-label">Name & Title</span>
-                <span class="info-value">${data.colleagueName || '<span class="empty-value">Not provided</span>'}</span>
+                <span class="info-value">${data.colleagueName ? escapeHtml(data.colleagueName) : '<span class="empty-value">Not provided</span>'}</span>
               </div>
               <div class="info-item">
                 <span class="info-label">Email</span>
-                <span class="info-value">${data.colleagueEmail || '<span class="empty-value">Not provided</span>'}</span>
+                <span class="info-value">${data.colleagueEmail ? escapeHtml(data.colleagueEmail) : '<span class="empty-value">Not provided</span>'}</span>
               </div>
               <div class="info-item">
                 <span class="info-label">Phone</span>
-                <span class="info-value">${data.colleaguePhone || '<span class="empty-value">Not provided</span>'}</span>
+                <span class="info-value">${data.colleaguePhone ? escapeHtml(data.colleaguePhone) : '<span class="empty-value">Not provided</span>'}</span>
               </div>
               <div class="info-item">
                 <span class="info-label">Address</span>
                 <span class="info-value">
-                  ${data.colleagueAddress1 || ''}<br>
-                  ${data.colleagueAddress2 || ''}<br>
-                  ${data.colleagueAddress3 || '<span class="empty-value">Not provided</span>'}
+                  ${data.colleagueAddress1 ? escapeHtml(data.colleagueAddress1) + '<br>' : ''}
+                  ${data.colleagueAddress2 ? escapeHtml(data.colleagueAddress2) + '<br>' : ''}
+                  ${data.colleagueAddress3 ? escapeHtml(data.colleagueAddress3) : '<span class="empty-value">Not provided</span>'}
                 </span>
               </div>
             </div>
@@ -506,22 +484,22 @@
               <h3>Your Contact Information</h3>
               <div class="info-item">
                 <span class="info-label">Name & Title</span>
-                <span class="info-value">${data.yourName || '<span class="empty-value">Not provided</span>'}</span>
+                <span class="info-value">${data.yourName ? escapeHtml(data.yourName) : '<span class="empty-value">Not provided</span>'}</span>
               </div>
               <div class="info-item">
                 <span class="info-label">Email</span>
-                <span class="info-value">${data.yourEmail || userEmail}</span>
+                <span class="info-value">${escapeHtml(data.yourEmail || userEmail)}</span>
               </div>
               <div class="info-item">
                 <span class="info-label">Phone</span>
-                <span class="info-value">${data.yourPhone || '<span class="empty-value">Not provided</span>'}</span>
+                <span class="info-value">${data.yourPhone ? escapeHtml(data.yourPhone) : '<span class="empty-value">Not provided</span>'}</span>
               </div>
               <div class="info-item">
                 <span class="info-label">Address</span>
                 <span class="info-value">
-                  ${data.yourAddress1 || ''}<br>
-                  ${data.yourAddress2 || ''}<br>
-                  ${data.yourAddress3 || '<span class="empty-value">Not provided</span>'}
+                  ${data.yourAddress1 ? escapeHtml(data.yourAddress1) + '<br>' : ''}
+                  ${data.yourAddress2 ? escapeHtml(data.yourAddress2) + '<br>' : ''}
+                  ${data.yourAddress3 ? escapeHtml(data.yourAddress3) : '<span class="empty-value">Not provided</span>'}
                 </span>
               </div>
             </div>
@@ -535,7 +513,7 @@
             ${data.timeline ? `
             <div class="info-card">
               <h3>Timeline & Milestones</h3>
-              <p>${data.timeline}</p>
+              <p>${escapeHtml(data.timeline)}</p>
             </div>
             ` : ''}
             ${data.primaryAudience || data.secondaryAudience ? `
@@ -544,13 +522,13 @@
               ${data.primaryAudience ? `
               <div class="info-item">
                 <span class="info-label">Primary Demographic</span>
-                <span class="info-value">${data.primaryAudience}</span>
+                <span class="info-value">${escapeHtml(data.primaryAudience)}</span>
               </div>
               ` : ''}
               ${data.secondaryAudience ? `
               <div class="info-item">
                 <span class="info-label">Secondary Demographic</span>
-                <span class="info-value">${data.secondaryAudience}</span>
+                <span class="info-value">${escapeHtml(data.secondaryAudience)}</span>
               </div>
               ` : ''}
             </div>
@@ -562,18 +540,14 @@
         ${data.callAction ? `
         <div class="section">
           <div class="section-title">Call To Action</div>
-          <div class="section-content">
-            <p>${data.callAction}</p>
-          </div>
+          <div class="section-content">${escapeHtml(data.callAction)}</div>
         </div>
         ` : ''}
 
         ${data.competition ? `
         <div class="section">
           <div class="section-title">Competitive Analysis</div>
-          <div class="section-content">
-            <p>${data.competition}</p>
-          </div>
+          <div class="section-content">${escapeHtml(data.competition)}</div>
         </div>
         ` : ''}
 
@@ -584,19 +558,19 @@
             ${data.graphics ? `
             <div class="info-card">
               <h3>Graphics & Design</h3>
-              <p>${data.graphics}</p>
+              <p>${escapeHtml(data.graphics)}</p>
             </div>
             ` : ''}
             ${data.photography ? `
             <div class="info-card">
               <h3>Photography</h3>
-              <p>${data.photography}</p>
+              <p>${escapeHtml(data.photography)}</p>
             </div>
             ` : ''}
             ${data.multimedia ? `
             <div class="info-card">
               <h3>Multimedia & Interactive</h3>
-              <p>${data.multimedia}</p>
+              <p>${escapeHtml(data.multimedia)}</p>
             </div>
             ` : ''}
           </div>
@@ -606,9 +580,7 @@
         ${data.otherInfo ? `
         <div class="section">
           <div class="section-title">Additional Information</div>
-          <div class="section-content">
-            <p>${data.otherInfo}</p>
-          </div>
+          <div class="section-content">${escapeHtml(data.otherInfo)}</div>
         </div>
         ` : ''}
 
@@ -619,7 +591,7 @@
             ${data.clientName ? `
             <div class="info-item">
               <span class="info-label">Reviewer</span>
-              <span class="info-value">${data.clientName}</span>
+              <span class="info-value">${escapeHtml(data.clientName)}</span>
             </div>
             ` : ''}
             ${data.approvalDate ? `
@@ -631,13 +603,13 @@
             ${data.clientComments ? `
             <div class="info-item">
               <span class="info-label">Comments</span>
-              <span class="info-value">${data.clientComments}</span>
+              <span class="info-value">${escapeHtml(data.clientComments)}</span>
             </div>
             ` : ''}
             ${data.approvalSignature ? `
             <div class="info-item">
               <span class="info-label">Digital Signature</span>
-              <span class="info-value">${data.approvalSignature}</span>
+              <span class="info-value">${escapeHtml(data.approvalSignature)}</span>
             </div>
             ` : ''}
           </div>
@@ -654,8 +626,8 @@
       
       const html = `
         <div class="project-banner">
-          <input type="text" id="edit-projectTitle" value="${data.projectTitle || ''}" placeholder="Project Title">
-          <div class="meta">Owner: ${userEmail}</div>
+          <h2>${escapeHtml(projectName) || 'Untitled Project'}</h2>
+          <div class="meta">Owner: ${escapeHtml(userEmail)}</div>
         </div>
 
         <div class="section">
@@ -832,28 +804,54 @@
         document.getElementById('saveBtn').style.display = 'none';
         document.getElementById('cancelBtn').style.display = 'none';
         document.getElementById('content').classList.remove('edit-mode');
-        loadProjectData();
+        renderViewMode(originalData);
       }
     }
 
     function cancelEdit() {
       if (confirm('Discard all changes?')) {
-        toggleEditMode();
+        isEditMode = false;
+        document.getElementById('editBtn').style.display = 'inline-block';
+        document.getElementById('saveBtn').style.display = 'none';
+        document.getElementById('cancelBtn').style.display = 'none';
+        document.getElementById('content').classList.remove('edit-mode');
+        renderViewMode(originalData);
       }
     }
 
     async function saveChanges() {
-      const formData = {};
-      
-      Object.keys(fields).forEach(field => {
-        const element = document.getElementById(`edit-${field}`);
-        if (element) {
-          formData[field] = element.value.trim();
-        }
-      });
+      const formData = {
+        notes: document.getElementById('edit-notes')?.value || '',
+        colleagueName: document.getElementById('edit-colleagueName')?.value || '',
+        colleaguePhone: document.getElementById('edit-colleaguePhone')?.value || '',
+        colleagueEmail: document.getElementById('edit-colleagueEmail')?.value || '',
+        colleagueAddress1: document.getElementById('edit-colleagueAddress1')?.value || '',
+        colleagueAddress2: document.getElementById('edit-colleagueAddress2')?.value || '',
+        colleagueAddress3: document.getElementById('edit-colleagueAddress3')?.value || '',
+        yourName: document.getElementById('edit-yourName')?.value || '',
+        yourPhone: document.getElementById('edit-yourPhone')?.value || '',
+        yourEmail: document.getElementById('edit-yourEmail')?.value || '',
+        yourAddress1: document.getElementById('edit-yourAddress1')?.value || '',
+        yourAddress2: document.getElementById('edit-yourAddress2')?.value || '',
+        yourAddress3: document.getElementById('edit-yourAddress3')?.value || '',
+        objectives: document.getElementById('edit-objectives')?.value || '',
+        timeline: document.getElementById('edit-timeline')?.value || '',
+        primaryAudience: document.getElementById('edit-primaryAudience')?.value || '',
+        secondaryAudience: document.getElementById('edit-secondaryAudience')?.value || '',
+        callAction: document.getElementById('edit-callAction')?.value || '',
+        competition: document.getElementById('edit-competition')?.value || '',
+        graphics: document.getElementById('edit-graphics')?.value || '',
+        photography: document.getElementById('edit-photography')?.value || '',
+        multimedia: document.getElementById('edit-multimedia')?.value || '',
+        otherInfo: document.getElementById('edit-otherInfo')?.value || '',
+        clientName: document.getElementById('edit-clientName')?.value || '',
+        approvalDate: document.getElementById('edit-approvalDate')?.value || '',
+        clientComments: document.getElementById('edit-clientComments')?.value || '',
+        approvalSignature: document.getElementById('edit-approvalSignature')?.value || ''
+      };
 
       try {
-        document.getElementById('saveBtn').textContent = '💾 Saving...';
+        document.getElementById('saveBtn').textContent = 'Saving...';
         document.getElementById('saveBtn').disabled = true;
 
         await apiCall(`/projects/${projectId}/description`, {
@@ -861,7 +859,9 @@
           body: JSON.stringify(formData)
         });
 
-        originalData = formData;
+        // Update original data with saved values
+        originalData = { ...formData };
+        
         showNotification("Project description saved successfully!", "success");
         updateStatusBar(`Last saved: ${new Date().toLocaleString()}`);
         
@@ -872,13 +872,14 @@
         document.getElementById('cancelBtn').style.display = 'none';
         document.getElementById('content').classList.remove('edit-mode');
         
-        loadProjectData();
+        // Render view mode with updated data
+        renderViewMode(originalData);
         
       } catch (error) {
         console.error("Failed to save description:", error);
         showNotification("Failed to save description. Please try again.", "error");
       } finally {
-        document.getElementById('saveBtn').textContent = '💾 Save Changes';
+        document.getElementById('saveBtn').textContent = 'Save Changes';
         document.getElementById('saveBtn').disabled = false;
       }
     }
@@ -896,7 +897,8 @@
           throw new Error("Project not found");
         }
 
-        document.getElementById('pageTitle').textContent = `${project.name} - Description`;
+        projectName = project.name;
+        document.getElementById('pageTitle').textContent = `${projectName} - Description`;
 
         // Load description data
         const description = await apiCall(`/projects/${projectId}/description`);
@@ -910,7 +912,7 @@
         }
 
         // Render view mode
-        renderViewMode(originalData, project.name);
+        renderViewMode(originalData);
         
         loading.style.display = 'none';
 
@@ -944,6 +946,3 @@
   </script>
 </body>
 </html>
-
-
-
