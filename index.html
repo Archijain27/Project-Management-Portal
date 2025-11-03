@@ -361,6 +361,12 @@
       transform: translateY(0);
     }
 
+    .submit-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
     .error-message {
       color: #e53e3e;
       font-size: 0.85rem;
@@ -370,6 +376,61 @@
 
     .error-message.show {
       display: block;
+    }
+
+    .success-message {
+      background: #d1fae5;
+      color: #065f46;
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      font-size: 0.9rem;
+      display: none;
+      animation: slideDown 0.3s ease-out;
+    }
+
+    .success-message.show {
+      display: block;
+    }
+
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .verification-notice {
+      background: #fef3c7;
+      border-left: 4px solid #f59e0b;
+      color: #92400e;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      font-size: 0.9rem;
+      display: none;
+    }
+
+    .verification-notice.show {
+      display: block;
+      animation: slideDown 0.3s ease-out;
+    }
+
+    .resend-link {
+      color: #667eea;
+      text-decoration: underline;
+      cursor: pointer;
+      font-weight: 600;
+      margin-top: 8px;
+      display: inline-block;
+    }
+
+    .resend-link:hover {
+      color: #4f46e5;
     }
 
     /* Responsive Design */
@@ -500,6 +561,16 @@
         <p>Sign in to continue your journey</p>
       </div>
 
+      <!-- Success Message -->
+      <div class="success-message" id="successMessage"></div>
+
+      <!-- Verification Notice -->
+      <div class="verification-notice" id="verificationNotice">
+        <strong>📧 Email Verification Required</strong>
+        <p id="verificationText"></p>
+        <span class="resend-link" id="resendLink" onclick="resendVerification()">Resend verification email</span>
+      </div>
+
       <!-- Tab Buttons -->
       <div class="tab-buttons">
         <button class="tab-btn active" onclick="switchTab('login')">Login</button>
@@ -527,7 +598,7 @@
             <div class="error-message" id="loginPasswordError">Password must be at least 6 characters</div>
           </div>
 
-          <button type="submit" class="submit-btn">Log In</button>
+          <button type="submit" class="submit-btn" id="loginBtn">Log In</button>
         </form>
       </div>
 
@@ -555,12 +626,12 @@
             <label>Password</label>
             <div class="input-wrapper">
               <span class="input-icon">🔒</span>
-              <input type="password" id="signupPassword" placeholder="Create a password" required>
+              <input type="password" id="signupPassword" placeholder="Create a password (min 6 characters)" required>
             </div>
             <div class="error-message" id="signupPasswordError">Password must be at least 6 characters</div>
           </div>
 
-          <button type="submit" class="submit-btn">Create Account</button>
+          <button type="submit" class="submit-btn" id="signupBtn">Create Account</button>
         </form>
       </div>
     </div>
@@ -568,10 +639,15 @@
 
   <script>
     const API_BASE = window.location.origin;
+    let pendingVerificationEmail = null;
 
     function switchTab(tab) {
       const tabs = document.querySelectorAll('.tab-btn');
       const forms = document.querySelectorAll('.form-content');
+      
+      // Hide messages when switching tabs
+      hideMessage('successMessage');
+      hideMessage('verificationNotice');
       
       tabs.forEach(t => t.classList.remove('active'));
       forms.forEach(f => f.classList.remove('active'));
@@ -585,11 +661,28 @@
       }
     }
 
+    function showMessage(elementId, message, isError = false) {
+      const el = document.getElementById(elementId);
+      if (el) {
+        el.textContent = message;
+        el.innerHTML = message; // Allow HTML
+        el.classList.add('show');
+      }
+    }
+
+    function hideMessage(elementId) {
+      const el = document.getElementById(elementId);
+      if (el) {
+        el.classList.remove('show');
+      }
+    }
+
     async function handleLogin(e) {
       e.preventDefault();
       
       const email = document.getElementById('loginEmail').value.trim();
       const password = document.getElementById('loginPassword').value;
+      const loginBtn = document.getElementById('loginBtn');
 
       if (!validateEmail(email)) {
         showError('loginEmailError');
@@ -602,6 +695,9 @@
       }
 
       try {
+        loginBtn.disabled = true;
+        loginBtn.textContent = 'Logging in...';
+
         const response = await fetch(`${API_BASE}/login`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -613,13 +709,28 @@
         if (response.ok && data.success) {
           sessionStorage.setItem('isLoggedIn', 'true');
           sessionStorage.setItem('userEmail', email);
-          window.location.href = 'dashboard.html';
+          showMessage('successMessage', '✅ Login successful! Redirecting...');
+          setTimeout(() => {
+            window.location.href = 'dashboard.html';
+          }, 1000);
+        } else if (data.needsVerification) {
+          // Show verification notice
+          pendingVerificationEmail = email;
+          document.getElementById('verificationText').innerHTML = 
+            `Your email is not verified yet. Please check your inbox (${email}) for the verification link.`;
+          showMessage('verificationNotice', '');
+          loginBtn.disabled = false;
+          loginBtn.textContent = 'Log In';
         } else {
           alert(data.message || 'Invalid credentials');
+          loginBtn.disabled = false;
+          loginBtn.textContent = 'Log In';
         }
       } catch (error) {
         console.error('Login error:', error);
         alert('Login failed. Please try again.');
+        loginBtn.disabled = false;
+        loginBtn.textContent = 'Log In';
       }
     }
 
@@ -629,6 +740,7 @@
       const name = document.getElementById('signupName').value.trim();
       const email = document.getElementById('signupEmail').value.trim();
       const password = document.getElementById('signupPassword').value;
+      const signupBtn = document.getElementById('signupBtn');
 
       if (!validateEmail(email)) {
         showError('signupEmailError');
@@ -641,6 +753,9 @@
       }
 
       try {
+        signupBtn.disabled = true;
+        signupBtn.textContent = 'Creating Account...';
+
         const response = await fetch(`${API_BASE}/register`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -650,15 +765,68 @@
         const data = await response.json();
 
         if (response.ok && data.success) {
-          alert('Account created successfully! Please log in.');
-          switchTab('login');
-          document.getElementById('loginEmail').value = email;
+          // Show success message
+          showMessage('successMessage', 
+            `🎉 Account created successfully!<br>📧 Please check your email (${email}) to verify your account.`
+          );
+          
+          // Switch to login tab after 3 seconds
+          setTimeout(() => {
+            switchTab('login');
+            document.getElementById('loginEmail').value = email;
+            hideMessage('successMessage');
+          }, 4000);
+          
+          signupBtn.disabled = false;
+          signupBtn.textContent = 'Create Account';
         } else {
           alert(data.message || 'Registration failed');
+          signupBtn.disabled = false;
+          signupBtn.textContent = 'Create Account';
         }
       } catch (error) {
         console.error('Signup error:', error);
         alert('Signup failed. Please try again.');
+        signupBtn.disabled = false;
+        signupBtn.textContent = 'Create Account';
+      }
+    }
+
+    async function resendVerification() {
+      const email = pendingVerificationEmail || document.getElementById('loginEmail').value.trim();
+      
+      if (!email) {
+        alert('Please enter your email address');
+        return;
+      }
+
+      try {
+        const resendLink = document.getElementById('resendLink');
+        resendLink.textContent = 'Sending...';
+        resendLink.style.pointerEvents = 'none';
+
+        const response = await fetch(`${API_BASE}/resend-verification`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          alert('✅ Verification email sent! Please check your inbox.');
+          resendLink.textContent = 'Email sent! Check your inbox';
+        } else {
+          alert(data.message || 'Failed to resend verification email');
+          resendLink.textContent = 'Resend verification email';
+          resendLink.style.pointerEvents = 'auto';
+        }
+      } catch (error) {
+        console.error('Resend error:', error);
+        alert('Failed to resend verification email. Please try again.');
+        const resendLink = document.getElementById('resendLink');
+        resendLink.textContent = 'Resend verification email';
+        resendLink.style.pointerEvents = 'auto';
       }
     }
 
@@ -680,8 +848,13 @@
         if (errorEl) errorEl.classList.remove('show');
       });
     });
+
+    // Check if coming from verification
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('verified') === 'true') {
+      showMessage('successMessage', '✅ Email verified successfully! You can now log in.');
+    }
   </script>
 </body>
 </html>
-
 
