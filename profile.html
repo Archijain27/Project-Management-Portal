@@ -13,6 +13,7 @@
       --muted: #6b7280;
       --success: #10b981;
       --error: #ef4444;
+      --warning: #f59e0b;
     }
 
     * {
@@ -52,6 +53,46 @@
     .header-actions {
       display: flex;
       gap: 15px;
+      align-items: center;
+    }
+
+    .autosave-status {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      transition: all 0.3s;
+    }
+
+    .autosave-status.saving {
+      background: rgba(245, 158, 11, 0.1);
+      color: var(--warning);
+    }
+
+    .autosave-status.saved {
+      background: rgba(16, 185, 129, 0.1);
+      color: var(--success);
+    }
+
+    .autosave-status.error {
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--error);
+    }
+
+    .spinner {
+      width: 14px;
+      height: 14px;
+      border: 2px solid currentColor;
+      border-top-color: transparent;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
     }
 
     .btn {
@@ -305,8 +346,12 @@
     <div class="header">
       <h1>📋 My Profile</h1>
       <div class="header-actions">
+        <div class="autosave-status saved" id="autosaveStatus">
+          <span id="statusIcon">✓</span>
+          <span id="statusText">All changes saved</span>
+        </div>
         <button class="btn btn-primary" id="generateResumeBtn">📄 Generate Resume</button>
-        <button class="btn btn-success" id="saveProfileBtn">💾 Save Profile</button>
+        <button class="btn btn-success" id="saveProfileBtn">💾 Save Now</button>
         <button class="btn btn-secondary" id="backToDashboard">← Back to Dashboard</button>
       </div>
     </div>
@@ -470,10 +515,32 @@
   <script>
     const API_BASE = window.location.origin;
     let userEmail = sessionStorage.getItem('userEmail');
+    let autosaveTimeout = null;
+    let isSaving = false;
 
     if (!userEmail) {
       alert('Please log in first');
       window.location.href = '/';
+    }
+
+    // Autosave status management
+    function updateAutosaveStatus(status, message) {
+      const statusEl = document.getElementById('autosaveStatus');
+      const iconEl = document.getElementById('statusIcon');
+      const textEl = document.getElementById('statusText');
+
+      statusEl.className = `autosave-status ${status}`;
+      
+      if (status === 'saving') {
+        iconEl.innerHTML = '<div class="spinner"></div>';
+        textEl.textContent = message || 'Saving...';
+      } else if (status === 'saved') {
+        iconEl.textContent = '✓';
+        textEl.textContent = message || 'All changes saved';
+      } else if (status === 'error') {
+        iconEl.textContent = '✕';
+        textEl.textContent = message || 'Failed to save';
+      }
     }
 
     // Notification system
@@ -497,12 +564,12 @@
         case 'degree':
           content = `
             <div class="list-item-content">
-              <input type="text" placeholder="Degree (e.g., Ph.D.)" value="${data.degree || ''}" data-field="degree">
-              <input type="text" placeholder="Specialization" value="${data.specialization || ''}" data-field="specialization">
-              <input type="text" placeholder="Institution" value="${data.institution || ''}" data-field="institution">
-              <input type="text" placeholder="Year" value="${data.year || ''}" data-field="year">
-              <input type="text" placeholder="Thesis Title (if applicable)" value="${data.thesis || ''}" data-field="thesis">
-              <input type="text" placeholder="Advisor/Mentor" value="${data.advisor || ''}" data-field="advisor">
+              <input type="text" class="autosave-field" placeholder="Degree (e.g., Ph.D.)" value="${data.degree || ''}" data-field="degree">
+              <input type="text" class="autosave-field" placeholder="Specialization" value="${data.specialization || ''}" data-field="specialization">
+              <input type="text" class="autosave-field" placeholder="Institution" value="${data.institution || ''}" data-field="institution">
+              <input type="text" class="autosave-field" placeholder="Year" value="${data.year || ''}" data-field="year">
+              <input type="text" class="autosave-field" placeholder="Thesis Title (if applicable)" value="${data.thesis || ''}" data-field="thesis">
+              <input type="text" class="autosave-field" placeholder="Advisor/Mentor" value="${data.advisor || ''}" data-field="advisor">
             </div>
           `;
           break;
@@ -510,10 +577,10 @@
         case 'employment':
           content = `
             <div class="list-item-content">
-              <input type="text" placeholder="Position Title" value="${data.position || ''}" data-field="position">
-              <input type="text" placeholder="Organization" value="${data.organization || ''}" data-field="organization">
-              <input type="text" placeholder="Duration (e.g., 2020-2023)" value="${data.duration || ''}" data-field="duration">
-              <textarea placeholder="Responsibilities" data-field="responsibilities">${data.responsibilities || ''}</textarea>
+              <input type="text" class="autosave-field" placeholder="Position Title" value="${data.position || ''}" data-field="position">
+              <input type="text" class="autosave-field" placeholder="Organization" value="${data.organization || ''}" data-field="organization">
+              <input type="text" class="autosave-field" placeholder="Duration (e.g., 2020-2023)" value="${data.duration || ''}" data-field="duration">
+              <textarea class="autosave-field" placeholder="Responsibilities" data-field="responsibilities">${data.responsibilities || ''}</textarea>
             </div>
           `;
           break;
@@ -521,10 +588,10 @@
         case 'course':
           content = `
             <div class="list-item-content">
-              <input type="text" placeholder="Course Name" value="${data.courseName || ''}" data-field="courseName">
-              <input type="text" placeholder="Course Code" value="${data.courseCode || ''}" data-field="courseCode">
-              <input type="text" placeholder="Semester/Year" value="${data.semester || ''}" data-field="semester">
-              <textarea placeholder="Lab Supervision Details" data-field="labDetails">${data.labDetails || ''}</textarea>
+              <input type="text" class="autosave-field" placeholder="Course Name" value="${data.courseName || ''}" data-field="courseName">
+              <input type="text" class="autosave-field" placeholder="Course Code" value="${data.courseCode || ''}" data-field="courseCode">
+              <input type="text" class="autosave-field" placeholder="Semester/Year" value="${data.semester || ''}" data-field="semester">
+              <textarea class="autosave-field" placeholder="Lab Supervision Details" data-field="labDetails">${data.labDetails || ''}</textarea>
             </div>
           `;
           break;
@@ -532,12 +599,12 @@
         case 'grant':
           content = `
             <div class="list-item-content">
-              <input type="text" placeholder="Project Title" value="${data.projectTitle || ''}" data-field="projectTitle">
-              <input type="text" placeholder="Role (PI/Co-PI)" value="${data.role || ''}" data-field="role">
-              <input type="text" placeholder="Funding Agency" value="${data.agency || ''}" data-field="agency">
-              <input type="text" placeholder="Amount" value="${data.amount || ''}" data-field="amount">
-              <input type="text" placeholder="Duration" value="${data.duration || ''}" data-field="duration">
-              <select data-field="status">
+              <input type="text" class="autosave-field" placeholder="Project Title" value="${data.projectTitle || ''}" data-field="projectTitle">
+              <input type="text" class="autosave-field" placeholder="Role (PI/Co-PI)" value="${data.role || ''}" data-field="role">
+              <input type="text" class="autosave-field" placeholder="Funding Agency" value="${data.agency || ''}" data-field="agency">
+              <input type="text" class="autosave-field" placeholder="Amount" value="${data.amount || ''}" data-field="amount">
+              <input type="text" class="autosave-field" placeholder="Duration" value="${data.duration || ''}" data-field="duration">
+              <select class="autosave-field" data-field="status">
                 <option value="ongoing" ${data.status === 'ongoing' ? 'selected' : ''}>Ongoing</option>
                 <option value="completed" ${data.status === 'completed' ? 'selected' : ''}>Completed</option>
               </select>
@@ -548,10 +615,10 @@
         case 'award':
           content = `
             <div class="list-item-content">
-              <input type="text" placeholder="Award Title" value="${data.title || ''}" data-field="title">
-              <input type="text" placeholder="Awarding Organization" value="${data.organization || ''}" data-field="organization">
-              <input type="text" placeholder="Year" value="${data.year || ''}" data-field="year">
-              <textarea placeholder="Description" data-field="description">${data.description || ''}</textarea>
+              <input type="text" class="autosave-field" placeholder="Award Title" value="${data.title || ''}" data-field="title">
+              <input type="text" class="autosave-field" placeholder="Awarding Organization" value="${data.organization || ''}" data-field="organization">
+              <input type="text" class="autosave-field" placeholder="Year" value="${data.year || ''}" data-field="year">
+              <textarea class="autosave-field" placeholder="Description" data-field="description">${data.description || ''}</textarea>
             </div>
           `;
           break;
@@ -559,7 +626,15 @@
       
       item.innerHTML = content + '<button class="remove-btn">×</button>';
       
-      item.querySelector('.remove-btn').onclick = () => item.remove();
+      item.querySelector('.remove-btn').onclick = () => {
+        item.remove();
+        triggerAutosave();
+      };
+
+      // Add autosave listeners to new fields
+      item.querySelectorAll('.autosave-field').forEach(field => {
+        field.addEventListener('input', triggerAutosave);
+      });
       
       return item;
     }
@@ -567,22 +642,27 @@
     // Add button handlers
     document.getElementById('addDegreeBtn').onclick = () => {
       document.getElementById('degreesList').appendChild(createListItem('degree'));
+      triggerAutosave();
     };
 
     document.getElementById('addEmploymentBtn').onclick = () => {
       document.getElementById('employmentList').appendChild(createListItem('employment'));
+      triggerAutosave();
     };
 
     document.getElementById('addCourseBtn').onclick = () => {
       document.getElementById('coursesList').appendChild(createListItem('course'));
+      triggerAutosave();
     };
 
     document.getElementById('addGrantBtn').onclick = () => {
       document.getElementById('grantsList').appendChild(createListItem('grant'));
+      triggerAutosave();
     };
 
     document.getElementById('addAwardBtn').onclick = () => {
       document.getElementById('awardsList').appendChild(createListItem('award'));
+      triggerAutosave();
     };
 
     // Collect list data
@@ -597,8 +677,22 @@
       });
     }
 
-    // Save profile
-    document.getElementById('saveProfileBtn').onclick = async () => {
+    // Autosave function
+    function triggerAutosave() {
+      clearTimeout(autosaveTimeout);
+      updateAutosaveStatus('saving');
+      
+      autosaveTimeout = setTimeout(async () => {
+        await saveProfile(true);
+      }, 2000); // Save after 2 seconds of inactivity
+    }
+
+    // Save profile function
+    async function saveProfile(isAutosave = false) {
+      if (isSaving) return;
+      
+      isSaving = true;
+      
       const profileData = {
         userEmail: userEmail,
         fullName: document.getElementById('fullName').value,
@@ -633,14 +727,32 @@
         const result = await response.json();
         
         if (response.ok) {
-          showNotification('Profile saved successfully!', 'success');
+          updateAutosaveStatus('saved');
+          if (!isAutosave) {
+            showNotification('Profile saved successfully!', 'success');
+          }
         } else {
-          showNotification(result.error || 'Failed to save profile', 'error');
+          updateAutosaveStatus('error', 'Save failed');
+          if (!isAutosave) {
+            showNotification(result.error || 'Failed to save profile', 'error');
+          }
         }
       } catch (error) {
         console.error('Save error:', error);
-        showNotification('Error saving profile', 'error');
+        updateAutosaveStatus('error', 'Network error');
+        if (!isAutosave) {
+          showNotification('Error saving profile', 'error');
+        }
+      } finally {
+        isSaving = false;
       }
+    }
+
+    // Manual save button
+    document.getElementById('saveProfileBtn').onclick = async () => {
+      clearTimeout(autosaveTimeout);
+      updateAutosaveStatus('saving', 'Saving...');
+      await saveProfile(false);
     };
 
     // Load profile
@@ -709,9 +821,21 @@
       window.location.href = '/dashboard';
     };
 
+    // Setup autosave listeners on all form fields
+    function setupAutosaveListeners() {
+      const fields = document.querySelectorAll('input, textarea, select');
+      fields.forEach(field => {
+        if (!field.classList.contains('autosave-field')) {
+          field.addEventListener('input', triggerAutosave);
+        }
+      });
+    }
+
     // Initialize
-    loadProfile();
+    loadProfile().then(() => {
+      setupAutosaveListeners();
+      updateAutosaveStatus('saved');
+    });
   </script>
 </body>
 </html>
-
