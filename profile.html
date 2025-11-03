@@ -517,6 +517,7 @@
     let userEmail = sessionStorage.getItem('userEmail');
     let autosaveTimeout = null;
     let isSaving = false;
+    let statusTimeout = null;
 
     if (!userEmail) {
       alert('Please log in first');
