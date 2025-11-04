@@ -329,7 +329,7 @@
           <span>Back to Projects</span>
         </a>
         <button class="edit-btn" id="editBtn" onclick="toggleEditMode()">✏️ Edit</button>
-        <button class="save-btn" id="saveBtn" style="display: none;" onclick="saveChanges()">Save Changes</button>
+        <button class="save-btn" id="saveBtn" style="display: none;" onclick="saveChanges()">💾 Save Changes</button>
         <button class="cancel-btn" id="cancelBtn" style="display: none;" onclick="cancelEdit()">✕ Cancel</button>
       </div>
     </div>
@@ -651,27 +651,27 @@
               <h3>Client Contact</h3>
               <div class="info-item">
                 <span class="info-label">Name & Title</span>
-                <input type="text" id="edit-colleagueName" value="${data.colleagueName || ''}" placeholder="Full name and title">
+                <input type="text" id="edit-colleagueName" value="${escapeHtml(data.colleagueName || '')}" placeholder="Full name and title">
               </div>
               <div class="info-item">
                 <span class="info-label">Email</span>
-                <input type="email" id="edit-colleagueEmail" value="${data.colleagueEmail || ''}" placeholder="Email address">
+                <input type="email" id="edit-colleagueEmail" value="${escapeHtml(data.colleagueEmail || '')}" placeholder="Email address">
               </div>
               <div class="info-item">
                 <span class="info-label">Phone</span>
-                <input type="tel" id="edit-colleaguePhone" value="${data.colleaguePhone || ''}" placeholder="Phone number">
+                <input type="tel" id="edit-colleaguePhone" value="${escapeHtml(data.colleaguePhone || '')}" placeholder="Phone number">
               </div>
               <div class="info-item">
                 <span class="info-label">Address Line 1</span>
-                <input type="text" id="edit-colleagueAddress1" value="${data.colleagueAddress1 || ''}" placeholder="Street address">
+                <input type="text" id="edit-colleagueAddress1" value="${escapeHtml(data.colleagueAddress1 || '')}" placeholder="Street address">
               </div>
               <div class="info-item">
                 <span class="info-label">Address Line 2</span>
-                <input type="text" id="edit-colleagueAddress2" value="${data.colleagueAddress2 || ''}" placeholder="Apt, suite, etc.">
+                <input type="text" id="edit-colleagueAddress2" value="${escapeHtml(data.colleagueAddress2 || '')}" placeholder="Apt, suite, etc.">
               </div>
               <div class="info-item">
                 <span class="info-label">City, State, ZIP</span>
-                <input type="text" id="edit-colleagueAddress3" value="${data.colleagueAddress3 || ''}" placeholder="City, State, ZIP">
+                <input type="text" id="edit-colleagueAddress3" value="${escapeHtml(data.colleagueAddress3 || '')}" placeholder="City, State, ZIP">
               </div>
             </div>
 
@@ -679,27 +679,27 @@
               <h3>Your Contact Information</h3>
               <div class="info-item">
                 <span class="info-label">Name & Title</span>
-                <input type="text" id="edit-yourName" value="${data.yourName || ''}" placeholder="Your name and title">
+                <input type="text" id="edit-yourName" value="${escapeHtml(data.yourName || '')}" placeholder="Your name and title">
               </div>
               <div class="info-item">
                 <span class="info-label">Email</span>
-                <input type="email" id="edit-yourEmail" value="${data.yourEmail || userEmail}" placeholder="Your email">
+                <input type="email" id="edit-yourEmail" value="${escapeHtml(data.yourEmail || userEmail)}" placeholder="Your email">
               </div>
               <div class="info-item">
                 <span class="info-label">Phone</span>
-                <input type="tel" id="edit-yourPhone" value="${data.yourPhone || ''}" placeholder="Your phone">
+                <input type="tel" id="edit-yourPhone" value="${escapeHtml(data.yourPhone || '')}" placeholder="Your phone">
               </div>
               <div class="info-item">
                 <span class="info-label">Address Line 1</span>
-                <input type="text" id="edit-yourAddress1" value="${data.yourAddress1 || ''}" placeholder="Street address">
+                <input type="text" id="edit-yourAddress1" value="${escapeHtml(data.yourAddress1 || '')}" placeholder="Street address">
               </div>
               <div class="info-item">
                 <span class="info-label">Address Line 2</span>
-                <input type="text" id="edit-yourAddress2" value="${data.yourAddress2 || ''}" placeholder="Apt, suite, etc.">
+                <input type="text" id="edit-yourAddress2" value="${escapeHtml(data.yourAddress2 || '')}" placeholder="Apt, suite, etc.">
               </div>
               <div class="info-item">
                 <span class="info-label">City, State, ZIP</span>
-                <input type="text" id="edit-yourAddress3" value="${data.yourAddress3 || ''}" placeholder="City, State, ZIP">
+                <input type="text" id="edit-yourAddress3" value="${escapeHtml(data.yourAddress3 || '')}" placeholder="City, State, ZIP">
               </div>
             </div>
           </div>
@@ -716,11 +716,11 @@
               <h3>Target Audience</h3>
               <div class="info-item">
                 <span class="info-label">Primary Demographic</span>
-                <input type="text" id="edit-primaryAudience" value="${data.primaryAudience || ''}" placeholder="Primary audience">
+                <input type="text" id="edit-primaryAudience" value="${escapeHtml(data.primaryAudience || '')}" placeholder="Primary audience">
               </div>
               <div class="info-item">
                 <span class="info-label">Secondary Demographic</span>
-                <input type="text" id="edit-secondaryAudience" value="${data.secondaryAudience || ''}" placeholder="Secondary audience">
+                <input type="text" id="edit-secondaryAudience" value="${escapeHtml(data.secondaryAudience || '')}" placeholder="Secondary audience">
               </div>
             </div>
           </div>
@@ -770,7 +770,7 @@
           <div class="info-card">
             <div class="info-item">
               <span class="info-label">Reviewer Name & Title</span>
-              <input type="text" id="edit-clientName" value="${data.clientName || ''}" placeholder="Reviewer name">
+              <input type="text" id="edit-clientName" value="${escapeHtml(data.clientName || '')}" placeholder="Reviewer name">
             </div>
             <div class="info-item">
               <span class="info-label">Review Date</span>
@@ -782,7 +782,7 @@
             </div>
             <div class="info-item">
               <span class="info-label">Digital Signature</span>
-              <input type="text" id="edit-approvalSignature" value="${data.approvalSignature || ''}" placeholder="Type name for signature">
+              <input type="text" id="edit-approvalSignature" value="${escapeHtml(data.approvalSignature || '')}" placeholder="Type name for signature">
             </div>
           </div>
         </div>
@@ -819,45 +819,65 @@
       }
     }
 
+    function getElementValue(id) {
+      const element = document.getElementById(id);
+      return element ? element.value.trim() : '';
+    }
+
     async function saveChanges() {
+      // Collect all form data explicitly
       const formData = {
-        notes: document.getElementById('edit-notes')?.value || '',
-        colleagueName: document.getElementById('edit-colleagueName')?.value || '',
-        colleaguePhone: document.getElementById('edit-colleaguePhone')?.value || '',
-        colleagueEmail: document.getElementById('edit-colleagueEmail')?.value || '',
-        colleagueAddress1: document.getElementById('edit-colleagueAddress1')?.value || '',
-        colleagueAddress2: document.getElementById('edit-colleagueAddress2')?.value || '',
-        colleagueAddress3: document.getElementById('edit-colleagueAddress3')?.value || '',
-        yourName: document.getElementById('edit-yourName')?.value || '',
-        yourPhone: document.getElementById('edit-yourPhone')?.value || '',
-        yourEmail: document.getElementById('edit-yourEmail')?.value || '',
-        yourAddress1: document.getElementById('edit-yourAddress1')?.value || '',
-        yourAddress2: document.getElementById('edit-yourAddress2')?.value || '',
-        yourAddress3: document.getElementById('edit-yourAddress3')?.value || '',
-        objectives: document.getElementById('edit-objectives')?.value || '',
-        timeline: document.getElementById('edit-timeline')?.value || '',
-        primaryAudience: document.getElementById('edit-primaryAudience')?.value || '',
-        secondaryAudience: document.getElementById('edit-secondaryAudience')?.value || '',
-        callAction: document.getElementById('edit-callAction')?.value || '',
-        competition: document.getElementById('edit-competition')?.value || '',
-        graphics: document.getElementById('edit-graphics')?.value || '',
-        photography: document.getElementById('edit-photography')?.value || '',
-        multimedia: document.getElementById('edit-multimedia')?.value || '',
-        otherInfo: document.getElementById('edit-otherInfo')?.value || '',
-        clientName: document.getElementById('edit-clientName')?.value || '',
-        approvalDate: document.getElementById('edit-approvalDate')?.value || '',
-        clientComments: document.getElementById('edit-clientComments')?.value || '',
-        approvalSignature: document.getElementById('edit-approvalSignature')?.value || ''
+        notes: getElementValue('edit-notes'),
+        objectives: getElementValue('edit-objectives'),
+        colleagueName: getElementValue('edit-colleagueName'),
+        colleagueEmail: getElementValue('edit-colleagueEmail'),
+        colleaguePhone: getElementValue('edit-colleaguePhone'),
+        colleagueAddress1: getElementValue('edit-colleagueAddress1'),
+        colleagueAddress2: getElementValue('edit-colleagueAddress2'),
+        colleagueAddress3: getElementValue('edit-colleagueAddress3'),
+        yourName: getElementValue('edit-yourName'),
+        yourEmail: getElementValue('edit-yourEmail'),
+        yourPhone: getElementValue('edit-yourPhone'),
+        yourAddress1: getElementValue('edit-yourAddress1'),
+        yourAddress2: getElementValue('edit-yourAddress2'),
+        yourAddress3: getElementValue('edit-yourAddress3'),
+        timeline: getElementValue('edit-timeline'),
+        primaryAudience: getElementValue('edit-primaryAudience'),
+        secondaryAudience: getElementValue('edit-secondaryAudience'),
+        callAction: getElementValue('edit-callAction'),
+        competition: getElementValue('edit-competition'),
+        graphics: getElementValue('edit-graphics'),
+        photography: getElementValue('edit-photography'),
+        multimedia: getElementValue('edit-multimedia'),
+        otherInfo: getElementValue('edit-otherInfo'),
+        clientName: getElementValue('edit-clientName'),
+        approvalDate: getElementValue('edit-approvalDate'),
+        clientComments: getElementValue('edit-clientComments'),
+        approvalSignature: getElementValue('edit-approvalSignature')
       };
 
+      // Debug log
+      console.log('Form data being saved:', formData);
+
       try {
-        document.getElementById('saveBtn').textContent = 'Saving...';
+        document.getElementById('saveBtn').textContent = '💾 Saving...';
         document.getElementById('saveBtn').disabled = true;
 
-        await apiCall(`/projects/${projectId}/description`, {
+        const response = await fetch(`${API_BASE}/projects/${projectId}/description`, {
           method: "PUT",
+          headers: {
+            'Content-Type': 'application/json'
+          },
           body: JSON.stringify(formData)
         });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || `HTTP ${response.status}: ${response.statusText}`);
+        }
+
+        const result = await response.json();
+        console.log('Save result:', result);
 
         // Update original data with saved values
         originalData = { ...formData };
@@ -877,9 +897,9 @@
         
       } catch (error) {
         console.error("Failed to save description:", error);
-        showNotification("Failed to save description. Please try again.", "error");
+        showNotification("Failed to save: " + error.message, "error");
       } finally {
-        document.getElementById('saveBtn').textContent = 'Save Changes';
+        document.getElementById('saveBtn').textContent = '💾 Save Changes';
         document.getElementById('saveBtn').disabled = false;
       }
     }
@@ -901,15 +921,20 @@
         document.getElementById('pageTitle').textContent = `${projectName} - Description`;
 
         // Load description data
-        const description = await apiCall(`/projects/${projectId}/description`);
-        
-        // Store original data
-        originalData = description || {};
+        try {
+          const description = await apiCall(`/projects/${projectId}/description`);
+          originalData = description || {};
+        } catch (error) {
+          console.log('No existing description, starting fresh');
+          originalData = {};
+        }
         
         // Pre-fill user email if not set
         if (!originalData.yourEmail) {
           originalData.yourEmail = userEmail;
         }
+
+        console.log('Loaded data:', originalData);
 
         // Render view mode
         renderViewMode(originalData);
