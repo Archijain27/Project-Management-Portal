@@ -447,14 +447,53 @@ app.get("/meetings/:email", async (req, res) => {
   }
 });
 
-// ===================== PROJECT DESCRIPTION API =====================
+// ===================== PROJECT DESCRIPTION API (FIXED) =====================
 app.get("/projects/:id/description", async (req, res) => {
   try {
     const result = await pool.query(
       "SELECT * FROM projects WHERE id = $1",
       [req.params.id]
     );
-    res.json(result.rows[0] || {});
+    
+    if (result.rows.length === 0) {
+      return res.json({});
+    }
+    
+    const row = result.rows[0];
+    
+    // Convert snake_case to camelCase for frontend
+    const description = {
+      projectTitle: row.project_title,
+      notes: row.notes,
+      colleagueName: row.colleague_name,
+      colleaguePhone: row.colleague_phone,
+      colleagueEmail: row.colleague_email,
+      colleagueAddress1: row.colleague_address1,
+      colleagueAddress2: row.colleague_address2,
+      colleagueAddress3: row.colleague_address3,
+      yourName: row.your_name,
+      yourPhone: row.your_phone,
+      yourEmail: row.your_email,
+      yourAddress1: row.your_address1,
+      yourAddress2: row.your_address2,
+      yourAddress3: row.your_address3,
+      objectives: row.objectives,
+      timeline: row.timeline,
+      primaryAudience: row.primary_audience,
+      secondaryAudience: row.secondary_audience,
+      callAction: row.call_action,
+      competition: row.competition,
+      graphics: row.graphics,
+      photography: row.photography,
+      multimedia: row.multimedia,
+      otherInfo: row.other_info,
+      clientName: row.client_name,
+      clientComments: row.client_comments,
+      approvalDate: row.approval_date,
+      approvalSignature: row.approval_signature
+    };
+    
+    res.json(description);
   } catch (error) {
     console.error('Error fetching description:', error);
     res.status(500).json({ error: "Error fetching description." });
@@ -470,6 +509,9 @@ app.put("/projects/:id/description", async (req, res) => {
     competition, graphics, photography, multimedia, otherInfo, clientName, 
     clientComments, approvalDate, approvalSignature 
   } = req.body;
+  
+  console.log('Received update request for project:', req.params.id);
+  console.log('Data received:', req.body);
  
   try {
     const result = await pool.query(
@@ -480,7 +522,8 @@ app.put("/projects/:id/description", async (req, res) => {
         objectives = $15, timeline = $16, primary_audience = $17, secondary_audience = $18, call_action = $19,
         competition = $20, graphics = $21, photography = $22, multimedia = $23, other_info = $24,
         client_name = $25, client_comments = $26, approval_date = $27, approval_signature = $28
-        WHERE id = $29`,
+        WHERE id = $29
+        RETURNING *`,
       [
         projectTitle, notes, colleagueName, colleaguePhone, colleagueEmail, 
         colleagueAddress1, colleagueAddress2, colleagueAddress3, yourName, 
@@ -490,10 +533,46 @@ app.put("/projects/:id/description", async (req, res) => {
         clientComments, approvalDate, approvalSignature, req.params.id
       ]
     );
-    res.json({ updated: result.rowCount });
+    
+    console.log('Update successful, rows affected:', result.rowCount);
+    
+    // Return the updated data in camelCase format
+    const row = result.rows[0];
+    const updatedDescription = {
+      projectTitle: row.project_title,
+      notes: row.notes,
+      colleagueName: row.colleague_name,
+      colleaguePhone: row.colleague_phone,
+      colleagueEmail: row.colleague_email,
+      colleagueAddress1: row.colleague_address1,
+      colleagueAddress2: row.colleague_address2,
+      colleagueAddress3: row.colleague_address3,
+      yourName: row.your_name,
+      yourPhone: row.your_phone,
+      yourEmail: row.your_email,
+      yourAddress1: row.your_address1,
+      yourAddress2: row.your_address2,
+      yourAddress3: row.your_address3,
+      objectives: row.objectives,
+      timeline: row.timeline,
+      primaryAudience: row.primary_audience,
+      secondaryAudience: row.secondary_audience,
+      callAction: row.call_action,
+      competition: row.competition,
+      graphics: row.graphics,
+      photography: row.photography,
+      multimedia: row.multimedia,
+      otherInfo: row.other_info,
+      clientName: row.client_name,
+      clientComments: row.client_comments,
+      approvalDate: row.approval_date,
+      approvalSignature: row.approval_signature
+    };
+    
+    res.json({ updated: result.rowCount, data: updatedDescription });
   } catch (error) {
     console.error('Update error:', error);
-    res.status(500).json({ error: "Error updating description." });
+    res.status(500).json({ error: "Error updating description.", details: error.message });
   }
 });
 
@@ -1518,3 +1597,4 @@ process.on('uncaughtException', (error) => {
   console.error('Uncaught Exception:', error);
   process.exit(1);
 });
+
