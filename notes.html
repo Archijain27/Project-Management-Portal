@@ -188,6 +188,10 @@
       flex: 1;
     }
 
+    .note-title:hover {
+      color: #4f46e5;
+    }
+
     .note-actions {
       display: flex;
       gap: 8px;
@@ -757,10 +761,11 @@
   <div class="modal" id="textModal">
     <div class="modal-content">
       <div class="modal-header">
-        <h2>Add Text Note</h2>
+        <h2 id="textModalTitle">Add Text Note</h2>
         <button class="close-btn" onclick="closeTextModal()">×</button>
       </div>
       <form id="textForm" onsubmit="saveTextNote(event)">
+        <input type="hidden" id="editNoteId">
         <div class="form-group">
           <label>Title *</label>
           <input type="text" id="textTitle" required>
@@ -774,6 +779,22 @@
           <button type="submit" class="btn-save">Save Note</button>
         </div>
       </form>
+    </div>
+  </div>
+
+  <!-- View Note Modal -->
+  <div class="modal" id="viewModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="viewNoteTitle"></h2>
+        <button class="close-btn" onclick="closeViewModal()">×</button>
+      </div>
+      <div class="note-meta" id="viewNoteMeta" style="margin-bottom: 20px;"></div>
+      <div id="viewNoteContent" style="color: #4b5563; line-height: 1.8; white-space: pre-wrap;"></div>
+      <div class="form-actions" style="margin-top: 30px;">
+        <button class="btn-cancel" onclick="closeViewModal()">Close</button>
+        <button class="btn-save" onclick="editFromView()">Edit Note</button>
+      </div>
     </div>
   </div>
 
@@ -899,9 +920,10 @@
         return `
           <div class="note-card ${note.type}">
             <div class="note-header">
-              <div class="note-title">${note.title}</div>
+              <div class="note-title" onclick="${isVoice ? '' : `viewNote('${note.id}')`}" style="${isVoice ? '' : 'cursor: pointer;'}">${note.title}</div>
               <div class="note-actions">
-                <button class="icon-btn delete" onclick="deleteNote('${note.id}', '${note.type}')" title="Delete">🗑️</button>
+                ${!isVoice ? `<button class="icon-btn" onclick="event.stopPropagation(); editNote('${note.id}')" title="Edit">✏️</button>` : ''}
+                <button class="icon-btn delete" onclick="event.stopPropagation(); deleteNote('${note.id}', '${note.type}')" title="Delete">🗑️</button>
               </div>
             </div>
             <div class="note-meta">
@@ -925,7 +947,7 @@
                 </div>
               </div>
             ` : ''}
-            ${!isVoice && note.content ? `<div class="note-content">${note.content.substring(0, 200)}${note.content.length > 200 ? '...' : ''}</div>` : ''}
+            ${!isVoice && note.content ? `<div class="note-content" onclick="${!isVoice ? `viewNote('${note.id}')` : ''}" style="cursor: pointer;">${note.content.substring(0, 200)}${note.content.length > 200 ? '...' : ''}</div>` : ''}
           </div>
         `;
       }).join('');
@@ -1141,13 +1163,67 @@
     }
 
     function openTextModal() {
+      document.getElementById('textModalTitle').textContent = 'Add Text Note';
+      document.getElementById('editNoteId').value = '';
       document.getElementById('textModal').classList.add('active');
     }
 
     function closeTextModal() {
       document.getElementById('textModal').classList.remove('active');
       document.getElementById('textForm').reset();
+      document.getElementById('editNoteId').value = '';
     }
+
+    function openViewModal() {
+      document.getElementById('viewModal').classList.add('active');
+    }
+
+    function closeViewModal() {
+      document.getElementById('viewModal').classList.remove('active');
+    }
+
+    window.viewNote = (id) => {
+      const note = allNotes.find(n => n.id === id && n.type === 'text');
+      if (!note) return;
+
+      const date = new Date(note.created_date).toLocaleDateString('en-US', { 
+        month: 'long', 
+        day: 'numeric', 
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+
+      document.getElementById('viewNoteTitle').textContent = note.title;
+      document.getElementById('viewNoteMeta').innerHTML = `
+        <span class="meta-item">📅 ${date}</span>
+        <span class="type-badge type-text">TEXT</span>
+      `;
+      document.getElementById('viewNoteContent').textContent = note.content || 'No content';
+      
+      // Store current note ID for edit function
+      document.getElementById('viewModal').dataset.noteId = id;
+      
+      openViewModal();
+    };
+
+    window.editNote = (id) => {
+      const note = allNotes.find(n => n.id === id && n.type === 'text');
+      if (!note) return;
+
+      document.getElementById('textModalTitle').textContent = 'Edit Text Note';
+      document.getElementById('editNoteId').value = id;
+      document.getElementById('textTitle').value = note.title;
+      document.getElementById('textContent').value = note.content || '';
+      
+      document.getElementById('textModal').classList.add('active');
+    };
+
+    window.editFromView = () => {
+      const noteId = document.getElementById('viewModal').dataset.noteId;
+      closeViewModal();
+      editNote(noteId);
+    };
 
     async function initializeMediaRecorder() {
       try {
@@ -1362,22 +1438,37 @@
 
       const title = document.getElementById('textTitle').value.trim();
       const content = document.getElementById('textContent').value.trim();
+      const editId = document.getElementById('editNoteId').value;
 
       try {
-        await fetch(`${API_BASE}/notes`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            user_email: userEmail,
-            title: title,
-            content: content,
-            created_date: new Date().toISOString()
-          })
-        });
+        if (editId) {
+          // Update existing note
+          await fetch(`${API_BASE}/notes/${editId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              title: title,
+              content: content
+            })
+          });
+          showToast('Note updated successfully!');
+        } else {
+          // Create new note
+          await fetch(`${API_BASE}/notes`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              user_email: userEmail,
+              title: title,
+              content: content,
+              created_date: new Date().toISOString()
+            })
+          });
+          showToast('Note saved successfully!');
+        }
 
         closeTextModal();
         loadAllNotes();
-        showToast('Note saved successfully!');
       } catch (error) {
         console.error('Error saving note:', error);
         showToast('Failed to save note', true);
@@ -1416,6 +1507,10 @@
 
     document.getElementById('textModal').addEventListener('click', (e) => {
       if (e.target.id === 'textModal') closeTextModal();
+    });
+
+    document.getElementById('viewModal').addEventListener('click', (e) => {
+      if (e.target.id === 'viewModal') closeViewModal();
     });
 
     // Cleanup on page unload
