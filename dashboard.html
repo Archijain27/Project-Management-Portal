@@ -509,10 +509,27 @@
     <div class="top-bar">
       <div class="welcome-text">
         Welcome back, <span id="userEmail" style="color: var(--text-secondary); font-weight: 400;">Loading...</span>
-     
+      </div>
+      <div class="user-profile">
+        <div class="notification-icon">
+          🔔
+          <div class="notification-badge"></div>
+        </div>
+        <div class="user-avatar">
+          <div class="avatar" id="userAvatar">MR</div>
+          <div class="user-details">
+            <div class="user-name" id="userName">Maria Rodriguez</div>
+            <div class="user-role">UX Designer</div>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <div id="dashboardView">
-      
+      <div class="dashboard-header">
+        <h1>Your Projects</h1>
+      </div>
+     
       <div class="dashboard-grid">
         <!-- Projects Tile -->
         <div class="dashboard-tile projects" data-tile="projects">
@@ -522,6 +539,7 @@
               <h3 class="tile-title">Your Projects</h3>
               <p class="tile-description">Manage all your projects in one centralized hub. Track members, view details, and monitor progress.</p>
             </div>
+            <div class="tile-action-icon">🚀</div>
           </div>
           <div class="tile-content" id="projects-content">
             <div class="loading">Loading projects...</div>
@@ -539,7 +557,7 @@
               <h3 class="tile-title">Recent Ideas</h3>
               <p class="tile-description">Capture and organize your brilliant ideas. Never lose a creative thought again.</p>
             </div>
-          
+            <div class="tile-action-icon">💡</div>
           </div>
           <div class="tile-content" id="ideas-content">
             <div class="loading">Loading ideas...</div>
@@ -557,7 +575,7 @@
               <h3 class="tile-title">Quick Notes</h3>
               <p class="tile-description">Take quick notes on the fly and access them instantly whenever you need them.</p>
             </div>
-        
+            <div class="tile-action-icon">✏️</div>
           </div>
           <div class="tile-content" id="notes-content">
             <div class="loading">Loading notes...</div>
@@ -575,7 +593,7 @@
               <h3 class="tile-title">Deadlines</h3>
               <p class="tile-description">Stay on top of all your deadlines with smart notifications and visual tracking.</p>
             </div>
-           
+            <div class="tile-action-icon">🔔</div>
           </div>
           <div class="tile-content" id="deadlines-content">
             <div class="loading">Loading deadlines...</div>
@@ -593,7 +611,7 @@
               <h3 class="tile-title">Future Work</h3>
               <p class="tile-description">Plan and organize your future work ideas, upcoming tasks, and long-term projects.</p>
             </div>
-       
+            <div class="tile-action-icon">🚀</div>
           </div>
           <div class="tile-content" id="future-content">
             <div class="loading">Loading future work...</div>
@@ -611,7 +629,7 @@
               <h3 class="tile-title">Career & Goals</h3>
               <p class="tile-description">Set, track, and achieve your career aspirations and personal goals.</p>
             </div>
-
+            <div class="tile-action-icon">🎯</div>
           </div>
           <div class="tile-content" id="career-content">
             <div class="loading">Loading goals...</div>
@@ -843,4 +861,3 @@
   </script>
 </body>
 </html>
-
