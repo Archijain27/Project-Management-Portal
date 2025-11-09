@@ -5,147 +5,296 @@
   <title>Dashboard</title>
   <style>
     :root{
-      --accent:#3b82f6;
-      --accent-2:#2563eb;
-      --bg:#f0f9ff;
+      --accent:#6366f1;
+      --accent-2:#4f46e5;
+      --bg:#f8f9fc;
       --card:#ffffff;
       --muted:#64748b;
-      --event-bg: rgba(59,130,246,0.12);
+      --text-primary:#0f172a;
+      --text-secondary:#475569;
+      --sidebar-bg:#ffffff;
+      --border:#e2e8f0;
     }
    
+    * {
+      box-sizing: border-box;
+    }
+
     body {
       margin: 0;
-      font-family: Arial, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', sans-serif;
       display: flex;
       height: 100vh;
       background: var(--bg);
+      color: var(--text-primary);
     }
    
     .sidebar {
-      width: 220px;
-      background: linear-gradient(180deg, #3b82f6, #2563eb);
-      color: white;
-      padding: 20px 15px;
+      width: 240px;
+      background: var(--sidebar-bg);
+      color: var(--text-primary);
+      padding: 24px 0;
       display: flex;
       flex-direction: column;
-      box-shadow: 3px 0 10px rgba(0,0,0,0.15);
+      box-shadow: 1px 0 0 var(--border);
+      position: relative;
     }
 
-    .sidebar h2 {
-      margin-top: 5px;
-      font-size: 1.7rem;
+    .sidebar-logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 0 24px;
+      margin-bottom: 32px;
+    }
+
+    .sidebar-logo-icon {
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
       font-weight: bold;
-      text-align: center;
-      letter-spacing: 1px;
+      font-size: 18px;
+    }
+
+    .sidebar-logo-text {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--text-primary);
     }
 
     .sidebar ul {
       list-style: none;
       padding: 0;
-      margin: 15px 0;
+      margin: 0;
+      flex: 1;
     }
 
     .sidebar li {
-      margin: 12px 0;
-      padding: 10px 15px;
+      margin: 4px 16px;
+      padding: 10px 16px;
       border-radius: 8px;
       cursor: pointer;
-      font-size: 1.2rem;
+      font-size: 0.938rem;
+      font-weight: 500;
       display: flex;
       align-items: center;
-      gap: 10px;
-      transition: background 0.3s, transform 0.2s;
+      gap: 12px;
+      transition: all 0.2s;
+      color: var(--text-secondary);
     }
 
     .sidebar li:hover {
-      background: rgba(255,255,255,0.15);
-      transform: translateX(5px);
+      background: #f1f5f9;
+      color: var(--text-primary);
     }
 
     .sidebar li.active {
-      background: rgba(255,255,255,0.2);
+      background: #eef2ff;
+      color: var(--accent);
     }
 
-    .sidebar li:last-child {
+    .sidebar li::before {
+      content: '';
+      width: 20px;
+      height: 20px;
+      display: inline-block;
+      opacity: 0.8;
+    }
+
+    #menu-dashboard::before { content: '📊'; }
+    #menu-calendar::before { content: '📅'; }
+    .sidebar li:nth-child(3)::before { content: '📄'; }
+    #menu-profile::before { content: '👤'; }
+    #menu-aboutus::before { content: 'ℹ️'; }
+    #logout::before { content: '🚪'; }
+
+    #logout {
       margin-top: auto;
-      background: transparent;
-      color: inherit;
-      font-weight: normal;
+      color: #ef4444;
+      font-weight: 500;
+    }
+
+    #logout:hover {
+      background: #fef2f2;
     }
 
     .main {
       flex: 1;
-      padding: 30px;
+      padding: 40px;
       background: var(--bg);
       overflow-y: auto;
     }
 
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 32px;
+    }
+
+    .welcome-text {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .user-profile {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .notification-icon {
+      position: relative;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--card);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .notification-icon:hover {
+      background: #f8fafc;
+    }
+
+    .notification-badge {
+      position: absolute;
+      top: -2px;
+      right: -2px;
+      width: 8px;
+      height: 8px;
+      background: #ef4444;
+      border-radius: 50%;
+      border: 2px solid white;
+    }
+
+    .user-avatar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+    }
+
+    .avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 600;
+      font-size: 0.875rem;
+    }
+
+    .user-details {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .user-name {
+      font-weight: 600;
+      font-size: 0.875rem;
+      color: var(--text-primary);
+    }
+
+    .user-role {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+    }
+
     .dashboard-header {
-      margin-bottom: 30px;
+      margin-bottom: 32px;
     }
 
     .dashboard-header h1 {
-      font-size: 2.5rem;
-      color: #333;
-      margin: 0 0 10px 0;
-      font-weight: 700;
-    }
-
-    .dashboard-header p {
-      color: var(--muted);
-      font-size: 1.1rem;
+      font-size: 1.125rem;
+      color: var(--text-primary);
       margin: 0;
-    }
-
-    .user-info {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 20px;
-      padding: 12px 16px;
-      background: rgba(255,255,255,0.8);
-      border-radius: 8px;
-      border: 1px solid rgba(59,130,246,0.1);
-    }
-
-    .user-email {
-      color: var(--accent);
       font-weight: 600;
+      margin-bottom: 24px;
     }
 
     .dashboard-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 25px;
-      max-width: 1200px;
+      gap: 24px;
+      max-width: 100%;
     }
 
     .dashboard-tile {
       background: var(--card);
       border-radius: 16px;
       padding: 24px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
       cursor: pointer;
-      transition: transform 0.3s, box-shadow 0.3s;
-      border: 1px solid rgba(59,130,246,0.1);
+      transition: all 0.3s;
+      border: 1px solid var(--border);
       position: relative;
       overflow: hidden;
-      min-height: 220px;
+      min-height: 260px;
+      display: flex;
+      flex-direction: column;
     }
 
     .dashboard-tile:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+      transform: translateY(-4px);
+      box-shadow: 0 12px 24px rgba(0,0,0,0.1);
+      border-color: rgba(99,102,241,0.2);
     }
 
     .tile-header {
       display: flex;
-      align-items: center;
-      gap: 12px;
+      justify-content: space-between;
+      align-items: flex-start;
       margin-bottom: 20px;
     }
 
+    .tile-title-section {
+      flex: 1;
+    }
+
     .tile-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      margin-bottom: 12px;
+    }
+
+    .tile-title {
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin: 0 0 8px 0;
+    }
+
+    .tile-description {
+      font-size: 0.813rem;
+      color: var(--text-secondary);
+      line-height: 1.5;
+      margin: 0;
+    }
+
+    .tile-action-icon {
       width: 40px;
       height: 40px;
       border-radius: 10px;
@@ -153,81 +302,175 @@
       align-items: center;
       justify-content: center;
       font-size: 20px;
-      color: white;
+      transition: all 0.2s;
     }
 
-    .tile-title {
-      font-size: 1.3rem;
-      font-weight: 600;
-      color: #333;
-      margin: 0;
+    .dashboard-tile:hover .tile-action-icon {
+      transform: scale(1.1);
     }
 
     .tile-content {
-      color: var(--muted);
+      color: var(--text-secondary);
       line-height: 1.6;
+      flex: 1;
+      font-size: 0.875rem;
     }
 
     .tile-item {
-      background: rgba(59,130,246,0.05);
-      padding: 10px 12px;
-      border-radius: 8px;
-      margin-bottom: 8px;
-      border-left: 3px solid var(--accent);
-      font-size: 0.95rem;
+      background: transparent;
+      padding: 12px 0;
+      border-bottom: 1px solid #f1f5f9;
+      margin-bottom: 0;
+      border-left: none;
+      font-size: 0.875rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--text-primary);
     }
 
     .tile-item:last-child {
-      margin-bottom: 0;
+      border-bottom: none;
     }
 
-    .tile-count {
-      position: absolute;
-      top: 20px;
-      right: 20px;
-      background: var(--accent);
-      color: white;
+    .tile-item::before {
+      content: '';
+      width: 6px;
+      height: 6px;
       border-radius: 50%;
-      width: 30px;
-      height: 30px;
+      background: var(--accent);
+      flex-shrink: 0;
+    }
+
+    .tile-footer {
+      margin-top: auto;
+      padding-top: 16px;
+    }
+
+    .tile-button {
+      width: 100%;
+      padding: 10px;
+      border: none;
+      background: transparent;
+      color: var(--accent);
+      font-weight: 600;
+      font-size: 0.875rem;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 0.9rem;
-      font-weight: 600;
+      gap: 8px;
+    }
+
+    .tile-button:hover {
+      background: #eef2ff;
     }
 
     /* Tile-specific colors */
-    .deadlines .tile-icon { background: linear-gradient(135deg, #3b82f6, #2563eb); }
-    .ideas .tile-icon { background: linear-gradient(135deg, #60a5fa, #3b82f6); }
-    .projects .tile-icon { background: linear-gradient(135deg, #2563eb, #1d4ed8); }
-    .notes .tile-icon { background: linear-gradient(135deg, #93c5fd, #60a5fa); }
-    .career .tile-icon { background: linear-gradient(135deg, #1e40af, #1e3a8a); }
-    .future .tile-icon { background: linear-gradient(135deg, #0ea5e9, #0284c7); }
+    .projects .tile-icon { background: #eef2ff; color: #6366f1; }
+    .projects .tile-action-icon { background: #eef2ff; color: #6366f1; }
+    
+    .ideas .tile-icon { background: #fef3c7; color: #f59e0b; }
+    .ideas .tile-action-icon { background: #fef3c7; color: #f59e0b; }
+    
+    .notes .tile-icon { background: #d1fae5; color: #10b981; }
+    .notes .tile-action-icon { background: #d1fae5; color: #10b981; }
+    
+    .deadlines .tile-icon { background: #fee2e2; color: #ef4444; }
+    .deadlines .tile-action-icon { background: #fee2e2; color: #ef4444; }
+    
+    .future .tile-icon { background: #dbeafe; color: #3b82f6; }
+    .future .tile-action-icon { background: #dbeafe; color: #3b82f6; }
+    
+    .career .tile-icon { background: #f3e8ff; color: #a855f7; }
+    .career .tile-action-icon { background: #f3e8ff; color: #a855f7; }
+
+    .progress-section {
+      margin-top: 16px;
+    }
+
+    .progress-item {
+      margin-bottom: 12px;
+    }
+
+    .progress-item:last-child {
+      margin-bottom: 0;
+    }
+
+    .progress-label {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 6px;
+      font-size: 0.813rem;
+    }
+
+    .progress-title {
+      color: var(--text-primary);
+      font-weight: 500;
+    }
+
+    .progress-percent {
+      color: var(--text-secondary);
+      font-weight: 600;
+    }
+
+    .progress-bar-container {
+      width: 100%;
+      height: 6px;
+      background: #f1f5f9;
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .progress-bar {
+      height: 100%;
+      border-radius: 3px;
+      transition: width 0.3s;
+    }
+
+    .career .progress-bar {
+      background: linear-gradient(90deg, #a855f7, #c084fc);
+    }
 
     .empty-state {
       text-align: center;
-      color: var(--muted);
+      color: var(--text-secondary);
       font-style: italic;
       margin-top: 20px;
+      font-size: 0.875rem;
     }
-
 
     .loading {
       text-align: center;
-      color: var(--muted);
+      color: var(--text-secondary);
       font-style: italic;
       margin: 20px 0;
+      font-size: 0.875rem;
     }
 
     .error {
       color: #ef4444;
       text-align: center;
-      font-size: 0.9rem;
+      font-size: 0.875rem;
       margin: 10px 0;
     }
 
-    @media (max-width: 1024px) {
+    .item-count-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2px 8px;
+      background: #f1f5f9;
+      color: var(--text-secondary);
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      margin-left: auto;
+    }
+
+    @media (max-width: 1200px) {
       .dashboard-grid {
         grid-template-columns: repeat(2, 1fr);
       }
@@ -238,105 +481,161 @@
         grid-template-columns: 1fr;
       }
       .sidebar {
-        width: 180px;
+        width: 200px;
+      }
+      .main {
+        padding: 24px;
       }
     }
   </style>
 </head>
 <body>
   <div class="sidebar">
-    <h2>Menu</h2>
+    <div class="sidebar-logo">
+      <div class="sidebar-logo-icon">P</div>
+      <div class="sidebar-logo-text">Productiv.</div>
+    </div>
     <ul>
       <li id="menu-dashboard" class="active">Dashboard</li>
       <li id="menu-calendar">Calendar</li>
       <li>Research Paper</li>
       <li id="menu-profile">Profile</li>
       <li id="menu-aboutus">About Us</li>
-      <li id="logout"> Logout</li>
+      <li id="logout">Logout</li>
     </ul>
   </div>
 
   <div class="main">
+    <div class="top-bar">
+      <div class="welcome-text">
+        Welcome back, <span id="userEmail" style="color: var(--text-secondary); font-weight: 400;">Loading...</span>
+      </div>
+      <div class="user-profile">
+        <div class="notification-icon">
+          🔔
+          <div class="notification-badge"></div>
+        </div>
+        <div class="user-avatar">
+          <div class="avatar" id="userAvatar">MR</div>
+          <div class="user-details">
+            <div class="user-name" id="userName">Maria Rodriguez</div>
+            <div class="user-role">UX Designer</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div id="dashboardView">
       <div class="dashboard-header">
-        <div class="user-info">
-          <span>Welcome back,</span>
-          <span class="user-email" id="userEmail">Loading...</span>
-        </div>
-        <h1>Dashboard</h1>
-        <p>Stay organized and track your progress across all areas of life</p>
+        <h1>Your Projects</h1>
       </div>
      
       <div class="dashboard-grid">
-        <!-- Deadlines Tile -->
-        <div class="dashboard-tile deadlines" data-tile="deadlines">
-          <div class="tile-header">
-            <div class="tile-icon">⏰</div>
-            <h3 class="tile-title">Deadlines</h3>
-          </div>
-          <div class="tile-count" id="deadlines-count">0</div>
-          <div class="tile-content" id="deadlines-content">
-            <div class="loading">Loading deadlines...</div>
-          </div>
-        </div>
-
-        <!-- Recent Ideas Tile -->
-        <div class="dashboard-tile ideas" data-tile="ideas">
-          <div class="tile-header">
-            <div class="tile-icon">💡</div>
-            <h3 class="tile-title">Recent Ideas</h3>
-          </div>
-          <div class="tile-count" id="ideas-count">0</div>
-          <div class="tile-content" id="ideas-content">
-            <div class="loading">Loading ideas...</div>
-          </div>
-        </div>
-
-        <!-- Ongoing Projects Tile -->
+        <!-- Projects Tile -->
         <div class="dashboard-tile projects" data-tile="projects">
           <div class="tile-header">
-            <div class="tile-icon">🚀</div>
-            <h3 class="tile-title">Your Projects</h3>
+            <div class="tile-title-section">
+              <div class="tile-icon">🚀</div>
+              <h3 class="tile-title">Your Projects</h3>
+              <p class="tile-description">Manage all your projects in one centralized hub. Track members, view details, and monitor progress.</p>
+            </div>
+            <div class="tile-action-icon">🚀</div>
           </div>
-          <div class="tile-count" id="projects-count">0</div>
           <div class="tile-content" id="projects-content">
             <div class="loading">Loading projects...</div>
           </div>
+          <div class="tile-footer">
+            <button class="tile-button">View All Projects →</button>
+          </div>
         </div>
 
-        <!-- Quick Notes Tile -->
+        <!-- Ideas Tile -->
+        <div class="dashboard-tile ideas" data-tile="ideas">
+          <div class="tile-header">
+            <div class="tile-title-section">
+              <div class="tile-icon">💡</div>
+              <h3 class="tile-title">Recent Ideas</h3>
+              <p class="tile-description">Capture and organize your brilliant ideas. Never lose a creative thought again.</p>
+            </div>
+            <div class="tile-action-icon">💡</div>
+          </div>
+          <div class="tile-content" id="ideas-content">
+            <div class="loading">Loading ideas...</div>
+          </div>
+          <div class="tile-footer">
+            <button class="tile-button">Manage Ideas →</button>
+          </div>
+        </div>
+
+        <!-- Notes Tile -->
         <div class="dashboard-tile notes" data-tile="notes">
           <div class="tile-header">
-            <div class="tile-icon">📝</div>
-            <h3 class="tile-title">Quick Notes</h3>
+            <div class="tile-title-section">
+              <div class="tile-icon">📝</div>
+              <h3 class="tile-title">Quick Notes</h3>
+              <p class="tile-description">Take quick notes on the fly and access them instantly whenever you need them.</p>
+            </div>
+            <div class="tile-action-icon">✏️</div>
           </div>
-          <div class="tile-count" id="notes-count">0</div>
           <div class="tile-content" id="notes-content">
             <div class="loading">Loading notes...</div>
           </div>
+          <div class="tile-footer">
+            <button class="tile-button">Save Note →</button>
+          </div>
         </div>
 
-        <!-- Career Progression Tile -->
-        <div class="dashboard-tile career" data-tile="career">
+        <!-- Deadlines Tile -->
+        <div class="dashboard-tile deadlines" data-tile="deadlines">
           <div class="tile-header">
-            <div class="tile-icon">📈</div>
-            <h3 class="tile-title">Career & Goals</h3>
+            <div class="tile-title-section">
+              <div class="tile-icon">⏰</div>
+              <h3 class="tile-title">Deadlines</h3>
+              <p class="tile-description">Stay on top of all your deadlines with smart notifications and visual tracking.</p>
+            </div>
+            <div class="tile-action-icon">🔔</div>
           </div>
-          <div class="tile-count" id="career-count">0</div>
-          <div class="tile-content" id="career-content">
-            <div class="loading">Loading goals...</div>
+          <div class="tile-content" id="deadlines-content">
+            <div class="loading">Loading deadlines...</div>
+          </div>
+          <div class="tile-footer">
+            <button class="tile-button">View Deadlines →</button>
           </div>
         </div>
 
         <!-- Future Work Tile -->
         <div class="dashboard-tile future" data-tile="future">
           <div class="tile-header">
-            <div class="tile-icon">🔮</div>
-            <h3 class="tile-title">Future Work</h3>
+            <div class="tile-title-section">
+              <div class="tile-icon">🔮</div>
+              <h3 class="tile-title">Future Work</h3>
+              <p class="tile-description">Plan and organize your future work ideas, upcoming tasks, and long-term projects.</p>
+            </div>
+            <div class="tile-action-icon">🚀</div>
           </div>
-          <div class="tile-count" id="future-count">0</div>
           <div class="tile-content" id="future-content">
             <div class="loading">Loading future work...</div>
+          </div>
+          <div class="tile-footer">
+            <button class="tile-button">Plan Future →</button>
+          </div>
+        </div>
+
+        <!-- Career Tile -->
+        <div class="dashboard-tile career" data-tile="career">
+          <div class="tile-header">
+            <div class="tile-title-section">
+              <div class="tile-icon">🎯</div>
+              <h3 class="tile-title">Career & Goals</h3>
+              <p class="tile-description">Set, track, and achieve your career aspirations and personal goals.</p>
+            </div>
+            <div class="tile-action-icon">🎯</div>
+          </div>
+          <div class="tile-content" id="career-content">
+            <div class="loading">Loading goals...</div>
+          </div>
+          <div class="tile-footer">
+            <button class="tile-button">Track Goals →</button>
           </div>
         </div>
       </div>
@@ -371,8 +670,10 @@
     redirectToLogin();
   }
 
-  // Display user email
+  // Display user email and initialize avatar
   document.getElementById('userEmail').textContent = userEmail;
+  const initials = userEmail.substring(0, 2).toUpperCase();
+  document.getElementById('userAvatar').textContent = initials;
 
   // ===================== API HELPERS =====================
   async function apiCall(endpoint, options = {}) {
@@ -417,41 +718,54 @@
   function renderTile(tileType) {
     loadTileData(tileType).then(data => {
       const contentEl = document.getElementById(`${tileType}-content`);
-      const countEl = document.getElementById(`${tileType}-count`);
-      
-      countEl.textContent = data.length;
       
       if (data.length === 0) {
         contentEl.innerHTML = `<div class="empty-state">No ${tileType} yet</div>`;
         return;
       }
 
-      // Show top 3 items
+      // Special rendering for career tile with progress bars
+      if (tileType === 'career') {
+        const topItems = data.slice(0, 2);
+        contentEl.innerHTML = '<div class="progress-section">' + topItems.map(item => {
+          const title = item.title || item.name || item.content || '';
+          const progress = item.progress || 0;
+          return `
+            <div class="progress-item">
+              <div class="progress-label">
+                <span class="progress-title">${title}</span>
+                <span class="progress-percent">${progress}%</span>
+              </div>
+              <div class="progress-bar-container">
+                <div class="progress-bar" style="width: ${progress}%"></div>
+              </div>
+            </div>
+          `;
+        }).join('') + '</div>';
+        return;
+      }
+
+      // Show top 3 items for other tiles
       const topItems = data.slice(0, 3);
       contentEl.innerHTML = topItems.map(item => {
         let displayText = item.title || item.name || item.content || item.description || '';
         
-        // Add specific formatting based on tile type (REMOVED member count for projects)
+        // Add specific formatting based on tile type
         switch(tileType) {
           case 'deadlines':
             if (item.due_date) {
               const daysLeft = Math.ceil((new Date(item.due_date) - new Date()) / (1000 * 60 * 60 * 24));
-              displayText += ` (${daysLeft > 0 ? daysLeft + ' days' : 'overdue'})`;
-            }
-            break;
-          case 'career':
-            if (item.progress) {
-              displayText += ` (${item.progress}%)`;
+              displayText += ` <span style="color: ${daysLeft <= 0 ? '#ef4444' : 'var(--text-secondary)'}; font-size: 0.813rem;">(${daysLeft > 0 ? daysLeft + ' days' : 'overdue'})</span>`;
             }
             break;
           case 'ideas':
             if (item.category) {
-              displayText += ` - ${item.category}`;
+              displayText += ` <span style="color: var(--text-secondary); font-size: 0.813rem;">• ${item.category}</span>`;
             }
             break;
           case 'future':
             if (item.timeline) {
-              displayText += ` (${item.timeline})`;
+              displayText += ` <span style="color: var(--text-secondary); font-size: 0.813rem;">(${item.timeline})</span>`;
             }
             break;
         }
@@ -480,39 +794,35 @@
   const menuCalendar = document.getElementById("menu-calendar");
 
   menuDashboard.onclick = () => {
-    // Already on dashboard, just ensure it's visible
     menuDashboard.classList.add("active");
     menuCalendar.classList.remove("active");
   };
 
   menuCalendar.onclick = () => {
-    // Redirect to Outlook Calendar page
     window.location.href = '/outlook-calendar.html';
   };
-  // Profile menu handler
-const menuProfile = document.getElementById("menu-profile");
-if (menuProfile) {
-  menuProfile.onclick = () => {
-    window.location.href = '/profile.html';
-  };
-}
 
-    // About Us menu handler
-const menuAboutUs = document.getElementById("menu-aboutus");
-if (menuAboutUs) {
-  menuAboutUs.onclick = () => {
-    window.location.href = '/aboutus.html';
-  };
-}
+  const menuProfile = document.getElementById("menu-profile");
+  if (menuProfile) {
+    menuProfile.onclick = () => {
+      window.location.href = '/profile.html';
+    };
+  }
+
+  const menuAboutUs = document.getElementById("menu-aboutus");
+  if (menuAboutUs) {
+    menuAboutUs.onclick = () => {
+      window.location.href = '/aboutus.html';
+    };
+  }
+
   // Tile click handlers
   document.querySelectorAll('.dashboard-tile').forEach(tile => {
     tile.addEventListener('click', () => {
       const tileType = tile.dataset.tile;
       
-      // Store the active tile for potential use by management pages
       sessionStorage.setItem('activeTile', tileType);
       
-      // Navigate to appropriate management pages
       switch(tileType) {
         case 'ideas':
           window.location.href = 'ideas.html';
@@ -550,6 +860,4 @@ if (menuAboutUs) {
 
   </script>
 </body>
-
 </html>
-
