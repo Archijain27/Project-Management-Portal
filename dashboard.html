@@ -4,14 +4,15 @@
   <meta charset="UTF-8">
   <title>Dashboard</title>
   <style>
-    :root{
-      --accent:#4f46e5;
-      --accent-2:#6d28d9;
-      --bg:#f4f4ff;
-      --card:#ffffff;
-      --muted:#6b7280;
-      --event-bg: rgba(79,70,229,0.12);
-    }
+   :root {
+  --accent: #B0DB9C;       /* main accent (medium green) */
+  --accent-2: #CAE8BD;     /* secondary accent (light green) */
+  --bg: #ECFAE5;           /* page background */
+  --card: #DDF6D2;         /* tile/card background */
+  --muted: #5B6B50;        /* muted text, soft greenish-gray */
+  --event-bg: rgba(176, 219, 156, 0.15); /* light accent tint */
+}
+
    
     body {
       margin: 0;
@@ -23,7 +24,7 @@
    
     .sidebar {
       width: 220px;
-      background: linear-gradient(180deg, #4f46e5, #4338ca);
+      background: linear-gradient(180deg, var(--accent), var(--accent-2));
       color: white;
       padding: 20px 15px;
       display: flex;
@@ -552,5 +553,6 @@ if (menuAboutUs) {
 </body>
 
 </html>
+
 
 
