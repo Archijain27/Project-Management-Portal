@@ -2,553 +2,1574 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Dashboard</title>
+  <title>Quick Notes - Project Management</title>
   <style>
-    :root{
-      --accent:#435663;
-      --accent-2:#A3B087;
-      --bg:#FFF8D4;
-      --card:#ffffff;
-      --muted:#64748b;
-      --event-bg: rgba(67,86,99,0.12);
+    :root {
+      --accent: #ef4444;
+      --accent-hover: #dc2626;
+      --bg: #f4f4ff;
+      --card: #ffffff;
+      --muted: #6b7280;
+      --success: #10b981;
+      --warning: #f59e0b;
     }
-   
-    body {
+
+    * {
       margin: 0;
-      font-family: Arial, sans-serif;
-      display: flex;
-      height: 100vh;
-      background: var(--bg);
-    }
-   
-    .sidebar {
-      width: 220px;
-      background: linear-gradient(180deg, #313647, #435663);
-      color: white;
-      padding: 20px 15px;
-      display: flex;
-      flex-direction: column;
-      box-shadow: 3px 0 10px rgba(0,0,0,0.15);
-    }
-
-    .sidebar h2 {
-      margin-top: 5px;
-      font-size: 1.7rem;
-      font-weight: bold;
-      text-align: center;
-      letter-spacing: 1px;
-    }
-
-    .sidebar ul {
-      list-style: none;
       padding: 0;
-      margin: 15px 0;
+      box-sizing: border-box;
     }
 
-    .sidebar li {
-      margin: 12px 0;
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+      background: var(--bg);
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 30px 20px;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .back-btn {
+      background: white;
+      border: 1px solid #e5e7eb;
       padding: 10px 15px;
       border-radius: 8px;
       cursor: pointer;
-      font-size: 1.2rem;
+      font-size: 0.95rem;
+      transition: all 0.2s;
+      text-decoration: none;
+      color: #374151;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .back-btn:hover {
+      background: #f9fafb;
+      border-color: #d1d5db;
+    }
+
+    .back-btn:focus {
+      outline: none;
+    }
+
+    h1 {
+      font-size: 2rem;
+      color: #1f2937;
       display: flex;
       align-items: center;
       gap: 10px;
-      transition: background 0.3s, transform 0.2s;
     }
 
-    .sidebar li:hover {
-      background: rgba(255,255,255,0.15);
-      transform: translateX(5px);
-    }
-
-    .sidebar li.active {
-      background: rgba(255,255,255,0.2);
-    }
-
-    .sidebar li:last-child {
-      margin-top: auto;
-      background: transparent;
-      color: inherit;
-      font-weight: normal;
-    }
-
-    .main {
-      flex: 1;
-      padding: 30px;
-      background: var(--bg);
-      overflow-y: auto;
-    }
-
-    .dashboard-header {
-      margin-bottom: 30px;
-    }
-
-    .dashboard-header h1 {
-      font-size: 2.5rem;
-      color: #333;
-      margin: 0 0 10px 0;
-      font-weight: 700;
-    }
-
-    .dashboard-header p {
-      color: var(--muted);
-      font-size: 1.1rem;
-      margin: 0;
-    }
-
-    .user-info {
+    .add-buttons {
       display: flex;
-      align-items: center;
       gap: 10px;
-      margin-bottom: 20px;
-      padding: 12px 16px;
-      background: rgba(255,255,255,0.8);
+    }
+
+    .add-btn {
+      background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+      color: white;
+      border: none;
+      padding: 12px 24px;
       border-radius: 8px;
-      border: 1px solid rgba(67,86,99,0.2);
-    }
-
-    .user-email {
-      color: var(--accent);
-      font-weight: 600;
-    }
-
-    .dashboard-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 25px;
-      max-width: 1200px;
-    }
-
-    .dashboard-tile {
-      background: var(--card);
-      border-radius: 16px;
-      padding: 24px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
       cursor: pointer;
-      transition: transform 0.3s, box-shadow 0.3s;
-      border: 1px solid rgba(67,86,99,0.15);
+      font-size: 1rem;
+      font-weight: 600;
+      transition: transform 0.2s, box-shadow 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .add-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+    }
+
+    .add-btn.voice {
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+    }
+
+    .add-btn.voice:hover {
+      box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+    }
+
+    .filter-section {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      margin-bottom: 25px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .filter-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .filter-group label {
+      font-size: 0.9rem;
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    .filter-select {
+      padding: 8px 12px;
+      border: 1px solid #e5e7eb;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      background: white;
+    }
+
+    .notes-grid {
+      display: grid;
+      gap: 20px;
+    }
+
+    .note-card {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      border-left: 4px solid var(--accent);
+      transition: transform 0.2s, box-shadow 0.2s;
       position: relative;
-      overflow: hidden;
-      min-height: 220px;
     }
 
-    .dashboard-tile:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+    .note-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.1);
     }
 
-    .tile-header {
+    .note-card.voice {
+      border-left-color: #f59e0b;
+    }
+
+    .note-card.text {
+      border-left-color: #6366f1;
+      cursor: pointer;
+    }
+
+    .note-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 12px;
+      gap: 15px;
+    }
+
+    .note-title {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: #1f2937;
+      flex: 1;
+    }
+
+    .note-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .icon-btn {
+      background: transparent;
+      border: 1px solid #e5e7eb;
+      padding: 6px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: all 0.2s;
+    }
+
+    .icon-btn:hover {
+      background: #f9fafb;
+      border-color: #d1d5db;
+    }
+
+    .icon-btn.edit:hover {
+      background: #eff6ff;
+      border-color: #bfdbfe;
+      color: #2563eb;
+    }
+
+    .icon-btn.delete:hover {
+      background: #fef2f2;
+      border-color: #fecaca;
+      color: #dc2626;
+    }
+
+    .audio-player {
+      margin-top: 15px;
+      padding: 15px;
+      background: #f9fafb;
+      border-radius: 8px;
       display: flex;
       align-items: center;
       gap: 12px;
+    }
+
+    .audio-controls {
+      display: flex;
+      gap: 8px;
+    }
+
+    .audio-btn {
+      background: white;
+      border: 1px solid #e5e7eb;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .audio-btn:hover {
+      background: #f3f4f6;
+      border-color: #d1d5db;
+    }
+
+    .audio-btn.play:hover {
+      background: #ecfdf5;
+      border-color: #a7f3d0;
+      color: var(--success);
+    }
+
+    .audio-btn.stop:hover {
+      background: #fef2f2;
+      border-color: #fecaca;
+      color: #dc2626;
+    }
+
+    .audio-progress {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 6px;
+      background: #e5e7eb;
+      border-radius: 3px;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #f59e0b, #d97706);
+      border-radius: 3px;
+      transition: width 0.05s linear;
+      will-change: width;
+    }
+
+    .audio-time {
+      font-size: 0.75rem;
+      color: var(--muted);
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .note-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      margin-bottom: 12px;
+      font-size: 0.9rem;
+    }
+
+    .meta-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      color: var(--muted);
+    }
+
+    .type-badge {
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
+    .type-voice {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .type-text {
+      background: #e0e7ff;
+      color: #3730a3;
+    }
+
+   .note-content {
+      color: #4b5563;
+      line-height: 1.6;
+      margin-top: 10px;
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+      white-space: pre-wrap;
+      max-width: 100%;
+      overflow-x: hidden;
+    }
+
+    .note-content.preview {
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .modal.active {
+      display: flex;
+    }
+
+    .modal-content {
+      background: white;
+      padding: 30px;
+      border-radius: 16px;
+      width: 90%;
+      max-width: 600px;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
       margin-bottom: 20px;
     }
 
-    .tile-icon {
-      width: 40px;
-      height: 40px;
-      border-radius: 10px;
+    .modal-header h2 {
+      font-size: 1.5rem;
+      color: #1f2937;
+    }
+
+    .close-btn {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: var(--muted);
+      padding: 0;
+      width: 30px;
+      height: 30px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: #374151;
+    }
+
+    .form-group input,
+    .form-group textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      font-family: inherit;
+    }
+
+    .form-group textarea {
+      resize: vertical;
+      min-height: 150px;
+    }
+
+    .view-content {
+      margin: 20px 0;
+      padding: 20px;
+      background: #f9fafb;
+      border-radius: 8px;
+      color: #374151;
+      line-height: 1.8;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      max-height: 400px;
+      overflow-y: auto;
+    }
+
+    .view-content:empty:before {
+      content: "No content";
+      color: var(--muted);
+      font-style: italic;
+    }
+
+    .voice-recorder {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+      padding: 30px 20px;
+      background: #f9fafb;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      position: relative;
+    }
+
+    .record-button-wrapper {
+      position: relative;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 20px;
+      width: 140px;
+      height: 140px;
+    }
+
+    .record-button {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      border: none;
+      background: linear-gradient(135deg, #ef4444, #dc2626);
       color: white;
+      font-size: 2rem;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+      position: relative;
+      z-index: 2;
     }
 
-    .tile-title {
-      font-size: 1.3rem;
-      font-weight: 600;
-      color: #333;
-      margin: 0;
+    .record-button:hover {
+      transform: scale(1.05);
+      box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
     }
 
-    .tile-content {
+    .record-button.recording {
+      background: linear-gradient(135deg, #10b981, #059669);
+    }
+
+    .visualizer-ring {
+      position: absolute;
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      border: 3px solid #10b981;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .visualizer-ring.active {
+      animation: ripple 1.5s ease-out infinite;
+    }
+
+    @keyframes ripple {
+      0% {
+        width: 80px;
+        height: 80px;
+        opacity: 0.8;
+      }
+      100% {
+        width: 140px;
+        height: 140px;
+        opacity: 0;
+      }
+    }
+
+    .volume-bars {
+      display: flex;
+      gap: 6px;
+      align-items: flex-end;
+      height: 50px;
+      opacity: 0;
+      transition: opacity 0.3s;
+      justify-content: center;
+    }
+
+    .volume-bars.active {
+      opacity: 1;
+    }
+
+    .volume-bar {
+      width: 5px;
+      height: 8px;
+      background: linear-gradient(to top, #10b981, #34d399);
+      border-radius: 2px;
+      transition: height 0.05s ease;
+    }
+
+    .recording-status {
+      text-align: center;
       color: var(--muted);
-      line-height: 1.6;
+      font-size: 1rem;
+      min-height: 60px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      align-items: center;
+      justify-content: center;
     }
 
-    .tile-item {
-      background: rgba(163,176,135,0.1);
-      padding: 10px 12px;
+    .recording-time {
+      font-weight: 600;
+      color: #10b981;
+      font-size: 1.4rem;
+    }
+
+    .recording-indicator {
+      display: none;
+      align-items: center;
+      gap: 8px;
+      color: #10b981;
+      font-weight: 600;
+    }
+
+    .recording-indicator.active {
+      display: flex;
+    }
+
+    .rec-dot {
+      width: 12px;
+      height: 12px;
+      background: #ef4444;
+      border-radius: 50%;
+      animation: blink 1.5s infinite;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    .form-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      margin-top: 25px;
+    }
+
+    .btn-cancel {
+      background: white;
+      border: 1px solid #d1d5db;
+      padding: 10px 20px;
       border-radius: 8px;
-      margin-bottom: 8px;
-      border-left: 3px solid var(--accent);
+      cursor: pointer;
       font-size: 0.95rem;
     }
 
-    .tile-item:last-child {
-      margin-bottom: 0;
-    }
-
-    .tile-count {
-      position: absolute;
-      top: 20px;
-      right: 20px;
-      background: var(--accent);
+    .btn-save {
+      background: linear-gradient(135deg, var(--accent), var(--accent-hover));
       color: white;
-      border-radius: 50%;
-      width: 30px;
-      height: 30px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.9rem;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.95rem;
       font-weight: 600;
     }
 
-    /* Tile-specific colors */
-    .deadlines .tile-icon { background: linear-gradient(135deg, #313647, #435663); }
-    .ideas .tile-icon { background: linear-gradient(135deg, #A3B087, #8A9972); }
-    .projects .tile-icon { background: linear-gradient(135deg, #435663, #A3B087); }
-    .notes .tile-icon { background: linear-gradient(135deg, #313647, #A3B087); }
-    .career .tile-icon { background: linear-gradient(135deg, #435663, #526E7D); }
-    .future .tile-icon { background: linear-gradient(135deg, #A3B087, #435663); }
+    .btn-save:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
 
     .empty-state {
       text-align: center;
+      padding: 60px 20px;
       color: var(--muted);
-      font-style: italic;
-      margin-top: 20px;
     }
 
+    .empty-state-icon {
+      font-size: 4rem;
+      margin-bottom: 15px;
+    }
+
+    .empty-state h3 {
+      font-size: 1.3rem;
+      margin-bottom: 10px;
+      color: #4b5563;
+    }
+
+    .toast {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: var(--success);
+      color: white;
+      padding: 12px 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      transform: translateX(400px);
+      transition: transform 0.3s;
+      z-index: 1000;
+    }
+
+    .toast.show {
+      transform: translateX(0);
+    }
+
+    .toast.error {
+      background: #ef4444;
+    }
 
     .loading {
       text-align: center;
+      padding: 20px;
       color: var(--muted);
       font-style: italic;
-      margin: 20px 0;
     }
 
     .error {
-      color: #ef4444;
-      text-align: center;
-      font-size: 0.9rem;
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      color: #dc2626;
+      padding: 12px;
+      border-radius: 8px;
       margin: 10px 0;
-    }
-
-    @media (max-width: 1024px) {
-      .dashboard-grid {
-        grid-template-columns: repeat(2, 1fr);
-      }
+      text-align: center;
     }
 
     @media (max-width: 768px) {
-      .dashboard-grid {
-        grid-template-columns: 1fr;
+      .header {
+        flex-direction: column;
+        align-items: flex-start;
       }
-      .sidebar {
-        width: 180px;
+
+      .filter-section {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .note-header {
+        flex-direction: column;
+      }
+
+      .note-actions {
+        align-self: flex-end;
+      }
+
+      .add-buttons {
+        flex-direction: column;
+        width: 100%;
+      }
+
+      .add-btn {
+        width: 100%;
+      }
+
+      .audio-player {
+        flex-direction: column;
       }
     }
   </style>
 </head>
 <body>
-  <div class="sidebar">
-    <h2>Menu</h2>
-    <ul>
-      <li id="menu-dashboard" class="active">Dashboard</li>
-      <li id="menu-calendar">Calendar</li>
-      <li>Research Paper</li>
-      <li id="menu-profile">Profile</li>
-      <li id="menu-aboutus">About Us</li>
-      <li id="logout"> Logout</li>
-    </ul>
-  </div>
-
-  <div class="main">
-    <div id="dashboardView">
-      <div class="dashboard-header">
-        <div class="user-info">
-          <span>Welcome back,</span>
-          <span class="user-email" id="userEmail">Loading...</span>
-        </div>
-        <h1>Dashboard</h1>
-        <p>Stay organized and track your progress across all areas of life</p>
+  <div class="container">
+    <div class="header">
+      <div class="header-left">
+        <a href="dashboard.html" class="back-btn">← Back</a>
+        <h1>📝 Quick Notes</h1>
       </div>
-     
-      <div class="dashboard-grid">
-        <!-- Deadlines Tile -->
-        <div class="dashboard-tile deadlines" data-tile="deadlines">
-          <div class="tile-header">
-            <div class="tile-icon">⏰</div>
-            <h3 class="tile-title">Deadlines</h3>
-          </div>
-          <div class="tile-count" id="deadlines-count">0</div>
-          <div class="tile-content" id="deadlines-content">
-            <div class="loading">Loading deadlines...</div>
-          </div>
-        </div>
+      <div class="add-buttons">
+        <button class="add-btn voice" onclick="openVoiceModal()">
+          🎤 Add Voice Note
+        </button>
+        <button class="add-btn" onclick="openTextModal()">
+          + Add Text Note
+        </button>
+      </div>
+    </div>
 
-        <!-- Recent Ideas Tile -->
-        <div class="dashboard-tile ideas" data-tile="ideas">
-          <div class="tile-header">
-            <div class="tile-icon">💡</div>
-            <h3 class="tile-title">Recent Ideas</h3>
-          </div>
-          <div class="tile-count" id="ideas-count">0</div>
-          <div class="tile-content" id="ideas-content">
-            <div class="loading">Loading ideas...</div>
-          </div>
-        </div>
+    <div class="filter-section">
+      <div class="filter-group">
+        <label>Type:</label>
+        <select class="filter-select" id="typeFilter" onchange="applyFilters()">
+          <option value="all">All Notes</option>
+          <option value="text">Text Notes</option>
+          <option value="voice">Voice Recordings</option>
+        </select>
+      </div>
+    </div>
 
-        <!-- Ongoing Projects Tile -->
-        <div class="dashboard-tile projects" data-tile="projects">
-          <div class="tile-header">
-            <div class="tile-icon">🚀</div>
-            <h3 class="tile-title">Your Projects</h3>
-          </div>
-          <div class="tile-count" id="projects-count">0</div>
-          <div class="tile-content" id="projects-content">
-            <div class="loading">Loading projects...</div>
-          </div>
-        </div>
+    <div id="loadingMessage" class="loading" style="display: none;">
+      Loading your notes...
+    </div>
 
-        <!-- Quick Notes Tile -->
-        <div class="dashboard-tile notes" data-tile="notes">
-          <div class="tile-header">
-            <div class="tile-icon">📝</div>
-            <h3 class="tile-title">Quick Notes</h3>
-          </div>
-          <div class="tile-count" id="notes-count">0</div>
-          <div class="tile-content" id="notes-content">
-            <div class="loading">Loading notes...</div>
-          </div>
-        </div>
+    <div id="errorMessage" class="error" style="display: none;">
+      Failed to load notes. Please try again.
+    </div>
 
-        <!-- Career Progression Tile -->
-        <div class="dashboard-tile career" data-tile="career">
-          <div class="tile-header">
-            <div class="tile-icon">📈</div>
-            <h3 class="tile-title">Career & Goals</h3>
-          </div>
-          <div class="tile-count" id="career-count">0</div>
-          <div class="tile-content" id="career-content">
-            <div class="loading">Loading goals...</div>
-          </div>
-        </div>
-
-        <!-- Future Work Tile -->
-        <div class="dashboard-tile future" data-tile="future">
-          <div class="tile-header">
-            <div class="tile-icon">🔮</div>
-            <h3 class="tile-title">Future Work</h3>
-          </div>
-          <div class="tile-count" id="future-count">0</div>
-          <div class="tile-content" id="future-content">
-            <div class="loading">Loading future work...</div>
-          </div>
-        </div>
+    <div class="notes-grid" id="notesGrid">
+      <div class="empty-state">
+        <div class="empty-state-icon">📝</div>
+        <h3>No notes yet</h3>
+        <p>Click "Add Text Note" or "Add Voice Note" to create your first note</p>
       </div>
     </div>
   </div>
 
+  <!-- Voice Recording Modal -->
+  <div class="modal" id="voiceModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Record Voice Note</h2>
+        <button class="close-btn" onclick="closeVoiceModal()">×</button>
+      </div>
+      <div class="voice-recorder">
+        <div class="record-button-wrapper">
+          <div class="visualizer-ring" id="visualizerRing"></div>
+          <button class="record-button" id="recordBtn">🎤</button>
+        </div>
+        <div class="volume-bars" id="volumeBars">
+          <div class="volume-bar"></div>
+          <div class="volume-bar"></div>
+          <div class="volume-bar"></div>
+          <div class="volume-bar"></div>
+          <div class="volume-bar"></div>
+          <div class="volume-bar"></div>
+          <div class="volume-bar"></div>
+        </div>
+        <div class="recording-status">
+          <div class="recording-indicator" id="recordingIndicator">
+            <span class="rec-dot"></span>
+            <span>REC</span>
+          </div>
+          <div id="recordingStatus">Click microphone to start recording</div>
+          <div class="recording-time" id="recordingTime" style="display: none;">00:00</div>
+        </div>
+      </div>
+      <form id="voiceForm" onsubmit="saveVoiceNote(event)">
+        <div class="form-group">
+          <label>Title</label>
+          <input type="text" id="voiceTitle" placeholder="Recording title (optional)">
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn-cancel" onclick="closeVoiceModal()">Cancel</button>
+          <button type="submit" class="btn-save" id="saveVoiceBtn" disabled>Save Recording</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Text Note Modal (Add/Edit) -->
+  <div class="modal" id="textModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="textModalTitle">Add Text Note</h2>
+        <button class="close-btn" onclick="closeTextModal()">×</button>
+      </div>
+      <form id="textForm" onsubmit="saveTextNote(event)">
+        <input type="hidden" id="editNoteId">
+        <div class="form-group">
+          <label>Title *</label>
+          <input type="text" id="textTitle" required>
+        </div>
+        <div class="form-group">
+          <label>Content</label>
+          <textarea id="textContent" placeholder="Write your note here..."></textarea>
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn-cancel" onclick="closeTextModal()">Cancel</button>
+          <button type="submit" class="btn-save">Save Note</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- View Note Modal -->
+  <div class="modal" id="viewModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="viewNoteTitle">Note</h2>
+        <button class="close-btn" onclick="closeViewModal()">×</button>
+      </div>
+      <div class="note-meta" id="viewNoteMeta"></div>
+      <div class="view-content" id="viewNoteContent"></div>
+      <div class="form-actions">
+        <button type="button" class="btn-cancel" onclick="closeViewModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
   <script>
-  // ===================== API CONFIGURATION =====================
-  const API_BASE = window.location.origin;
+    const API_BASE = window.location.origin;
+    let allNotes = [];
+    let mediaRecorder;
+    let audioChunks = [];
+    let isRecording = false;
+    let recordingStartTime;
+    let recordingTimer;
+    let currentAudioBlob;
+    let audioContext;
+    let analyser;
+    let dataArray;
+    let animationId;
+    let mediaStream;
+    let audioPlayers = {};
 
-  // ===================== AUTHENTICATION =====================
-  function getCurrentUser() {
-    return sessionStorage.getItem('userEmail');
-  }
+    function getCurrentUser() {
+      return sessionStorage.getItem('userEmail') || 'demo@user.com';
+    }
 
-  function isUserLoggedIn() {
-    return sessionStorage.getItem('isLoggedIn') === 'true';
-  }
+    function isUserLoggedIn() {
+      return sessionStorage.getItem('isLoggedIn') === 'true';
+    }
 
-  function redirectToLogin() {
-    alert('Please log in to access this page');
-    window.location.href = '/';
-  }
+    if (!isUserLoggedIn()) {
+      alert('Please log in to access this page');
+      window.location.href = '/';
+    }
 
-  // Check authentication
-  if (!isUserLoggedIn()) {
-    redirectToLogin();
-  }
+    const userEmail = getCurrentUser();
+    if (!userEmail) {
+      alert('Please log in to access this page');
+      window.location.href = '/';
+    }
 
-  const userEmail = getCurrentUser();
-  if (!userEmail) {
-    redirectToLogin();
-  }
+    function showToast(message, isError = false) {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.className = 'toast' + (isError ? ' error' : '');
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 3000);
+    }
 
-  // Display user email
-  document.getElementById('userEmail').textContent = userEmail;
+    async function loadAllNotes() {
+      try {
+        document.getElementById('loadingMessage').style.display = 'block';
+        document.getElementById('errorMessage').style.display = 'none';
+        document.getElementById('notesGrid').style.display = 'none';
 
-  // ===================== API HELPERS =====================
-  async function apiCall(endpoint, options = {}) {
-    try {
-      const response = await fetch(`${API_BASE}${endpoint}`, {
-        headers: {
-          'Content-Type': 'application/json',
-          ...options.headers
-        },
-        ...options
-      });
-      
-      const data = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(data.error || 'API call failed');
+        const response = await fetch(`${API_BASE}/notes/${encodeURIComponent(userEmail)}`);
+        const textNotes = await response.json();
+        
+        const voiceRecordings = getVoiceRecordings();
+        
+        allNotes = [
+          ...textNotes.map(note => ({ ...note, type: 'text' })),
+          ...voiceRecordings.map(rec => ({ ...rec, type: 'voice' }))
+        ];
+
+        document.getElementById('loadingMessage').style.display = 'none';
+        document.getElementById('notesGrid').style.display = 'grid';
+        renderNotes(allNotes);
+      } catch (error) {
+        console.error('Error loading notes:', error);
+        document.getElementById('loadingMessage').style.display = 'none';
+        document.getElementById('errorMessage').style.display = 'block';
       }
-      
-      return data;
-    } catch (error) {
-      console.error('API Error:', error);
-      throw error;
     }
-  }
 
-  // ===================== DATABASE INTEGRATION =====================
-  
-  // Load tile data from database APIs
-  async function loadTileData(tileType) {
-    try {
-      const data = await apiCall(`/${tileType}/${encodeURIComponent(userEmail)}`);
-      return data;
-    } catch (error) {
-      console.error(`Failed to load ${tileType}:`, error);
-      return [];
+    function getVoiceRecordings() {
+      try {
+        const stored = localStorage.getItem(`voice_recordings_${userEmail}`);
+        return stored ? JSON.parse(stored) : [];
+      } catch (error) {
+        console.error('Error loading voice recordings:', error);
+        return [];
+      }
     }
-  }
 
-  // ===================== DASHBOARD RENDERING =====================
+    function formatTime(seconds) {
+      if (!seconds || isNaN(seconds) || !isFinite(seconds)) return '00:00';
+      seconds = Math.max(0, seconds);
+      const mins = Math.floor(seconds / 60);
+      const secs = Math.floor(seconds % 60);
+      return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    }
 
-  // Render tile content
-  function renderTile(tileType) {
-    loadTileData(tileType).then(data => {
-      const contentEl = document.getElementById(`${tileType}-content`);
-      const countEl = document.getElementById(`${tileType}-count`);
+    function renderNotes(notes) {
+      const grid = document.getElementById('notesGrid');
       
-      countEl.textContent = data.length;
-      
-      if (data.length === 0) {
-        contentEl.innerHTML = `<div class="empty-state">No ${tileType} yet</div>`;
+      if (notes.length === 0) {
+        grid.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-state-icon">📝</div>
+            <h3>No notes found</h3>
+            <p>Try adjusting your filters or add a new note</p>
+          </div>
+        `;
         return;
       }
 
-      // Show top 3 items
-      const topItems = data.slice(0, 3);
-      contentEl.innerHTML = topItems.map(item => {
-        let displayText = item.title || item.name || item.content || item.description || '';
+      const sorted = [...notes].sort((a, b) => {
+        const dateA = new Date(a.created_date || a.date);
+        const dateB = new Date(b.created_date || b.date);
+        return dateB - dateA;
+      });
+
+      grid.innerHTML = sorted.map(note => {
+        const isVoice = note.type === 'voice';
+        const date = new Date(note.created_date || note.date).toLocaleDateString('en-US', { 
+          month: 'short', 
+          day: 'numeric', 
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        });
+
+        return `
+          <div class="note-card ${note.type}" ${!isVoice ? `onclick="viewNote('${note.id}')"` : ''}>
+            <div class="note-header">
+              <div class="note-title">${note.title}</div>
+              <div class="note-actions" onclick="event.stopPropagation()">
+                ${!isVoice ? `<button class="icon-btn edit" onclick="editNote('${note.id}')" title="Edit">✏️</button>` : ''}
+                <button class="icon-btn delete" onclick="deleteNote('${note.id}', '${note.type}')" title="Delete">🗑️</button>
+              </div>
+            </div>
+            <div class="note-meta">
+              <span class="meta-item">📅 ${date}</span>
+              <span class="type-badge type-${note.type}">${isVoice ? 'VOICE' : 'TEXT'}</span>
+            </div>
+            ${isVoice ? `
+              <div class="audio-player" data-note-id="${note.id}" onclick="event.stopPropagation()">
+                <div class="audio-controls">
+                  <button class="audio-btn play" onclick="togglePlayPause('${note.id}')" id="playBtn_${note.id}" title="Play">▶️</button>
+                  <button class="audio-btn stop" onclick="stopAudio('${note.id}')" title="Stop">⏹️</button>
+                </div>
+                <div class="audio-progress">
+                  <div class="progress-bar" onclick="seekAudio(event, '${note.id}')">
+                    <div class="progress-fill" id="progress_${note.id}" style="width: 0%"></div>
+                  </div>
+                  <div class="audio-time">
+                    <span id="currentTime_${note.id}">00:00</span>
+                    <span id="duration_${note.id}">00:00</span>
+                  </div>
+                </div>
+              </div>
+            ` : ''}
+            ${!isVoice && note.content ? `<div class="note-content preview">${note.content}</div>` : ''}
+          </div>
+        `;
+      }).join('');
+
+      // Initialize audio players for voice notes
+      sorted.filter(n => n.type === 'voice').forEach(note => {
+        initializeAudioPlayer(note.id, note.audioData);
+      });
+    }
+
+    window.viewNote = (id) => {
+      const note = allNotes.find(n => n.id == id && n.type === 'text');
+      if (!note) return;
+
+      document.getElementById('viewNoteTitle').textContent = note.title;
+      document.getElementById('viewNoteContent').textContent = note.content || '';
+      
+      const date = new Date(note.created_date).toLocaleDateString('en-US', { 
+        month: 'short', 
+        day: 'numeric', 
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+      
+      document.getElementById('viewNoteMeta').innerHTML = `
+        <span class="meta-item">📅 ${date}</span>
+        <span class="type-badge type-text">TEXT</span>
+      `;
+      
+      document.getElementById('viewModal').classList.add('active');
+    };
+
+    function closeViewModal() {
+      document.getElementById('viewModal').classList.remove('active');
+    }
+
+    window.editNote = (id) => {
+      const note = allNotes.find(n => n.id == id && n.type === 'text');
+      if (!note) return;
+
+      document.getElementById('textModalTitle').textContent = 'Edit Text Note';
+      document.getElementById('editNoteId').value = note.id;
+      document.getElementById('textTitle').value = note.title;
+      document.getElementById('textContent').value = note.content || '';
+      document.getElementById('textModal').classList.add('active');
+    };
+
+    function initializeAudioPlayer(id, audioData) {
+      if (!audioData) {
+        console.error('No audio data for note:', id);
+        return;
+      }
+
+      try {
+        // Clean up existing player if any
+        if (audioPlayers[id]) {
+          audioPlayers[id].pause();
+          audioPlayers[id].src = '';
+          delete audioPlayers[id];
+        }
+
+        const audio = new Audio();
+        audio.preload = 'metadata';
+        audio.src = audioData;
+        audioPlayers[id] = audio;
+
+        audio.addEventListener('loadedmetadata', () => {
+          const durationEl = document.getElementById(`duration_${id}`);
+          if (durationEl && audio.duration && isFinite(audio.duration)) {
+            durationEl.textContent = formatTime(audio.duration);
+          }
+        });
+
+        audio.addEventListener('loadeddata', () => {
+          const durationEl = document.getElementById(`duration_${id}`);
+          if (durationEl && audio.duration && isFinite(audio.duration)) {
+            durationEl.textContent = formatTime(audio.duration);
+          }
+        });
+
+        audio.addEventListener('timeupdate', () => {
+          const currentTimeEl = document.getElementById(`currentTime_${id}`);
+          const progressEl = document.getElementById(`progress_${id}`);
+          
+          if (currentTimeEl && isFinite(audio.currentTime)) {
+            currentTimeEl.textContent = formatTime(audio.currentTime);
+          }
+          if (progressEl && audio.duration && isFinite(audio.duration) && audio.duration > 0) {
+            const percentage = Math.min(100, Math.max(0, (audio.currentTime / audio.duration) * 100));
+            progressEl.style.width = percentage + '%';
+          }
+        });
+
+        audio.addEventListener('ended', () => {
+          const playBtn = document.getElementById(`playBtn_${id}`);
+          if (playBtn) {
+            playBtn.textContent = '▶️';
+          }
+          audio.currentTime = 0;
+          const progressEl = document.getElementById(`progress_${id}`);
+          if (progressEl) {
+            progressEl.style.width = '0%';
+          }
+          const currentTimeEl = document.getElementById(`currentTime_${id}`);
+          if (currentTimeEl) {
+            currentTimeEl.textContent = '00:00';
+          }
+        });
+
+        audio.addEventListener('error', (e) => {
+          console.error('Audio error for note', id, ':', e);
+          const durationEl = document.getElementById(`duration_${id}`);
+          const currentTimeEl = document.getElementById(`currentTime_${id}`);
+          if (durationEl) durationEl.textContent = '00:00';
+          if (currentTimeEl) currentTimeEl.textContent = '00:00';
+        });
+
+        audio.addEventListener('play', () => {
+          // Pause other playing audios
+          Object.entries(audioPlayers).forEach(([otherId, otherAudio]) => {
+            if (otherId !== id && !otherAudio.paused) {
+              otherAudio.pause();
+              const otherPlayBtn = document.getElementById(`playBtn_${otherId}`);
+              if (otherPlayBtn) {
+                otherPlayBtn.textContent = '▶️';
+              }
+            }
+          });
+        });
+      } catch (error) {
+        console.error('Error initializing audio player:', error);
+      }
+    }
+
+    window.togglePlayPause = (id) => {
+      const audio = audioPlayers[id];
+      const playBtn = document.getElementById(`playBtn_${id}`);
+      
+      if (!audio || !playBtn) {
+        console.error('Audio player not found for:', id);
+        showToast('Error: Audio player not available', true);
+        return;
+      }
+
+      if (audio.paused) {
+        audio.play().then(() => {
+          playBtn.textContent = '⏸️';
+        }).catch(err => {
+          console.error('Error playing audio:', err);
+          showToast('Error playing recording', true);
+        });
+      } else {
+        audio.pause();
+        playBtn.textContent = '▶️';
+      }
+    };
+
+    window.stopAudio = (id) => {
+      const audio = audioPlayers[id];
+      const playBtn = document.getElementById(`playBtn_${id}`);
+      const progressEl = document.getElementById(`progress_${id}`);
+      const currentTimeEl = document.getElementById(`currentTime_${id}`);
+      
+      if (!audio) {
+        console.error('Audio not found for:', id);
+        return;
+      }
+
+      audio.pause();
+      audio.currentTime = 0;
+      
+      if (playBtn) playBtn.textContent = '▶️';
+      if (progressEl) progressEl.style.width = '0%';
+      if (currentTimeEl) currentTimeEl.textContent = '00:00';
+    };
+
+    window.seekAudio = (event, id) => {
+      const audio = audioPlayers[id];
+      if (!audio || !audio.duration || !isFinite(audio.duration)) return;
+
+      const progressBar = event.currentTarget;
+      const rect = progressBar.getBoundingClientRect();
+      const clickX = event.clientX - rect.left;
+      const percentage = Math.min(1, Math.max(0, clickX / rect.width));
+      const newTime = percentage * audio.duration;
+      
+      if (isFinite(newTime)) {
+        audio.currentTime = newTime;
+      }
+    };
+
+    function applyFilters() {
+      const typeFilter = document.getElementById('typeFilter').value;
+      let filtered = allNotes;
+
+      if (typeFilter !== 'all') {
+        filtered = filtered.filter(n => n.type === typeFilter);
+      }
+
+      renderNotes(filtered);
+    }
+
+    function openVoiceModal() {
+      document.getElementById('voiceModal').classList.add('active');
+      resetRecordingUI();
+    }
+
+    function resetRecordingUI() {
+      document.getElementById('recordingStatus').textContent = 'Click microphone to start recording';
+      document.getElementById('recordingTime').style.display = 'none';
+      document.getElementById('saveVoiceBtn').disabled = true;
+      document.getElementById('recordingIndicator').classList.remove('active');
+      document.getElementById('volumeBars').classList.remove('active');
+      document.getElementById('visualizerRing').classList.remove('active');
+      const btn = document.getElementById('recordBtn');
+      btn.classList.remove('recording');
+      btn.innerHTML = '🎤';
+    }
+
+    function closeVoiceModal() {
+      if (isRecording) {
+        stopRecording();
+      }
+      
+      // Stop audio visualization
+      if (animationId) {
+        cancelAnimationFrame(animationId);
+        animationId = null;
+      }
+      
+      // Close audio context
+      if (audioContext && audioContext.state !== 'closed') {
+        audioContext.close();
+        audioContext = null;
+      }
+      
+      // Stop media stream
+      if (mediaStream) {
+        mediaStream.getTracks().forEach(track => track.stop());
+        mediaStream = null;
+      }
+      
+      mediaRecorder = null;
+      audioChunks = [];
+      currentAudioBlob = null;
+      
+      document.getElementById('voiceModal').classList.remove('active');
+      document.getElementById('voiceForm').reset();
+      resetRecordingUI();
+    }
+
+    function openTextModal() {
+      document.getElementById('textModalTitle').textContent = 'Add Text Note';
+      document.getElementById('editNoteId').value = '';
+      document.getElementById('textModal').classList.add('active');
+    }
+
+    function closeTextModal() {
+      document.getElementById('textModal').classList.remove('active');
+      document.getElementById('textForm').reset();
+    }
+
+    async function initializeMediaRecorder() {
+      try {
+        // Request microphone access
+        mediaStream = await navigator.mediaDevices.getUserMedia({ 
+          audio: {
+            echoCancellation: true,
+            noiseSuppression: true,
+            autoGainControl: true
+          } 
+        });
         
-        // Add specific formatting based on tile type (REMOVED member count for projects)
-        switch(tileType) {
-          case 'deadlines':
-            if (item.due_date) {
-              const daysLeft = Math.ceil((new Date(item.due_date) - new Date()) / (1000 * 60 * 60 * 24));
-              displayText += ` (${daysLeft > 0 ? daysLeft + ' days' : 'overdue'})`;
-            }
-            break;
-          case 'career':
-            if (item.progress) {
-              displayText += ` (${item.progress}%)`;
-            }
-            break;
-          case 'ideas':
-            if (item.category) {
-              displayText += ` - ${item.category}`;
-            }
-            break;
-          case 'future':
-            if (item.timeline) {
-              displayText += ` (${item.timeline})`;
-            }
-            break;
+        // Initialize audio context for visualization
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        analyser = audioContext.createAnalyser();
+        const source = audioContext.createMediaStreamSource(mediaStream);
+        source.connect(analyser);
+        analyser.fftSize = 256;
+        analyser.smoothingTimeConstant = 0.8;
+        const bufferLength = analyser.frequencyBinCount;
+        dataArray = new Uint8Array(bufferLength);
+
+        // Initialize media recorder
+        const options = { mimeType: 'audio/webm' };
+        if (!MediaRecorder.isTypeSupported(options.mimeType)) {
+          options.mimeType = 'audio/mp4';
+          if (!MediaRecorder.isTypeSupported(options.mimeType)) {
+            options.mimeType = '';
+          }
+        }
+
+        mediaRecorder = new MediaRecorder(mediaStream, options.mimeType ? options : undefined);
+
+        mediaRecorder.ondataavailable = (event) => {
+          if (event.data.size > 0) {
+            audioChunks.push(event.data);
+          }
+        };
+
+        mediaRecorder.onstop = () => {
+          currentAudioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+          audioChunks = [];
+          document.getElementById('saveVoiceBtn').disabled = false;
+        };
+
+        mediaRecorder.onerror = (event) => {
+          console.error('MediaRecorder error:', event);
+          showToast('Recording error occurred', true);
+        };
+
+        return true;
+      } catch (error) {
+        console.error('Microphone error:', error);
+        showToast('Cannot access microphone. Please allow microphone permissions.', true);
+        return false;
+      }
+    }
+
+    function visualizeAudio() {
+      if (!isRecording || !analyser) {
+        return;
+      }
+
+      animationId = requestAnimationFrame(visualizeAudio);
+      analyser.getByteFrequencyData(dataArray);
+
+      // Calculate average volume from frequency data
+      let sum = 0;
+      for (let i = 0; i < dataArray.length; i++) {
+        sum += dataArray[i];
+      }
+      const average = sum / dataArray.length;
+      const normalizedVolume = Math.min(average / 128, 1); // Normalize to 0-1
+
+      // Update volume bars with different heights
+      const volumeBars = document.querySelectorAll('.volume-bar');
+      volumeBars.forEach((bar, index) => {
+        // Create a wave effect by using different frequency ranges
+        const freqIndex = Math.floor((index / volumeBars.length) * dataArray.length);
+        const barValue = dataArray[freqIndex] || 0;
+        const height = Math.max(8, (barValue / 255) * 50);
+        bar.style.height = height + 'px';
+      });
+
+      // Update visualizer ring opacity based on volume
+      const ring = document.getElementById('visualizerRing');
+      if (ring && normalizedVolume > 0.05) {
+        ring.style.opacity = Math.min(normalizedVolume * 0.8, 0.8);
+      }
+    }
+
+    function startRecording() {
+      if (!mediaRecorder) return;
+      
+      isRecording = true;
+      audioChunks = [];
+      
+      const btn = document.getElementById('recordBtn');
+      btn.classList.add('recording');
+      btn.innerHTML = '⏹️';
+      
+      document.getElementById('recordingStatus').textContent = 'Recording in progress...';
+      document.getElementById('recordingTime').style.display = 'block';
+      document.getElementById('recordingIndicator').classList.add('active');
+      document.getElementById('volumeBars').classList.add('active');
+      document.getElementById('visualizerRing').classList.add('active');
+      
+      recordingStartTime = Date.now();
+      recordingTimer = setInterval(updateRecordingTime, 100);
+      
+      try {
+        mediaRecorder.start(100); // Collect data every 100ms
+        visualizeAudio();
+      } catch (error) {
+        console.error('Error starting recording:', error);
+        showToast('Failed to start recording', true);
+        isRecording = false;
+        resetRecordingUI();
+      }
+    }
+
+    function stopRecording() {
+      if (!mediaRecorder || !isRecording) return;
+      
+      isRecording = false;
+      const btn = document.getElementById('recordBtn');
+      btn.classList.remove('recording');
+      btn.innerHTML = '🎤';
+      
+      document.getElementById('recordingStatus').textContent = 'Recording saved! Add a title and click Save.';
+      document.getElementById('recordingTime').style.display = 'none';
+      document.getElementById('recordingIndicator').classList.remove('active');
+      document.getElementById('volumeBars').classList.remove('active');
+      document.getElementById('visualizerRing').classList.remove('active');
+      
+      clearInterval(recordingTimer);
+      
+      if (animationId) {
+        cancelAnimationFrame(animationId);
+        animationId = null;
+      }
+      
+      try {
+        if (mediaRecorder.state !== 'inactive') {
+          mediaRecorder.stop();
+        }
+      } catch (error) {
+        console.error('Error stopping recording:', error);
+      }
+    }
+
+    function updateRecordingTime() {
+      const elapsed = Math.floor((Date.now() - recordingStartTime) / 1000);
+      const minutes = Math.floor(elapsed / 60);
+      const seconds = elapsed % 60;
+      document.getElementById('recordingTime').textContent = 
+        `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    }
+
+    document.getElementById('recordBtn').onclick = async () => {
+      if (!isRecording) {
+        if (!mediaRecorder) {
+          const initialized = await initializeMediaRecorder();
+          if (!initialized) return;
+        }
+        startRecording();
+      } else {
+        stopRecording();
+      }
+    };
+
+    function saveVoiceNote(event) {
+      event.preventDefault();
+      if (!currentAudioBlob) {
+        showToast('No recording available', true);
+        return;
+      }
+
+      const title = document.getElementById('voiceTitle').value.trim() || 
+                    `Recording ${new Date().toLocaleString()}`;
+      
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const recording = {
+            id: Date.now().toString(),
+            title: title,
+            date: new Date().toISOString(),
+            audioData: reader.result
+          };
+
+          const recordings = getVoiceRecordings();
+          recordings.unshift(recording);
+          localStorage.setItem(`voice_recordings_${userEmail}`, JSON.stringify(recordings));
+          
+          closeVoiceModal();
+          loadAllNotes();
+          showToast('Voice recording saved successfully!');
+        } catch (error) {
+          console.error('Error saving recording:', error);
+          showToast('Failed to save recording', true);
+        }
+      };
+      reader.onerror = () => {
+        showToast('Failed to process recording', true);
+      };
+      reader.readAsDataURL(currentAudioBlob);
+    }
+
+    async function saveTextNote(event) {
+      event.preventDefault();
+
+      const title = document.getElementById('textTitle').value.trim();
+      const content = document.getElementById('textContent').value.trim();
+      const editId = document.getElementById('editNoteId').value;
+
+      try {
+        if (editId) {
+          // Update existing note
+          await fetch(`${API_BASE}/notes/${editId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              title: title,
+              content: content
+            })
+          });
+          showToast('Note updated successfully!');
+        } else {
+          // Create new note
+          await fetch(`${API_BASE}/notes`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              user_email: userEmail,
+              title: title,
+              content: content,
+              created_date: new Date().toISOString()
+            })
+          });
+          showToast('Note saved successfully!');
+        }
+
+        closeTextModal();
+        loadAllNotes();
+      } catch (error) {
+        console.error('Error saving note:', error);
+        showToast('Failed to save note', true);
+      }
+    }
+
+    window.deleteNote = async (id, type) => {
+      if (!confirm('Are you sure you want to delete this note?')) return;
+
+      try {
+        if (type === 'voice') {
+          // Stop and cleanup audio if playing
+          if (audioPlayers[id]) {
+            audioPlayers[id].pause();
+            audioPlayers[id].src = '';
+            delete audioPlayers[id];
+          }
+          
+          const recordings = getVoiceRecordings().filter(r => r.id !== id);
+          localStorage.setItem(`voice_recordings_${userEmail}`, JSON.stringify(recordings));
+        } else {
+          await fetch(`${API_BASE}/notes/${id}`, { method: 'DELETE' });
         }
         
-        return `<div class="tile-item">${displayText}</div>`;
-      }).join('');
-      
-      if (data.length > 3) {
-        contentEl.innerHTML += `<div class="empty-state" style="margin-top: 10px;">+${data.length - 3} more items</div>`;
+        loadAllNotes();
+        showToast('Note deleted');
+      } catch (error) {
+        console.error('Error deleting note:', error);
+        showToast('Failed to delete note', true);
       }
-    }).catch(error => {
-      const contentEl = document.getElementById(`${tileType}-content`);
-      contentEl.innerHTML = `<div class="error">Failed to load ${tileType}</div>`;
-      console.error(`Error rendering ${tileType}:`, error);
+    };
+
+    document.getElementById('voiceModal').addEventListener('click', (e) => {
+      if (e.target.id === 'voiceModal') closeVoiceModal();
     });
-  }
 
-  // Initialize all tiles
-  function initializeDashboard() {
-    const tileTypes = ['deadlines', 'ideas', 'projects', 'notes', 'career', 'future'];
-    tileTypes.forEach(renderTile);
-  }
+    document.getElementById('textModal').addEventListener('click', (e) => {
+      if (e.target.id === 'textModal') closeTextModal();
+    });
 
-  // ===================== NAVIGATION =====================
-  const menuDashboard = document.getElementById("menu-dashboard");
-  const menuCalendar = document.getElementById("menu-calendar");
+    document.getElementById('viewModal').addEventListener('click', (e) => {
+      if (e.target.id === 'viewModal') closeViewModal();
+    });
 
-  menuDashboard.onclick = () => {
-    // Already on dashboard, just ensure it's visible
-    menuDashboard.classList.add("active");
-    menuCalendar.classList.remove("active");
-  };
-
-  menuCalendar.onclick = () => {
-    // Redirect to Outlook Calendar page
-    window.location.href = '/outlook-calendar.html';
-  };
-  // Profile menu handler
-const menuProfile = document.getElementById("menu-profile");
-if (menuProfile) {
-  menuProfile.onclick = () => {
-    window.location.href = '/profile.html';
-  };
-}
-
-    // About Us menu handler
-const menuAboutUs = document.getElementById("menu-aboutus");
-if (menuAboutUs) {
-  menuAboutUs.onclick = () => {
-    window.location.href = '/aboutus.html';
-  };
-}
-  // Tile click handlers
-  document.querySelectorAll('.dashboard-tile').forEach(tile => {
-    tile.addEventListener('click', () => {
-      const tileType = tile.dataset.tile;
+    // Cleanup on page unload
+    window.addEventListener('beforeunload', (e) => {
+      // Only show warning if recording is in progress
+      if (isRecording) {
+        e.preventDefault();
+        e.returnValue = 'Recording in progress. Are you sure you want to leave?';
+        return e.returnValue;
+      }
       
-      // Store the active tile for potential use by management pages
-      sessionStorage.setItem('activeTile', tileType);
+      // Cleanup resources
+      Object.values(audioPlayers).forEach(audio => {
+        try {
+          audio.pause();
+          audio.src = '';
+        } catch (err) {
+          console.error('Error cleaning up audio:', err);
+        }
+      });
       
-      // Navigate to appropriate management pages
-      switch(tileType) {
-        case 'ideas':
-          window.location.href = 'ideas.html';
-          break;
-        case 'notes':
-          window.location.href = 'notes.html';
-          break;
-        case 'projects':
-          window.location.href = 'projects.html';
-          break;
-        case 'deadlines':
-          window.location.href = 'deadlines.html';
-          break;
-        case 'career':
-          window.location.href = 'career.html';
-          break;
-        case 'future':
-          window.location.href = 'future.html';
-          break;
-        default:
-          alert(`${tileType.charAt(0).toUpperCase() + tileType.slice(1)} Management\n\nThis would redirect to a dedicated ${tileType} management page.`);
+      if (audioContext && audioContext.state !== 'closed') {
+        try {
+          audioContext.close();
+        } catch (err) {
+          console.error('Error closing audio context:', err);
+        }
+      }
+      
+      if (mediaStream) {
+        try {
+          mediaStream.getTracks().forEach(track => track.stop());
+        } catch (err) {
+          console.error('Error stopping media stream:', err);
+        }
       }
     });
-  });
 
-  // Logout
-  document.getElementById("logout").onclick = () => {
-    sessionStorage.removeItem("userEmail");
-    sessionStorage.removeItem("isLoggedIn");
-    window.location.href = "/";
-  };
-
-  // ===================== INITIALIZATION =====================
-  initializeDashboard();
-
+    // Load notes on page load
+    loadAllNotes();
   </script>
 </body>
-
 </html>
