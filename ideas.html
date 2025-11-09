@@ -234,32 +234,6 @@
       word-wrap: break-word;
     }
 
-    .idea-actions {
-      display: flex;
-      gap: 8px;
-    }
-
-    .icon-btn {
-      background: transparent;
-      border: 1px solid #e5e7eb;
-      padding: 6px 10px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 0.9rem;
-      transition: all 0.2s;
-    }
-
-    .icon-btn:hover {
-      background: #f9fafb;
-      border-color: #d1d5db;
-    }
-
-    .icon-btn.delete:hover {
-      background: #fef2f2;
-      border-color: #fecaca;
-      color: #dc2626;
-    }
-
     .idea-meta {
       display: flex;
       flex-wrap: wrap;
@@ -348,15 +322,55 @@
       color: #1f2937;
     }
 
-    .close-btn {
-      background: none;
+    .btn-edit {
+      padding: 8px 16px;
       border: none;
-      font-size: 1.5rem;
+      border-radius: 8px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      color: white;
       cursor: pointer;
+      font-weight: 600;
+      font-size: 0.9rem;
+      transition: opacity 0.3s;
+    }
+
+    .btn-edit:hover {
+      opacity: 0.9;
+    }
+
+    .view-mode {
+      display: block;
+    }
+
+    .edit-mode {
+      display: none;
+    }
+
+    .view-field {
+      margin-bottom: 20px;
+    }
+
+    .view-field-label {
+      font-size: 0.85rem;
+      color: #9ca3af;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .view-field-value {
+      color: #333;
+      font-size: 1rem;
+      line-height: 1.6;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+    }
+
+    .view-field-value.empty {
       color: var(--muted);
-      padding: 0;
-      width: 30px;
-      height: 30px;
+      font-style: italic;
     }
 
     .form-group {
@@ -405,6 +419,17 @@
 
     .btn-save {
       background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.95rem;
+      font-weight: 600;
+    }
+
+    .btn-delete {
+      background: #dc2626;
       color: white;
       border: none;
       padding: 10px 20px;
@@ -538,10 +563,38 @@
   <div class="modal" id="ideaModal">
     <div class="modal-content">
       <div class="modal-header">
-        <h2 id="modalTitle">Add Idea</h2>
-        <button class="close-btn" onclick="closeModal()">×</button>
+        <h2 id="modalTitle">Idea Details</h2>
+        <button class="btn-edit" id="editBtn" style="display: none;">✏️ Edit</button>
       </div>
-      <form id="ideaForm" onsubmit="saveIdea(event)">
+
+      <!-- View Mode -->
+      <div id="viewMode" class="view-mode">
+        <div class="view-field">
+          <div class="view-field-label">Title</div>
+          <div class="view-field-value" id="viewTitle"></div>
+        </div>
+        <div class="view-field">
+          <div class="view-field-label">Category</div>
+          <div class="view-field-value">
+            <span id="viewCategoryBadge" class="category-badge"></span>
+          </div>
+        </div>
+        <div class="view-field">
+          <div class="view-field-label">Content</div>
+          <div class="view-field-value" id="viewContent"></div>
+        </div>
+        <div class="view-field">
+          <div class="view-field-label">Created Date</div>
+          <div class="view-field-value" id="viewCreatedDate"></div>
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn-cancel" id="closeViewBtn">Close</button>
+          <button type="button" class="btn-delete" id="deleteViewBtn">🗑️ Delete</button>
+        </div>
+      </div>
+
+      <!-- Edit Mode -->
+      <form id="ideaForm" class="edit-mode" onsubmit="saveIdea(event)">
         <div class="form-group">
           <label>Title *</label>
           <input type="text" id="titleInput" placeholder="Enter your idea title..." required>
@@ -562,7 +615,7 @@
           <textarea id="contentInput" placeholder="Write your idea here..."></textarea>
         </div>
         <div class="form-actions">
-          <button type="button" class="btn-cancel" onclick="closeModal()">Cancel</button>
+          <button type="button" class="btn-cancel" onclick="handleCancel()">Cancel</button>
           <button type="submit" class="btn-save">Save Idea</button>
         </div>
       </form>
@@ -573,6 +626,7 @@
     const API_BASE = window.location.origin;
     let allIdeas = [];
     let editingId = null;
+    let isEditMode = false;
 
     function getCurrentUser() {
       return sessionStorage.getItem('userEmail');
@@ -593,6 +647,13 @@
       window.location.href = '/';
     }
 
+    // DOM Elements
+    const viewMode = document.getElementById('viewMode');
+    const ideaForm = document.getElementById('ideaForm');
+    const editBtn = document.getElementById('editBtn');
+    const closeViewBtn = document.getElementById('closeViewBtn');
+    const deleteViewBtn = document.getElementById('deleteViewBtn');
+
     function countWords(text) {
       return text.trim() ? text.trim().split(/\s+/).length : 0;
     }
@@ -611,7 +672,6 @@
         const response = await fetch(`${API_BASE}/ideas/${encodeURIComponent(userEmail)}`);
         
         if (!response.ok) {
-          // If 404 or 500, it might just mean no ideas exist yet
           console.log('Response status:', response.status);
           allIdeas = [];
           renderIdeas(allIdeas);
@@ -625,7 +685,6 @@
         updateStats();
       } catch (error) {
         console.error('Error loading ideas:', error);
-        // Don't show alert - just display empty state
         allIdeas = [];
         renderIdeas(allIdeas);
         updateStats();
@@ -652,13 +711,9 @@
         const date = formatDate(idea.created_date);
 
         return `
-          <div class="idea-card" onclick="editIdea(${idea.id})">
+          <div class="idea-card" onclick="viewIdea(${idea.id})">
             <div class="idea-card-header">
               <div class="idea-title">${idea.title}</div>
-              <div class="idea-actions">
-                <button class="icon-btn" onclick="event.stopPropagation(); editIdea(${idea.id})" title="Edit">✏️</button>
-                <button class="icon-btn delete" onclick="event.stopPropagation(); deleteIdea(${idea.id})" title="Delete">🗑️</button>
-              </div>
             </div>
             <div class="idea-meta">
               <span class="meta-item">📅 ${date}</span>
@@ -694,11 +749,61 @@
       renderIdeas(filtered);
     }
 
+    function showViewMode() {
+      isEditMode = false;
+      viewMode.style.display = 'block';
+      ideaForm.style.display = 'none';
+      editBtn.style.display = 'inline-block';
+    }
+
+    function showEditMode() {
+      isEditMode = true;
+      viewMode.style.display = 'none';
+      ideaForm.style.display = 'block';
+      editBtn.style.display = 'none';
+    }
+
+    function viewIdea(id) {
+      const idea = allIdeas.find(i => i.id === id);
+      if (!idea) return;
+
+      editingId = idea.id;
+      document.getElementById('modalTitle').textContent = 'Idea Details';
+      
+      // Populate view mode
+      document.getElementById('viewTitle').textContent = idea.title;
+      
+      const categoryBadge = document.getElementById('viewCategoryBadge');
+      categoryBadge.textContent = (idea.category || 'general').toUpperCase();
+      categoryBadge.className = `category-badge category-${idea.category || 'general'}`;
+
+      const contentElement = document.getElementById('viewContent');
+      if (idea.content) {
+        contentElement.textContent = idea.content;
+        contentElement.classList.remove('empty');
+      } else {
+        contentElement.textContent = 'No content provided';
+        contentElement.classList.add('empty');
+      }
+
+      document.getElementById('viewCreatedDate').textContent = new Date(idea.created_date).toLocaleString();
+
+      // Populate edit form (for when user clicks edit)
+      document.getElementById('titleInput').value = idea.title;
+      document.getElementById('categoryInput').value = idea.category || 'general';
+      document.getElementById('contentInput').value = idea.content || '';
+
+      showViewMode();
+      document.getElementById('ideaModal').classList.add('active');
+    }
+
     function openAddModal() {
       editingId = null;
       document.getElementById('modalTitle').textContent = 'Add Idea';
       document.getElementById('ideaForm').reset();
+      showEditMode();
       document.getElementById('ideaModal').classList.add('active');
+      document.getElementById('titleInput').focus();
     }
 
     function editIdea(id) {
@@ -710,14 +815,40 @@
       document.getElementById('titleInput').value = idea.title;
       document.getElementById('categoryInput').value = idea.category || 'general';
       document.getElementById('contentInput').value = idea.content || '';
+      showEditMode();
       document.getElementById('ideaModal').classList.add('active');
+      document.getElementById('titleInput').focus();
+    }
+
+    function handleCancel() {
+      if (editingId) {
+        // If editing existing idea, go back to view mode
+        viewIdea(editingId);
+      } else {
+        // If creating new idea, close modal
+        closeModal();
+      }
     }
 
     function closeModal() {
       document.getElementById('ideaModal').classList.remove('active');
       document.getElementById('ideaForm').reset();
       editingId = null;
+      isEditMode = false;
     }
+
+    // Event Listeners
+    editBtn.onclick = () => {
+      document.getElementById('modalTitle').textContent = 'Edit Idea';
+      showEditMode();
+      document.getElementById('titleInput').focus();
+    };
+
+    closeViewBtn.onclick = closeModal;
+
+    deleteViewBtn.onclick = () => {
+      deleteIdea(editingId);
+    };
 
     async function saveIdea(event) {
       event.preventDefault();
@@ -766,6 +897,7 @@
           method: 'DELETE'
         });
         loadIdeas();
+        closeModal();
       } catch (error) {
         console.error('Error deleting idea:', error);
         alert('Failed to delete idea');
