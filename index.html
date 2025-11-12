@@ -450,26 +450,57 @@
     }
 
     /* Responsive Design */
+    @media (max-width: 1024px) {
+      .login-container {
+        max-width: 850px;
+      }
+
+      .login-left {
+        padding: 50px 40px;
+        min-width: 350px;
+      }
+
+      .login-right {
+        padding: 50px 40px;
+        min-width: 350px;
+      }
+
+      .illustration {
+        width: 240px;
+        height: 240px;
+      }
+    }
+
     @media (max-width: 968px) {
       .login-container {
         flex-direction: column;
         max-width: 500px;
+        min-height: auto;
       }
 
       .login-left {
         padding: 40px 30px;
-        min-height: 300px;
+        min-height: auto;
         min-width: unset;
+      }
+
+      .brand-header {
+        margin-bottom: 30px;
       }
 
       .illustration {
         width: 200px;
         height: 200px;
-        margin-bottom: 30px;
+        margin-bottom: 25px;
       }
 
       .quote-text {
         font-size: 1rem;
+        max-width: 100%;
+      }
+
+      .quote-author {
+        font-size: 0.85rem;
       }
 
       .login-right {
@@ -477,8 +508,114 @@
         min-width: unset;
       }
 
+      .form-header {
+        margin-bottom: 30px;
+      }
+
       .form-header h2 {
         font-size: 1.6rem;
+      }
+
+      .form-header p {
+        font-size: 0.9rem;
+      }
+    }
+
+    @media (max-width: 640px) {
+      body {
+        padding: 15px;
+      }
+
+      .login-container {
+        max-width: 100%;
+      }
+
+      .login-left {
+        padding: 35px 25px;
+      }
+
+      .brand-header {
+        margin-bottom: 25px;
+      }
+
+      .brand-logo {
+        width: 28px;
+        height: 28px;
+        font-size: 16px;
+      }
+
+      .brand-name {
+        font-size: 1.2rem;
+      }
+
+      .illustration {
+        width: 180px;
+        height: 180px;
+        margin-bottom: 20px;
+      }
+
+      .quote-text {
+        font-size: 0.95rem;
+      }
+
+      .login-right {
+        padding: 35px 25px;
+      }
+
+      .form-header h2 {
+        font-size: 1.5rem;
+      }
+
+      .tab-buttons {
+        margin-bottom: 25px;
+      }
+
+      .tab-btn {
+        padding: 10px 15px;
+        font-size: 0.9rem;
+      }
+
+      .form-group {
+        margin-bottom: 18px;
+      }
+
+      .form-group input {
+        padding: 12px 12px 12px 40px;
+        font-size: 0.9rem;
+      }
+
+      .input-icon {
+        font-size: 1rem;
+        left: 12px;
+      }
+
+      .remember-forgot {
+        font-size: 0.8rem;
+        margin-bottom: 20px;
+      }
+
+      .submit-btn {
+        padding: 12px;
+        font-size: 0.95rem;
+      }
+
+      .social-divider {
+        margin: 20px 0;
+        font-size: 0.8rem;
+      }
+
+      .social-buttons {
+        gap: 10px;
+        margin-bottom: 20px;
+      }
+
+      .social-btn {
+        padding: 10px;
+        font-size: 0.85rem;
+      }
+
+      .signup-link {
+        font-size: 0.85rem;
       }
     }
 
@@ -495,35 +632,209 @@
         padding: 30px 20px;
       }
 
+      .brand-header {
+        margin-bottom: 20px;
+      }
+
+      .brand-logo {
+        width: 26px;
+        height: 26px;
+        font-size: 14px;
+      }
+
+      .brand-name {
+        font-size: 1.1rem;
+      }
+
       .illustration {
-        width: 160px;
-        height: 160px;
+        width: 150px;
+        height: 150px;
+        margin-bottom: 20px;
       }
 
       .quote-text {
-        font-size: 0.95rem;
+        font-size: 0.9rem;
+        line-height: 1.5;
+      }
+
+      .quote-author {
+        font-size: 0.8rem;
       }
 
       .login-right {
         padding: 30px 20px;
       }
 
+      .form-header {
+        margin-bottom: 25px;
+      }
+
       .form-header h2 {
         font-size: 1.4rem;
+        margin-bottom: 8px;
+      }
+
+      .form-header p {
+        font-size: 0.85rem;
+      }
+
+      .tab-buttons {
+        margin-bottom: 20px;
+      }
+
+      .tab-btn {
+        padding: 10px 12px;
+        font-size: 0.85rem;
+      }
+
+      .form-group {
+        margin-bottom: 16px;
+      }
+
+      .form-group label {
+        font-size: 0.85rem;
+        margin-bottom: 6px;
       }
 
       .form-group input {
-        padding: 11px 12px 11px 40px;
-        font-size: 0.9rem;
+        padding: 11px 10px 11px 38px;
+        font-size: 0.85rem;
+      }
+
+      .input-icon {
+        font-size: 0.95rem;
+        left: 11px;
+      }
+
+      .remember-forgot {
+        font-size: 0.75rem;
+        margin-bottom: 18px;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .remember-me input[type="checkbox"] {
+        width: 14px;
+        height: 14px;
       }
 
       .submit-btn {
-        padding: 12px;
-        font-size: 0.95rem;
+        padding: 11px;
+        font-size: 0.9rem;
+      }
+
+      .social-divider {
+        margin: 18px 0;
+        font-size: 0.75rem;
       }
 
       .social-buttons {
         flex-direction: column;
+        gap: 8px;
+        margin-bottom: 18px;
+      }
+
+      .social-btn {
+        padding: 10px;
+        font-size: 0.8rem;
+      }
+
+      .signup-link {
+        font-size: 0.8rem;
+      }
+
+      .success-message,
+      .verification-notice {
+        padding: 10px;
+        font-size: 0.85rem;
+        margin-bottom: 15px;
+      }
+
+      .error-message {
+        font-size: 0.8rem;
+      }
+    }
+
+    @media (max-width: 360px) {
+      body {
+        padding: 8px;
+      }
+
+      .login-left {
+        padding: 25px 15px;
+      }
+
+      .illustration {
+        width: 130px;
+        height: 130px;
+        margin-bottom: 15px;
+      }
+
+      .quote-text {
+        font-size: 0.85rem;
+      }
+
+      .login-right {
+        padding: 25px 15px;
+      }
+
+      .form-header h2 {
+        font-size: 1.3rem;
+      }
+
+      .form-group input {
+        padding: 10px 8px 10px 36px;
+        font-size: 0.8rem;
+      }
+
+      .input-icon {
+        font-size: 0.9rem;
+        left: 10px;
+      }
+    }
+
+    /* Landscape orientation on mobile */
+    @media (max-width: 968px) and (orientation: landscape) {
+      .login-container {
+        flex-direction: row;
+        max-width: 100%;
+      }
+
+      .login-left {
+        min-width: 300px;
+        padding: 30px 25px;
+      }
+
+      .illustration {
+        width: 140px;
+        height: 140px;
+        margin-bottom: 15px;
+      }
+
+      .quote-text {
+        font-size: 0.85rem;
+      }
+
+      .quote-author {
+        font-size: 0.75rem;
+      }
+
+      .login-right {
+        padding: 30px 25px;
+        overflow-y: auto;
+        max-height: 90vh;
+      }
+
+      .form-header h2 {
+        font-size: 1.4rem;
+      }
+
+      .form-group {
+        margin-bottom: 14px;
+      }
+
+      .social-divider {
+        margin: 15px 0;
       }
     }
   </style>
