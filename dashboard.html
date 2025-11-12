@@ -428,10 +428,6 @@
     </div>
 
     <div id="dashboardView">
-      <div class="dashboard-header">
-        <h1>Your Projects</h1>
-      </div>
-     
       <div class="dashboard-grid">
         <!-- Projects Tile -->
         <div class="dashboard-tile projects" data-tile="projects">
@@ -618,28 +614,7 @@
         return;
       }
 
-      // Special rendering for career tile with progress bars
-      if (tileType === 'career') {
-        const topItems = data.slice(0, 2);
-        contentEl.innerHTML = '<div class="progress-section">' + topItems.map(item => {
-          const title = item.title || item.name || item.content || '';
-          const progress = item.progress || 0;
-          return `
-            <div class="progress-item">
-              <div class="progress-label">
-                <span class="progress-title">${title}</span>
-                <span class="progress-percent">${progress}%</span>
-              </div>
-              <div class="progress-bar-container">
-                <div class="progress-bar" style="width: ${progress}%"></div>
-              </div>
-            </div>
-          `;
-        }).join('') + '</div>';
-        return;
-      }
-
-      // Show top 3 items for other tiles
+      // Show top 3 items for all tiles (including career)
       const topItems = data.slice(0, 3);
       contentEl.innerHTML = topItems.map(item => {
         let displayText = item.title || item.name || item.content || item.description || '';
@@ -755,4 +730,3 @@
   </script>
 </body>
 </html>
-
