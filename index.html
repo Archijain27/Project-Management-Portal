@@ -14,7 +14,7 @@
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', sans-serif;
       overflow-x: hidden;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: #e8eef5;
       min-height: 100vh;
       display: flex;
       align-items: center;
@@ -23,103 +23,17 @@
       padding: 20px;
     }
 
-    /* Animated Background */
-    .bg-animation {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
-      z-index: 0;
-      pointer-events: none;
-    }
-
-    .floating-shapes {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-    }
-
-    .shape {
-      position: absolute;
-      background: rgba(255, 255, 255, 0.1);
-      backdrop-filter: blur(10px);
-      border-radius: 50%;
-      animation: float 20s infinite ease-in-out;
-    }
-
-    .shape:nth-child(1) {
-      width: 80px;
-      height: 80px;
-      top: 10%;
-      left: 10%;
-      animation-delay: 0s;
-    }
-
-    .shape:nth-child(2) {
-      width: 120px;
-      height: 120px;
-      top: 60%;
-      left: 80%;
-      animation-delay: 2s;
-    }
-
-    .shape:nth-child(3) {
-      width: 60px;
-      height: 60px;
-      top: 80%;
-      left: 20%;
-      animation-delay: 4s;
-    }
-
-    .shape:nth-child(4) {
-      width: 100px;
-      height: 100px;
-      top: 20%;
-      left: 70%;
-      animation-delay: 1s;
-    }
-
-    .shape:nth-child(5) {
-      width: 90px;
-      height: 90px;
-      top: 50%;
-      left: 50%;
-      animation-delay: 3s;
-    }
-
-    @keyframes float {
-      0%, 100% {
-        transform: translateY(0) translateX(0) rotate(0deg);
-        opacity: 0.5;
-      }
-      25% {
-        transform: translateY(-100px) translateX(50px) rotate(90deg);
-        opacity: 0.8;
-      }
-      50% {
-        transform: translateY(-50px) translateX(-50px) rotate(180deg);
-        opacity: 0.3;
-      }
-      75% {
-        transform: translateY(50px) translateX(100px) rotate(270deg);
-        opacity: 0.6;
-      }
-    }
-
     /* Main Container */
     .login-container {
       position: relative;
       z-index: 1;
       display: flex;
       width: 100%;
-      max-width: 900px;
+      max-width: 950px;
       min-height: 550px;
-      background: rgba(255, 255, 255, 0.98);
-      backdrop-filter: blur(20px);
-      border-radius: 20px;
-      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
       overflow: hidden;
       animation: slideIn 0.6s ease-out;
     }
@@ -137,117 +51,115 @@
 
     /* Left Side - Image/Branding */
     .login-left {
-      flex: 0 0 45%;
-      background: linear-gradient(135deg, #f0f4ff 0%, #e8eeff 100%);
-      padding: 50px 40px;
+      flex: 1;
+      background: #dfe7f2;
+      padding: 60px 50px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: flex-start;
+      position: relative;
+      overflow: hidden;
+      min-width: 400px;
+    }
+
+    .brand-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 40px;
+    }
+
+    .brand-logo {
+      width: 32px;
+      height: 32px;
+      background: #4a90e2;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .brand-name {
+      font-size: 1.4rem;
+      font-weight: 600;
+      color: #2c3e50;
+    }
+
+    .brand-content {
+      text-align: left;
+      color: #2c3e50;
+      z-index: 1;
+      flex: 1;
       display: flex;
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      position: relative;
-      overflow: hidden;
-      border-right: 1px solid #e2e8f0;
+      width: 100%;
     }
 
-    .brand-content {
-      text-align: center;
-      color: #4a5568;
-      z-index: 1;
+    .illustration {
+      width: 280px;
+      height: 280px;
+      margin: 0 auto 40px;
+      background: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjgwIiBoZWlnaHQ9IjI4MCIgdmlld0JveD0iMCAwIDI4MCAyODAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyODAiIGhlaWdodD0iMjgwIiBmaWxsPSJ0cmFuc3BhcmVudCIvPgo8IS0tIElzb21ldHJpYyBkYXNoYm9hcmQgaWxsdXN0cmF0aW9uIC0tPgo8ZyBvcGFjaXR5PSIwLjkiPgo8IS0tIEJhc2UgcGxhdGZvcm0gLS0+CjxwYXRoIGQ9Ik0xNDAgMjIwTDYwIDE3MFYxMDBMMTQwIDUwTDIyMCAxMDBWMTcwTDE0MCAyMjBaIiBmaWxsPSIjZmZmZmZmIiBzdHJva2U9IiNiZGMzYzkiIHN0cm9rZS13aWR0aD0iMiIvPgo8IS0tIENoYXJ0IGJhcnMgLS0+CjxyZWN0IHg9Ijg1IiB5PSIxMjAiIHdpZHRoPSIyMCIgaGVpZ2h0PSI0MCIgZmlsbD0iIzRhOTBlMiIgb3BhY2l0eT0iMC43Ii8+CjxyZWN0IHg9IjExNSIgeT0iMTAwIiB3aWR0aD0iMjAiIGhlaWdodD0iNjAiIGZpbGw9IiM1MGE4ZjUiIG9wYWNpdHk9IjAuNyIvPgo8cmVjdCB4PSIxNDUiIHk9Ijg1IiB3aWR0aD0iMjAiIGhlaWdodD0iNzUiIGZpbGw9IiM2NmJiZmYiIG9wYWNpdHk9IjAuNyIvPgo8cmVjdCB4PSIxNzUiIHk9IjExMCIgd2lkdGg9IjIwIiBoZWlnaHQ9IjUwIiBmaWxsPSIjNGE5MGUyIiBvcGFjaXR5PSIwLjciLz4KPC9nPgo8L3N2Zz4=') center/contain no-repeat;
     }
 
-    .logo-icon {
-      font-size: 80px;
-      margin-bottom: 30px;
-      filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1));
-    }
-
-    .brand-content h1 {
-      font-size: 1.8rem;
-      font-weight: 700;
-      margin-bottom: 15px;
-      color: #667eea;
-    }
-
-    .brand-content p {
-      font-size: 0.95rem;
-      opacity: 0.8;
+    .quote-text {
+      font-size: 1.1rem;
+      color: #2c3e50;
       line-height: 1.6;
-      color: #4a5568;
-      max-width: 280px;
-      margin: 0 auto;
+      text-align: center;
+      margin-bottom: 15px;
+      font-weight: 500;
+      max-width: 350px;
     }
 
-    .features {
-      margin-top: 40px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    .feature-item {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-size: 0.85rem;
-      color: #4a5568;
-    }
-
-    .feature-icon {
-      font-size: 1.2rem;
-    }
-
-    .quote-section {
-      margin-top: 40px;
-      padding: 20px;
-      background: rgba(255, 255, 255, 0.5);
-      border-radius: 12px;
-      border-left: 4px solid #667eea;
-    }
-
-    .quote-section p {
+    .quote-author {
       font-size: 0.9rem;
-      font-style: italic;
-      color: #2d3748;
-      margin-bottom: 8px;
-      max-width: 100%;
-    }
-
-    .quote-section span {
-      font-size: 0.8rem;
-      color: #718096;
+      color: #7f8c8d;
+      text-align: center;
     }
 
     /* Right Side - Form */
     .login-right {
       flex: 1;
-      padding: 50px 45px;
+      padding: 60px 50px;
       display: flex;
       flex-direction: column;
       justify-content: center;
+      min-width: 400px;
       background: white;
     }
 
     .form-header {
       margin-bottom: 35px;
+      text-align: center;
     }
 
     .form-header h2 {
-      font-size: 1.75rem;
-      color: #2d3748;
-      margin-bottom: 8px;
-      font-weight: 700;
+      font-size: 2rem;
+      color: #2c3e50;
+      margin-bottom: 10px;
+      font-weight: 600;
     }
 
     .form-header p {
-      color: #718096;
-      font-size: 0.9rem;
+      color: #7f8c8d;
+      font-size: 0.95rem;
     }
 
     .tab-buttons {
       display: flex;
       gap: 0;
       margin-bottom: 30px;
-      border-bottom: 2px solid #e2e8f0;
+      background: transparent;
+      padding: 0;
+      border-radius: 0;
+      border-bottom: 2px solid #e8eef5;
     }
 
     .tab-btn {
@@ -255,23 +167,21 @@
       padding: 12px 20px;
       border: none;
       background: transparent;
-      border-bottom: 3px solid transparent;
+      border-radius: 0;
       cursor: pointer;
-      font-weight: 600;
-      color: #718096;
+      font-weight: 500;
+      color: #7f8c8d;
       transition: all 0.3s;
+      border-bottom: 3px solid transparent;
+      margin-bottom: -2px;
       font-size: 0.95rem;
     }
 
-    .tab-btn:hover {
-      color: #667eea;
-    }
-
     .tab-btn.active {
-      color: #667eea;
-      border-bottom-color: #667eea;
       background: transparent;
+      color: #4a90e2;
       box-shadow: none;
+      border-bottom: 3px solid #4a90e2;
     }
 
     .form-content {
@@ -301,9 +211,9 @@
     .form-group label {
       display: block;
       margin-bottom: 8px;
-      color: #2d3748;
-      font-weight: 600;
-      font-size: 0.85rem;
+      color: #2c3e50;
+      font-weight: 500;
+      font-size: 0.9rem;
     }
 
     .input-wrapper {
@@ -316,43 +226,81 @@
       top: 50%;
       transform: translateY(-50%);
       font-size: 1.1rem;
-      opacity: 0.5;
+      color: #bdc3c9;
     }
 
     .form-group input {
       width: 100%;
-      padding: 12px 15px 12px 45px;
-      border: 1px solid #e2e8f0;
-      border-radius: 8px;
+      padding: 13px 15px 13px 45px;
+      border: 1px solid #e0e6ed;
+      border-radius: 6px;
       font-size: 0.95rem;
       transition: all 0.3s;
       background: white;
+      color: #2c3e50;
+    }
+
+    .form-group input::placeholder {
+      color: #bdc3c9;
     }
 
     .form-group input:focus {
       outline: none;
-      border-color: #667eea;
-      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+      border-color: #4a90e2;
+      background: white;
+      box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+    }
+
+    .remember-forgot {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 25px;
+      font-size: 0.85rem;
+    }
+
+    .remember-me {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: #5a6c7d;
+    }
+
+    .remember-me input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      cursor: pointer;
+    }
+
+    .forgot-link {
+      color: #4a90e2;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .forgot-link:hover {
+      text-decoration: underline;
     }
 
     .submit-btn {
       width: 100%;
-      padding: 14px;
+      padding: 13px;
       border: none;
-      border-radius: 8px;
-      background: #667eea;
+      border-radius: 6px;
+      background: #4a90e2;
       color: white;
       font-size: 1rem;
       font-weight: 600;
       cursor: pointer;
       transition: all 0.3s;
-      margin-top: 10px;
+      box-shadow: none;
+      margin-top: 0px;
     }
 
     .submit-btn:hover {
-      background: #5568d3;
+      background: #357abd;
       transform: translateY(-1px);
-      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+      box-shadow: 0 4px 12px rgba(74, 144, 226, 0.3);
     }
 
     .submit-btn:active {
@@ -365,9 +313,79 @@
       transform: none;
     }
 
+    .social-divider {
+      text-align: center;
+      margin: 25px 0;
+      color: #7f8c8d;
+      font-size: 0.85rem;
+      position: relative;
+    }
+
+    .social-divider::before,
+    .social-divider::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      width: 40%;
+      height: 1px;
+      background: #e0e6ed;
+    }
+
+    .social-divider::before {
+      left: 0;
+    }
+
+    .social-divider::after {
+      right: 0;
+    }
+
+    .social-buttons {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 25px;
+    }
+
+    .social-btn {
+      flex: 1;
+      padding: 11px;
+      border: 1px solid #e0e6ed;
+      border-radius: 6px;
+      background: white;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-size: 0.9rem;
+      color: #5a6c7d;
+      font-weight: 500;
+      transition: all 0.3s;
+    }
+
+    .social-btn:hover {
+      border-color: #bdc3c9;
+      background: #f8f9fa;
+    }
+
+    .signup-link {
+      text-align: center;
+      color: #7f8c8d;
+      font-size: 0.9rem;
+    }
+
+    .signup-link a {
+      color: #4a90e2;
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .signup-link a:hover {
+      text-decoration: underline;
+    }
+
     .error-message {
       color: #e53e3e;
-      font-size: 0.8rem;
+      font-size: 0.85rem;
       margin-top: 5px;
       display: none;
     }
@@ -380,7 +398,7 @@
       background: #d1fae5;
       color: #065f46;
       padding: 12px;
-      border-radius: 8px;
+      border-radius: 6px;
       margin-bottom: 20px;
       font-size: 0.9rem;
       display: none;
@@ -407,7 +425,7 @@
       border-left: 4px solid #f59e0b;
       color: #92400e;
       padding: 15px;
-      border-radius: 8px;
+      border-radius: 6px;
       margin-bottom: 20px;
       font-size: 0.9rem;
       display: none;
@@ -419,7 +437,7 @@
     }
 
     .resend-link {
-      color: #667eea;
+      color: #4a90e2;
       text-decoration: underline;
       cursor: pointer;
       font-weight: 600;
@@ -428,80 +446,7 @@
     }
 
     .resend-link:hover {
-      color: #4f46e5;
-    }
-
-    .forgot-password {
-      text-align: right;
-      margin-top: -10px;
-      margin-bottom: 15px;
-    }
-
-    .forgot-password a {
-      color: #667eea;
-      text-decoration: none;
-      font-size: 0.85rem;
-    }
-
-    .forgot-password a:hover {
-      text-decoration: underline;
-    }
-
-    .social-login {
-      margin-top: 25px;
-      padding-top: 25px;
-      border-top: 1px solid #e2e8f0;
-    }
-
-    .social-login p {
-      text-align: center;
-      color: #718096;
-      font-size: 0.85rem;
-      margin-bottom: 15px;
-    }
-
-    .social-buttons {
-      display: flex;
-      gap: 10px;
-    }
-
-    .social-btn {
-      flex: 1;
-      padding: 10px;
-      border: 1px solid #e2e8f0;
-      border-radius: 8px;
-      background: white;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      font-size: 0.9rem;
-      font-weight: 600;
-      color: #4a5568;
-      transition: all 0.3s;
-    }
-
-    .social-btn:hover {
-      border-color: #667eea;
-      background: #f7fafc;
-    }
-
-    .signup-prompt {
-      text-align: center;
-      margin-top: 20px;
-      font-size: 0.9rem;
-      color: #718096;
-    }
-
-    .signup-prompt a {
-      color: #667eea;
-      text-decoration: none;
-      font-weight: 600;
-    }
-
-    .signup-prompt a:hover {
-      text-decoration: underline;
+      color: #357abd;
     }
 
     /* Responsive Design */
@@ -512,37 +457,28 @@
       }
 
       .login-left {
-        flex: 0 0 auto;
-        padding: 30px 20px;
-        min-height: 200px;
-        border-right: none;
-        border-bottom: 1px solid #e2e8f0;
+        padding: 40px 30px;
+        min-height: 300px;
+        min-width: unset;
       }
 
-      .logo-icon {
-        font-size: 60px;
-        margin-bottom: 15px;
+      .illustration {
+        width: 200px;
+        height: 200px;
+        margin-bottom: 30px;
       }
 
-      .brand-content h1 {
-        font-size: 1.5rem;
-      }
-
-      .brand-content p {
-        font-size: 0.85rem;
-      }
-
-      .features,
-      .quote-section {
-        display: none;
+      .quote-text {
+        font-size: 1rem;
       }
 
       .login-right {
-        padding: 35px 30px;
+        padding: 40px 30px;
+        min-width: unset;
       }
 
       .form-header h2 {
-        font-size: 1.5rem;
+        font-size: 1.6rem;
       }
     }
 
@@ -552,28 +488,28 @@
       }
 
       .login-container {
-        border-radius: 15px;
+        border-radius: 8px;
       }
 
       .login-left {
-        padding: 25px 15px;
+        padding: 30px 20px;
       }
 
-      .logo-icon {
-        font-size: 50px;
-        margin-bottom: 10px;
+      .illustration {
+        width: 160px;
+        height: 160px;
       }
 
-      .brand-content h1 {
-        font-size: 1.3rem;
+      .quote-text {
+        font-size: 0.95rem;
       }
 
       .login-right {
-        padding: 25px 20px;
+        padding: 30px 20px;
       }
 
       .form-header h2 {
-        font-size: 1.3rem;
+        font-size: 1.4rem;
       }
 
       .form-group input {
@@ -593,30 +529,22 @@
   </style>
 </head>
 <body>
-  <!-- Animated Background -->
-  <div class="bg-animation">
-    <div class="floating-shapes">
-      <div class="shape"></div>
-      <div class="shape"></div>
-      <div class="shape"></div>
-      <div class="shape"></div>
-      <div class="shape"></div>
-    </div>
-  </div>
-
   <!-- Main Login Container -->
   <div class="login-container">
     <!-- Left Side - Branding -->
     <div class="login-left">
+      <div class="brand-header">
+        <div class="brand-logo">≋</div>
+        <div class="brand-name">ProjectFlow</div>
+      </div>
+
       <div class="brand-content">
-        <div class="logo-icon">📊</div>
-        <h1>ProjectFlow</h1>
-        <p>Login to continue to your dashboard.</p>
+        <div class="illustration"></div>
         
-        <div class="quote-section">
-          <p>"The key is not to prioritize what's on your schedule, but to schedule your priorities."</p>
-          <span>- Stephen Covey</span>
+        <div class="quote-text">
+          "The key is not to prioritize what's on your schedule, but to schedule your priorities."
         </div>
+        <div class="quote-author">- Stephen Covey</div>
       </div>
     </div>
 
@@ -645,92 +573,98 @@
 
       <!-- Login Form -->
       <div class="form-content active" id="loginForm">
-        <div class="form-group">
-          <label>Email Address</label>
-          <div class="input-wrapper">
-            <span class="input-icon">📧</span>
-            <input type="email" id="loginEmail" placeholder="Enter your email" required>
+        <form onsubmit="handleLogin(event)">
+          <div class="form-group">
+            <label>Email Address</label>
+            <div class="input-wrapper">
+              <span class="input-icon">✉</span>
+              <input type="email" id="loginEmail" placeholder="Enter your email" required>
+            </div>
+            <div class="error-message" id="loginEmailError">Please enter a valid email</div>
           </div>
-          <div class="error-message" id="loginEmailError">Please enter a valid email</div>
-        </div>
 
-        <div class="form-group">
-          <label>Password</label>
-          <div class="input-wrapper">
-            <span class="input-icon">🔒</span>
-            <input type="password" id="loginPassword" placeholder="Enter your password" required>
+          <div class="form-group">
+            <label>Password</label>
+            <div class="input-wrapper">
+              <span class="input-icon">🔒</span>
+              <input type="password" id="loginPassword" placeholder="Enter your password" required>
+            </div>
+            <div class="error-message" id="loginPasswordError">Password must be at least 6 characters</div>
           </div>
-          <div class="error-message" id="loginPasswordError">Password must be at least 6 characters</div>
-        </div>
 
-        <div class="forgot-password">
-          <a href="#" onclick="alert('Password reset feature coming soon!'); return false;">Forgot your password?</a>
-        </div>
+          <div class="remember-forgot">
+            <label class="remember-me">
+              <input type="checkbox" id="rememberMe">
+              <span>Remember me</span>
+            </label>
+            <a href="#" class="forgot-link">Forgot your password?</a>
+          </div>
 
-        <button type="button" class="submit-btn" id="loginBtn" onclick="handleLogin(event)">Login</button>
+          <button type="submit" class="submit-btn" id="loginBtn">Login</button>
 
-        <div class="social-login">
-          <p>Or continue with</p>
+          <div class="social-divider">Or continue with</div>
+
           <div class="social-buttons">
-            <button class="social-btn" onclick="alert('Google login coming soon!')">
-              <span>🔴</span> Google
+            <button type="button" class="social-btn">
+              <span style="color: #db4437;">G</span> Google
             </button>
-            <button class="social-btn" onclick="alert('GitHub login coming soon!')">
-              <span>⚫</span> Github
+            <button type="button" class="social-btn">
+              <span style="color: #333;">⚉</span> GitHub
             </button>
           </div>
-        </div>
 
-        <div class="signup-prompt">
-          Don't have an account? <a href="#" onclick="switchTab('signup'); return false;">Sign Up</a>
-        </div>
+          <div class="signup-link">
+            Don't have an account? <a href="#" onclick="switchTab('signup'); return false;">Sign Up</a>
+          </div>
+        </form>
       </div>
 
       <!-- Signup Form -->
       <div class="form-content" id="signupForm">
-        <div class="form-group">
-          <label>Full Name</label>
-          <div class="input-wrapper">
-            <span class="input-icon">👤</span>
-            <input type="text" id="signupName" placeholder="Enter your full name" required>
+        <form onsubmit="handleSignup(event)">
+          <div class="form-group">
+            <label>Full Name</label>
+            <div class="input-wrapper">
+              <span class="input-icon">👤</span>
+              <input type="text" id="signupName" placeholder="Enter your full name" required>
+            </div>
           </div>
-        </div>
 
-        <div class="form-group">
-          <label>Email Address</label>
-          <div class="input-wrapper">
-            <span class="input-icon">📧</span>
-            <input type="email" id="signupEmail" placeholder="Enter your email" required>
+          <div class="form-group">
+            <label>Email Address</label>
+            <div class="input-wrapper">
+              <span class="input-icon">✉</span>
+              <input type="email" id="signupEmail" placeholder="Enter your email" required>
+            </div>
+            <div class="error-message" id="signupEmailError">Please enter a valid email</div>
           </div>
-          <div class="error-message" id="signupEmailError">Please enter a valid email</div>
-        </div>
 
-        <div class="form-group">
-          <label>Password</label>
-          <div class="input-wrapper">
-            <span class="input-icon">🔒</span>
-            <input type="password" id="signupPassword" placeholder="Create a password (min 6 characters)" required>
+          <div class="form-group">
+            <label>Password</label>
+            <div class="input-wrapper">
+              <span class="input-icon">🔒</span>
+              <input type="password" id="signupPassword" placeholder="Create a password (min 6 characters)" required>
+            </div>
+            <div class="error-message" id="signupPasswordError">Password must be at least 6 characters</div>
           </div>
-          <div class="error-message" id="signupPasswordError">Password must be at least 6 characters</div>
-        </div>
 
-        <button type="button" class="submit-btn" id="signupBtn" onclick="handleSignup(event)">Create Account</button>
+          <button type="submit" class="submit-btn" id="signupBtn">Create Account</button>
 
-        <div class="social-login">
-          <p>Or continue with</p>
+          <div class="social-divider">Or continue with</div>
+
           <div class="social-buttons">
-            <button class="social-btn" onclick="alert('Google signup coming soon!')">
-              <span>🔴</span> Google
+            <button type="button" class="social-btn">
+              <span style="color: #db4437;">G</span> Google
             </button>
-            <button class="social-btn" onclick="alert('GitHub signup coming soon!')">
-              <span>⚫</span> Github
+            <button type="button" class="social-btn">
+              <span style="color: #333;">⚉</span> GitHub
             </button>
           </div>
-        </div>
 
-        <div class="signup-prompt">
-          Already have an account? <a href="#" onclick="switchTab('login'); return false;">Login</a>
-        </div>
+          <div class="signup-link">
+            Already have an account? <a href="#" onclick="switchTab('login'); return false;">Login</a>
+          </div>
+        </form>
       </div>
     </div>
   </div>
@@ -776,7 +710,7 @@
     }
 
     async function handleLogin(e) {
-      if (e && e.preventDefault) e.preventDefault();
+      e.preventDefault();
       
       const email = document.getElementById('loginEmail').value.trim();
       const password = document.getElementById('loginPassword').value;
@@ -833,7 +767,7 @@
     }
 
     async function handleSignup(e) {
-      if (e && e.preventDefault) e.preventDefault();
+      e.preventDefault();
       
       const name = document.getElementById('signupName').value.trim();
       const email = document.getElementById('signupEmail').value.trim();
