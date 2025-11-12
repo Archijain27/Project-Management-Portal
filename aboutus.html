@@ -19,36 +19,91 @@
 
         .sidebar {
             width: 240px;
-            background: #5b4cdb;
-            color: white;
-            padding: 20px 0;
+            background: #ffffff;
+            color: #0f172a;
+            padding: 24px 0;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 1px 0 0 #e2e8f0;
             position: fixed;
             height: 100vh;
             overflow-y: auto;
         }
 
-        .menu-title {
-            font-size: 24px;
+        .sidebar-logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 0 24px;
+            margin-bottom: 32px;
+        }
+
+        .sidebar-logo-icon {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
             font-weight: bold;
-            padding: 20px;
-            margin-bottom: 10px;
+            font-size: 18px;
+        }
+
+        .sidebar-logo-text {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #0f172a;
         }
 
         .menu-item {
-            padding: 15px 20px;
+            margin: 4px 16px;
+            padding: 10px 16px;
+            border-radius: 8px;
             cursor: pointer;
-            transition: background 0.3s;
-            color: rgba(255, 255, 255, 0.9);
+            font-size: 0.938rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.2s;
+            color: #475569;
             text-decoration: none;
-            display: block;
         }
 
         .menu-item:hover {
-            background: rgba(255, 255, 255, 0.1);
+            background: #f1f5f9;
+            color: #0f172a;
         }
 
         .menu-item.active {
-            background: rgba(255, 255, 255, 0.15);
+            background: #eef2ff;
+            color: #6366f1;
+        }
+
+        .menu-item::before {
+            content: '';
+            width: 20px;
+            height: 20px;
+            display: inline-block;
+            opacity: 0.8;
+        }
+
+        .menu-item[href*="dashboard"]::before { content: '📊'; }
+        .menu-item[href*="calendar"]::before { content: '📅'; }
+        .menu-item[href*="profile"]::before { content: '👤'; }
+        .menu-item[href*="aboutus"]::before { content: 'ℹ️'; }
+        .menu-item[href*="logout"]::before { content: '🚪'; }
+
+        .menu-item[href*="logout"] {
+            margin-top: auto;
+            color: #ef4444;
+            font-weight: 500;
+        }
+
+        .menu-item[href*="logout"]:hover {
+            background: #fef2f2;
         }
 
         .main-content {
@@ -399,10 +454,12 @@
 </head>
 <body>
     <div class="sidebar">
-        <div class="menu-title">Menu</div>
+        <div class="sidebar-logo">
+            <div class="sidebar-logo-icon">P</div>
+            <div class="sidebar-logo-text">Productiv.</div>
+        </div>
         <a href="dashboard.html" class="menu-item">Dashboard</a>
         <a href="calendar.html" class="menu-item">Calendar</a>
-        <a href="research-paper.html" class="menu-item">Research Paper</a>
         <a href="profile.html" class="menu-item">Profile</a>
         <a href="aboutus.html" class="menu-item active">About Us</a>
         <a href="logout.html" class="menu-item">Logout</a>
