@@ -114,12 +114,12 @@
       z-index: 1;
       display: flex;
       width: 100%;
-      max-width: 1100px;
-      min-height: 500px;
-      background: rgba(255, 255, 255, 0.95);
+      max-width: 900px;
+      min-height: 550px;
+      background: rgba(255, 255, 255, 0.98);
       backdrop-filter: blur(20px);
-      border-radius: 30px;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      border-radius: 20px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
       overflow: hidden;
       animation: slideIn 0.6s ease-out;
     }
@@ -137,77 +137,48 @@
 
     /* Left Side - Image/Branding */
     .login-left {
-      flex: 1;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      padding: 40px;
+      flex: 0 0 45%;
+      background: linear-gradient(135deg, #f0f4ff 0%, #e8eeff 100%);
+      padding: 50px 40px;
       display: flex;
       flex-direction: column;
       justify-content: center;
       align-items: center;
       position: relative;
       overflow: hidden;
-      min-width: 300px;
-    }
-
-    .login-left::before {
-      content: '';
-      position: absolute;
-      width: 300px;
-      height: 300px;
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 50%;
-      top: -100px;
-      right: -100px;
-      animation: pulse 3s infinite;
-    }
-
-    @keyframes pulse {
-      0%, 100% {
-        transform: scale(1);
-        opacity: 0.5;
-      }
-      50% {
-        transform: scale(1.1);
-        opacity: 0.8;
-      }
+      border-right: 1px solid #e2e8f0;
     }
 
     .brand-content {
       text-align: center;
-      color: white;
+      color: #4a5568;
       z-index: 1;
     }
 
     .logo-icon {
-      font-size: 100px;
-      margin-bottom: 20px;
-      animation: bounce 2s infinite;
-    }
-
-    @keyframes bounce {
-      0%, 100% {
-        transform: translateY(0);
-      }
-      50% {
-        transform: translateY(-20px);
-      }
+      font-size: 80px;
+      margin-bottom: 30px;
+      filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1));
     }
 
     .brand-content h1 {
-      font-size: 2rem;
+      font-size: 1.8rem;
       font-weight: 700;
       margin-bottom: 15px;
-      text-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+      color: #667eea;
     }
 
     .brand-content p {
-      font-size: 1rem;
-      opacity: 0.95;
+      font-size: 0.95rem;
+      opacity: 0.8;
       line-height: 1.6;
+      color: #4a5568;
+      max-width: 280px;
+      margin: 0 auto;
     }
 
     .features {
-      margin-top: 30px;
+      margin-top: 40px;
       display: flex;
       flex-direction: column;
       gap: 12px;
@@ -217,63 +188,90 @@
       display: flex;
       align-items: center;
       gap: 10px;
-      font-size: 0.9rem;
+      font-size: 0.85rem;
+      color: #4a5568;
     }
 
     .feature-icon {
-      font-size: 1.3rem;
+      font-size: 1.2rem;
+    }
+
+    .quote-section {
+      margin-top: 40px;
+      padding: 20px;
+      background: rgba(255, 255, 255, 0.5);
+      border-radius: 12px;
+      border-left: 4px solid #667eea;
+    }
+
+    .quote-section p {
+      font-size: 0.9rem;
+      font-style: italic;
+      color: #2d3748;
+      margin-bottom: 8px;
+      max-width: 100%;
+    }
+
+    .quote-section span {
+      font-size: 0.8rem;
+      color: #718096;
     }
 
     /* Right Side - Form */
     .login-right {
       flex: 1;
-      padding: 40px;
+      padding: 50px 45px;
       display: flex;
       flex-direction: column;
       justify-content: center;
-      min-width: 300px;
+      background: white;
     }
 
     .form-header {
-      margin-bottom: 30px;
+      margin-bottom: 35px;
     }
 
     .form-header h2 {
-      font-size: 1.8rem;
+      font-size: 1.75rem;
       color: #2d3748;
-      margin-bottom: 10px;
+      margin-bottom: 8px;
+      font-weight: 700;
     }
 
     .form-header p {
       color: #718096;
-      font-size: 0.95rem;
+      font-size: 0.9rem;
     }
 
     .tab-buttons {
       display: flex;
-      gap: 10px;
-      margin-bottom: 25px;
-      background: #f7fafc;
-      padding: 5px;
-      border-radius: 12px;
+      gap: 0;
+      margin-bottom: 30px;
+      border-bottom: 2px solid #e2e8f0;
     }
 
     .tab-btn {
       flex: 1;
-      padding: 12px;
+      padding: 12px 20px;
       border: none;
       background: transparent;
-      border-radius: 8px;
+      border-bottom: 3px solid transparent;
       cursor: pointer;
       font-weight: 600;
       color: #718096;
       transition: all 0.3s;
+      font-size: 0.95rem;
+    }
+
+    .tab-btn:hover {
+      color: #667eea;
     }
 
     .tab-btn.active {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+      color: #667eea;
+      border-bottom-color: #667eea;
+      background: transparent;
+      box-shadow: none;
     }
 
     .form-content {
@@ -305,7 +303,7 @@
       margin-bottom: 8px;
       color: #2d3748;
       font-weight: 600;
-      font-size: 0.9rem;
+      font-size: 0.85rem;
     }
 
     .input-wrapper {
@@ -317,44 +315,44 @@
       left: 15px;
       top: 50%;
       transform: translateY(-50%);
-      font-size: 1.2rem;
+      font-size: 1.1rem;
+      opacity: 0.5;
     }
 
     .form-group input {
       width: 100%;
-      padding: 14px 15px 14px 45px;
-      border: 2px solid #e2e8f0;
-      border-radius: 12px;
-      font-size: 1rem;
+      padding: 12px 15px 12px 45px;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      font-size: 0.95rem;
       transition: all 0.3s;
-      background: #f7fafc;
+      background: white;
     }
 
     .form-group input:focus {
       outline: none;
       border-color: #667eea;
-      background: white;
-      box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
     }
 
     .submit-btn {
       width: 100%;
-      padding: 16px;
+      padding: 14px;
       border: none;
-      border-radius: 12px;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 8px;
+      background: #667eea;
       color: white;
-      font-size: 1.1rem;
-      font-weight: 700;
+      font-size: 1rem;
+      font-weight: 600;
       cursor: pointer;
       transition: all 0.3s;
-      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
       margin-top: 10px;
     }
 
     .submit-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5);
+      background: #5568d3;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
     }
 
     .submit-btn:active {
@@ -369,7 +367,7 @@
 
     .error-message {
       color: #e53e3e;
-      font-size: 0.85rem;
+      font-size: 0.8rem;
       margin-top: 5px;
       display: none;
     }
@@ -433,6 +431,79 @@
       color: #4f46e5;
     }
 
+    .forgot-password {
+      text-align: right;
+      margin-top: -10px;
+      margin-bottom: 15px;
+    }
+
+    .forgot-password a {
+      color: #667eea;
+      text-decoration: none;
+      font-size: 0.85rem;
+    }
+
+    .forgot-password a:hover {
+      text-decoration: underline;
+    }
+
+    .social-login {
+      margin-top: 25px;
+      padding-top: 25px;
+      border-top: 1px solid #e2e8f0;
+    }
+
+    .social-login p {
+      text-align: center;
+      color: #718096;
+      font-size: 0.85rem;
+      margin-bottom: 15px;
+    }
+
+    .social-buttons {
+      display: flex;
+      gap: 10px;
+    }
+
+    .social-btn {
+      flex: 1;
+      padding: 10px;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      background: white;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #4a5568;
+      transition: all 0.3s;
+    }
+
+    .social-btn:hover {
+      border-color: #667eea;
+      background: #f7fafc;
+    }
+
+    .signup-prompt {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 0.9rem;
+      color: #718096;
+    }
+
+    .signup-prompt a {
+      color: #667eea;
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .signup-prompt a:hover {
+      text-decoration: underline;
+    }
+
     /* Responsive Design */
     @media (max-width: 968px) {
       .login-container {
@@ -441,12 +512,16 @@
       }
 
       .login-left {
+        flex: 0 0 auto;
         padding: 30px 20px;
         min-height: 200px;
+        border-right: none;
+        border-bottom: 1px solid #e2e8f0;
       }
 
       .logo-icon {
         font-size: 60px;
+        margin-bottom: 15px;
       }
 
       .brand-content h1 {
@@ -454,15 +529,16 @@
       }
 
       .brand-content p {
-        font-size: 0.9rem;
+        font-size: 0.85rem;
       }
 
-      .features {
+      .features,
+      .quote-section {
         display: none;
       }
 
       .login-right {
-        padding: 30px 25px;
+        padding: 35px 30px;
       }
 
       .form-header h2 {
@@ -476,7 +552,7 @@
       }
 
       .login-container {
-        border-radius: 20px;
+        border-radius: 15px;
       }
 
       .login-left {
@@ -501,13 +577,17 @@
       }
 
       .form-group input {
-        padding: 12px 12px 12px 40px;
-        font-size: 0.95rem;
+        padding: 11px 12px 11px 40px;
+        font-size: 0.9rem;
       }
 
       .submit-btn {
-        padding: 14px;
-        font-size: 1rem;
+        padding: 12px;
+        font-size: 0.95rem;
+      }
+
+      .social-buttons {
+        flex-direction: column;
       }
     }
   </style>
@@ -529,27 +609,13 @@
     <!-- Left Side - Branding -->
     <div class="login-left">
       <div class="brand-content">
-        <div class="logo-icon">🚀</div>
-        <h1>Project Tracker</h1>
-        <p>Organize your life, track your progress, achieve your goals</p>
+        <div class="logo-icon">📊</div>
+        <h1>ProjectFlow</h1>
+        <p>Login to continue to your dashboard.</p>
         
-        <div class="features">
-          <div class="feature-item">
-            <span class="feature-icon">✨</span>
-            <span>Track projects & deadlines</span>
-          </div>
-          <div class="feature-item">
-            <span class="feature-icon">💡</span>
-            <span>Capture brilliant ideas</span>
-          </div>
-          <div class="feature-item">
-            <span class="feature-icon">📊</span>
-            <span>Monitor your progress</span>
-          </div>
-          <div class="feature-item">
-            <span class="feature-icon">🎯</span>
-            <span>Set and achieve goals</span>
-          </div>
+        <div class="quote-section">
+          <p>"The key is not to prioritize what's on your schedule, but to schedule your priorities."</p>
+          <span>- Stephen Covey</span>
         </div>
       </div>
     </div>
@@ -557,8 +623,8 @@
     <!-- Right Side - Login Form -->
     <div class="login-right">
       <div class="form-header">
-        <h2>Welcome Back! 👋</h2>
-        <p>Sign in to continue your journey</p>
+        <h2>Welcome Back</h2>
+        <p>Login to continue to your dashboard.</p>
       </div>
 
       <!-- Success Message -->
@@ -579,60 +645,92 @@
 
       <!-- Login Form -->
       <div class="form-content active" id="loginForm">
-        <form onsubmit="handleLogin(event)">
-          <div class="form-group">
-            <label>Email Address</label>
-            <div class="input-wrapper">
-              <span class="input-icon">📧</span>
-              <input type="email" id="loginEmail" placeholder="Enter your email" required>
-            </div>
-            <div class="error-message" id="loginEmailError">Please enter a valid email</div>
+        <div class="form-group">
+          <label>Email Address</label>
+          <div class="input-wrapper">
+            <span class="input-icon">📧</span>
+            <input type="email" id="loginEmail" placeholder="Enter your email" required>
           </div>
+          <div class="error-message" id="loginEmailError">Please enter a valid email</div>
+        </div>
 
-          <div class="form-group">
-            <label>Password</label>
-            <div class="input-wrapper">
-              <span class="input-icon">🔒</span>
-              <input type="password" id="loginPassword" placeholder="Enter your password" required>
-            </div>
-            <div class="error-message" id="loginPasswordError">Password must be at least 6 characters</div>
+        <div class="form-group">
+          <label>Password</label>
+          <div class="input-wrapper">
+            <span class="input-icon">🔒</span>
+            <input type="password" id="loginPassword" placeholder="Enter your password" required>
           </div>
+          <div class="error-message" id="loginPasswordError">Password must be at least 6 characters</div>
+        </div>
 
-          <button type="submit" class="submit-btn" id="loginBtn">Log In</button>
-        </form>
+        <div class="forgot-password">
+          <a href="#" onclick="alert('Password reset feature coming soon!'); return false;">Forgot your password?</a>
+        </div>
+
+        <button type="button" class="submit-btn" id="loginBtn" onclick="handleLogin(event)">Login</button>
+
+        <div class="social-login">
+          <p>Or continue with</p>
+          <div class="social-buttons">
+            <button class="social-btn" onclick="alert('Google login coming soon!')">
+              <span>🔴</span> Google
+            </button>
+            <button class="social-btn" onclick="alert('GitHub login coming soon!')">
+              <span>⚫</span> Github
+            </button>
+          </div>
+        </div>
+
+        <div class="signup-prompt">
+          Don't have an account? <a href="#" onclick="switchTab('signup'); return false;">Sign Up</a>
+        </div>
       </div>
 
       <!-- Signup Form -->
       <div class="form-content" id="signupForm">
-        <form onsubmit="handleSignup(event)">
-          <div class="form-group">
-            <label>Full Name</label>
-            <div class="input-wrapper">
-              <span class="input-icon">👤</span>
-              <input type="text" id="signupName" placeholder="Enter your full name" required>
-            </div>
+        <div class="form-group">
+          <label>Full Name</label>
+          <div class="input-wrapper">
+            <span class="input-icon">👤</span>
+            <input type="text" id="signupName" placeholder="Enter your full name" required>
           </div>
+        </div>
 
-          <div class="form-group">
-            <label>Email Address</label>
-            <div class="input-wrapper">
-              <span class="input-icon">📧</span>
-              <input type="email" id="signupEmail" placeholder="Enter your email" required>
-            </div>
-            <div class="error-message" id="signupEmailError">Please enter a valid email</div>
+        <div class="form-group">
+          <label>Email Address</label>
+          <div class="input-wrapper">
+            <span class="input-icon">📧</span>
+            <input type="email" id="signupEmail" placeholder="Enter your email" required>
           </div>
+          <div class="error-message" id="signupEmailError">Please enter a valid email</div>
+        </div>
 
-          <div class="form-group">
-            <label>Password</label>
-            <div class="input-wrapper">
-              <span class="input-icon">🔒</span>
-              <input type="password" id="signupPassword" placeholder="Create a password (min 6 characters)" required>
-            </div>
-            <div class="error-message" id="signupPasswordError">Password must be at least 6 characters</div>
+        <div class="form-group">
+          <label>Password</label>
+          <div class="input-wrapper">
+            <span class="input-icon">🔒</span>
+            <input type="password" id="signupPassword" placeholder="Create a password (min 6 characters)" required>
           </div>
+          <div class="error-message" id="signupPasswordError">Password must be at least 6 characters</div>
+        </div>
 
-          <button type="submit" class="submit-btn" id="signupBtn">Create Account</button>
-        </form>
+        <button type="button" class="submit-btn" id="signupBtn" onclick="handleSignup(event)">Create Account</button>
+
+        <div class="social-login">
+          <p>Or continue with</p>
+          <div class="social-buttons">
+            <button class="social-btn" onclick="alert('Google signup coming soon!')">
+              <span>🔴</span> Google
+            </button>
+            <button class="social-btn" onclick="alert('GitHub signup coming soon!')">
+              <span>⚫</span> Github
+            </button>
+          </div>
+        </div>
+
+        <div class="signup-prompt">
+          Already have an account? <a href="#" onclick="switchTab('login'); return false;">Login</a>
+        </div>
       </div>
     </div>
   </div>
@@ -678,7 +776,7 @@
     }
 
     async function handleLogin(e) {
-      e.preventDefault();
+      if (e && e.preventDefault) e.preventDefault();
       
       const email = document.getElementById('loginEmail').value.trim();
       const password = document.getElementById('loginPassword').value;
@@ -720,22 +818,22 @@
             `Your email is not verified yet. Please check your inbox (${email}) for the verification link.`;
           showMessage('verificationNotice', '');
           loginBtn.disabled = false;
-          loginBtn.textContent = 'Log In';
+          loginBtn.textContent = 'Login';
         } else {
           alert(data.message || 'Invalid credentials');
           loginBtn.disabled = false;
-          loginBtn.textContent = 'Log In';
+          loginBtn.textContent = 'Login';
         }
       } catch (error) {
         console.error('Login error:', error);
         alert('Login failed. Please try again.');
         loginBtn.disabled = false;
-        loginBtn.textContent = 'Log In';
+        loginBtn.textContent = 'Login';
       }
     }
 
     async function handleSignup(e) {
-      e.preventDefault();
+      if (e && e.preventDefault) e.preventDefault();
       
       const name = document.getElementById('signupName').value.trim();
       const email = document.getElementById('signupEmail').value.trim();
@@ -857,4 +955,3 @@
   </script>
 </body>
 </html>
-
