@@ -12,10 +12,9 @@
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', sans-serif;
+            background: #f5f5f5;
             min-height: 100vh;
-            display: flex;
         }
 
         .sidebar {
@@ -54,194 +53,306 @@
 
         .main-content {
             margin-left: 240px;
-            flex: 1;
-            padding: 40px;
-            overflow-y: auto;
+            min-height: 100vh;
         }
 
-        .header {
-            background: white;
-            border-radius: 12px;
-            padding: 30px;
-            margin-bottom: 30px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        /* Hero Section */
+        .hero-section {
+            background: linear-gradient(135deg, #667eea 0%, #a855f7 50%, #4ade80 100%);
+            padding: 80px 40px;
+            text-align: center;
+            color: white;
         }
 
-        .header h1 {
-            color: #5b4cdb;
-            font-size: 36px;
-            margin-bottom: 10px;
-        }
-
-        .header p {
-            color: #666;
-            font-size: 16px;
-        }
-
-        .section {
-            background: white;
-            border-radius: 12px;
-            padding: 30px;
-            margin-bottom: 30px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-
-        .section h2 {
-            color: #5b4cdb;
-            font-size: 28px;
+        .hero-section h1 {
+            font-size: 48px;
+            font-weight: 700;
             margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
         }
 
-        .section h2::before {
-            content: '';
-            width: 4px;
-            height: 28px;
-            background: #5b4cdb;
-            border-radius: 2px;
+        .hero-section p {
+            font-size: 18px;
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.6;
+            opacity: 0.95;
         }
 
+        /* Content Container */
+        .content-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 60px 40px;
+        }
+
+        /* Section Styling */
+        .section {
+            margin-bottom: 80px;
+        }
+
+        .section-title {
+            font-size: 36px;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 50px;
+            color: #1a1a1a;
+        }
+
+        /* Vision Section */
+        .vision-box {
+            background: #f0f4ff;
+            padding: 40px;
+            border-radius: 16px;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .vision-box p {
+            color: #4a5568;
+            font-size: 16px;
+            line-height: 1.8;
+            margin-bottom: 20px;
+        }
+
+        .vision-box p:last-child {
+            margin-bottom: 0;
+        }
+
+        /* Team Grid */
         .team-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 25px;
-            margin-top: 30px;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+            max-width: 1000px;
+            margin: 0 auto;
         }
 
-        .team-member {
+        .team-card {
+            background: white;
+            border-radius: 16px;
+            padding: 40px 30px;
             text-align: center;
-            padding: 25px;
-            background: #f8f9ff;
-            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
             transition: transform 0.3s, box-shadow 0.3s;
         }
 
-        .team-member:hover {
+        .team-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 8px 16px rgba(91, 76, 219, 0.2);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
         }
 
         .avatar {
-            width: 100px;
-            height: 100px;
+            width: 80px;
+            height: 80px;
             border-radius: 50%;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            margin: 0 auto 15px;
+            margin: 0 auto 20px;
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
-            font-size: 36px;
-            font-weight: bold;
-            border: 4px solid white;
-            box-shadow: 0 4px 12px rgba(91, 76, 219, 0.3);
+            font-size: 28px;
+            font-weight: 700;
         }
 
-        .team-member h3 {
-            color: #333;
+        .avatar.blue {
+            background: #3b82f6;
+        }
+
+        .avatar.purple {
+            background: #a855f7;
+        }
+
+        .avatar.green {
+            background: #10b981;
+        }
+
+        .team-card h3 {
             font-size: 20px;
+            font-weight: 600;
+            color: #1a1a1a;
             margin-bottom: 8px;
         }
 
-        .team-member .role {
-            color: #5b4cdb;
-            font-weight: 600;
+        .team-card .role {
+            color: #10b981;
             font-size: 14px;
-            margin-bottom: 5px;
+            font-weight: 500;
+            margin-bottom: 8px;
         }
 
-        .team-member .email {
-            color: #888;
-            font-size: 13px;
+        .team-card .email {
+            color: #6b7280;
+            font-size: 14px;
         }
 
+        /* Features Grid */
         .features-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
-            margin-top: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            max-width: 1100px;
+            margin: 0 auto;
         }
 
         .feature-card {
-            padding: 25px;
-            background: linear-gradient(135deg, #f8f9ff 0%, #e8ebff 100%);
+            background: white;
             border-radius: 12px;
-            border-left: 4px solid #5b4cdb;
-            transition: transform 0.3s;
-        }
-
-        .feature-card:hover {
-            transform: translateX(5px);
-        }
-
-        .feature-card h3 {
-            color: #5b4cdb;
-            font-size: 20px;
-            margin-bottom: 12px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
+            padding: 30px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
         }
 
         .feature-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin-bottom: 15px;
+        }
+
+        .feature-card.blue { background: #eff6ff; }
+        .feature-card.blue .feature-icon { background: #3b82f6; color: white; }
+
+        .feature-card.yellow { background: #fffbeb; }
+        .feature-card.yellow .feature-icon { background: #f59e0b; color: white; }
+
+        .feature-card.green { background: #f0fdf4; }
+        .feature-card.green .feature-icon { background: #10b981; color: white; }
+
+        .feature-card.red { background: #fef2f2; }
+        .feature-card.red .feature-icon { background: #ef4444; color: white; }
+
+        .feature-card.purple { background: #faf5ff; }
+        .feature-card.purple .feature-icon { background: #a855f7; color: white; }
+
+        .feature-card.indigo { background: #eef2ff; }
+        .feature-card.indigo .feature-icon { background: #6366f1; color: white; }
+
+        .feature-card h3 {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 10px;
+        }
+
+        .feature-card p {
+            color: #4a5568;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        /* Objectives */
+        .objectives-list {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .objective-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px 30px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: flex-start;
+            gap: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .objective-number {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 16px;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .objective-number.num1 { background: #3b82f6; }
+        .objective-number.num2 { background: #a855f7; }
+        .objective-number.num3 { background: #10b981; }
+        .objective-number.num4 { background: #f97316; }
+        .objective-number.num5 { background: #8b5cf6; }
+
+        .objective-card p {
+            color: #4a5568;
+            font-size: 15px;
+            line-height: 1.6;
+            margin: 0;
+        }
+
+        .objective-card strong {
+            color: #1a1a1a;
+        }
+
+        /* Making Life Easier Section */
+        .easier-section {
+            background: linear-gradient(135deg, #667eea 0%, #a855f7 50%, #4ade80 100%);
+            padding: 60px 40px;
+            margin-top: 80px;
+        }
+
+        .easier-content {
+            max-width: 900px;
+            margin: 0 auto;
+            text-align: center;
+            color: white;
+        }
+
+        .easier-content h2 {
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 30px;
+        }
+
+        .easier-content p {
+            font-size: 16px;
+            line-height: 1.8;
+            margin-bottom: 20px;
+            opacity: 0.95;
+        }
+
+        /* Footer */
+        .footer {
+            background: #1a1a2e;
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .footer-logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .footer-icon {
             width: 32px;
             height: 32px;
-            border-radius: 8px;
+            background: #6366f1;
+            border-radius: 6px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 18px;
         }
 
-        .feature-card p {
-            color: #555;
-            line-height: 1.6;
-            font-size: 15px;
+        .footer-logo h3 {
+            font-size: 20px;
+            font-weight: 600;
         }
 
-        .objectives-list {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            margin-top: 20px;
-        }
-
-        .objective-item {
-            display: flex;
-            align-items: flex-start;
-            gap: 15px;
-            padding: 20px;
-            background: #f8f9ff;
-            border-radius: 12px;
-        }
-
-        .objective-number {
-            width: 40px;
-            height: 40px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            flex-shrink: 0;
-        }
-
-        .objective-item p {
-            color: #555;
-            line-height: 1.6;
-            flex: 1;
-        }
-
-        .description {
-            color: #555;
-            line-height: 1.8;
-            font-size: 16px;
-            margin-top: 20px;
-            text-align: justify;
+        .footer p {
+            color: #9ca3af;
+            font-size: 14px;
+            margin-bottom: 5px;
         }
 
         @media (max-width: 768px) {
@@ -253,11 +364,35 @@
 
             .main-content {
                 margin-left: 0;
-                padding: 20px;
             }
 
-            .team-grid, .features-grid {
+            .hero-section {
+                padding: 60px 20px;
+            }
+
+            .hero-section h1 {
+                font-size: 36px;
+            }
+
+            .content-container {
+                padding: 40px 20px;
+            }
+
+            .section-title {
+                font-size: 28px;
+            }
+
+            .team-grid,
+            .features-grid {
                 grid-template-columns: 1fr;
+            }
+
+            .easier-section {
+                padding: 40px 20px;
+            }
+
+            .easier-content h2 {
+                font-size: 28px;
             }
         }
     </style>
@@ -274,120 +409,130 @@
     </div>
 
     <div class="main-content">
-        <div class="header">
+        <!-- Hero Section -->
+        <div class="hero-section">
             <h1>About Us</h1>
-            <p>Meet the team behind this innovative productivity platform</p>
+            <p>Meet the team behind this innovative productivity platform that transforms the way you manage projects, ideas, and career goals</p>
         </div>
 
-        <div class="section">
-            <h2>Our Vision</h2>
-            <div class="description">
-                In today's fast-paced academic and professional world, staying organized and managing multiple aspects of life can be overwhelming. Our platform was born from the recognition that students and professionals need a comprehensive, user-friendly solution to manage their projects, ideas, deadlines, and career goals all in one place. We envisioned a system that doesn't just store information, but actively helps users stay on track, collaborate effectively, and achieve their goals with ease. This dashboard represents our commitment to making productivity intuitive, accessible, and genuinely helpful for everyone who strives to excel in their academic and professional journey.
-            </div>
-        </div>
-
-        <div class="section">
-            <h2>Our Team</h2>
-            <div class="team-grid">
-                <div class="team-member">
-                    <div class="avatar">NG</div>
-                    <h3>Dr. Nishant Gupta</h3>
-                    <div class="role">Faculty Mentor</div>
-                    <div class="email">nishant.gupta@lnmiit.ac.in</div>
-                </div>
-               
-                <div class="team-member">
-                    <div class="avatar">HV</div>
-                    <h3>Himi Vyas</h3>
-                    <div class="email">23uec550@lnmiit.ac.in</div>
-                </div>
-                <div class="team-member">
-                    <div class="avatar">AJ</div>
-                    <h3>Archi Jain</h3>
-                    <div class="email">23ume514@lnmiit.ac.in</div>
+        <div class="content-container">
+            <!-- Vision Section -->
+            <div class="section">
+                <h2 class="section-title">Our Vision</h2>
+                <div class="vision-box">
+                    <p>In today's fast-paced academic and professional world, staying organized and managing multiple aspects of life can be overwhelming. Our platform was born from the recognition that students and professionals need a comprehensive, user-friendly solution to manage their projects, ideas, deadlines, and career goals all in one place.</p>
+                    <p>We envisioned a system that doesn't just store information, but actively helps users stay on track, collaborate effectively, and achieve their goals with ease. This dashboard represents our commitment to making productivity intuitive, accessible, and genuinely helpful for everyone who strives to excel in their academic and professional journey.</p>
                 </div>
             </div>
-        </div>
 
-        <div class="section">
-            <h2>Key Features</h2>
-            <div class="features-grid">
-                <div class="feature-card">
-                    <h3>
-                        <span class="feature-icon" style="background: #10b981; color: white;">✓</span>
-                        Your Projects
-                    </h3>
-                    <p>Manage all your projects in one centralized hub. Track members, view detailed descriptions, monitor progress, and access all project-related features seamlessly.</p>
-                </div>
-                <div class="feature-card">
-                    <h3>
-                        <span class="feature-icon" style="background: #f59e0b; color: white;">💡</span>
-                        Recent Ideas
-                    </h3>
-                    <p>Capture and organize your brilliant ideas across different topics. Never lose a creative thought again with our intuitive idea management system.</p>
-                </div>
-                <div class="feature-card">
-                    <h3>
-                        <span class="feature-icon" style="background: #6366f1; color: white;">📝</span>
-                        Quick Notes
-                    </h3>
-                    <p>Take quick notes on the fly and access them instantly whenever you need. Perfect for jotting down important information during meetings or classes.</p>
-                </div>
-                <div class="feature-card">
-                    <h3>
-                        <span class="feature-icon" style="background: #ef4444; color: white;">⏰</span>
-                        Deadlines
-                    </h3>
-                    <p>Stay on top of all your deadlines with smart notifications and visual tracking. Never miss an important submission or meeting again.</p>
-                </div>
-                <div class="feature-card">
-                    <h3>
-                        <span class="feature-icon" style="background: #06b6d4; color: white;">🚀</span>
-                        Future Work
-                    </h3>
-                    <p>Plan and organize your future work ideas, upcoming tasks, and long-term projects. Keep your vision clear and actionable.</p>
-                </div>
-                <div class="feature-card">
-                    <h3>
-                        <span class="feature-icon" style="background: #8b5cf6; color: white;">🎯</span>
-                        Career & Goals
-                    </h3>
-                    <p>Set, track, and achieve your career aspirations and personal goals. Break down big dreams into manageable milestones.</p>
+            <!-- Team Section -->
+            <div class="section">
+                <h2 class="section-title">Our Team</h2>
+                <div class="team-grid">
+                    <div class="team-card">
+                        <div class="avatar blue">NG</div>
+                        <h3>Dr. Nishant Gupta</h3>
+                        <div class="role">Faculty Mentor</div>
+                        <div class="email">nishant.gupta@lnmiit.ac.in</div>
+                    </div>
+                    <div class="team-card">
+                        <div class="avatar purple">HV</div>
+                        <h3>Himi Vyas</h3>
+                        <div class="role">Developer</div>
+                        <div class="email">23uec550@lnmiit.ac.in</div>
+                    </div>
+                    <div class="team-card">
+                        <div class="avatar green">AJ</div>
+                        <h3>Archi Jain</h3>
+                        <div class="role">Developer</div>
+                        <div class="email">23ume514@lnmiit.ac.in</div>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <div class="section">
-            <h2>Our Objectives</h2>
-            <div class="objectives-list">
-                <div class="objective-item">
-                    <div class="objective-number">1</div>
-                    <p><strong>Centralized Organization:</strong> Provide a single platform where users can manage all aspects of their academic and professional life without switching between multiple tools.</p>
+            <!-- Features Section -->
+            <div class="section">
+                <h2 class="section-title">Key Features</h2>
+                <div class="features-grid">
+                    <div class="feature-card blue">
+                        <div class="feature-icon">📁</div>
+                        <h3>Your Projects</h3>
+                        <p>Manage all your projects in one centralized hub. Track members, view detailed descriptions, monitor progress, and access all project-related features seamlessly.</p>
+                    </div>
+                    <div class="feature-card yellow">
+                        <div class="feature-icon">💡</div>
+                        <h3>Recent Ideas</h3>
+                        <p>Capture and organize your brilliant ideas across different topics. Never lose a creative thought again with our intuitive idea management system.</p>
+                    </div>
+                    <div class="feature-card green">
+                        <div class="feature-icon">📝</div>
+                        <h3>Quick Notes</h3>
+                        <p>Take quick notes on the fly and access them instantly whenever you need. Perfect for jotting down important information during meetings or classes.</p>
+                    </div>
+                    <div class="feature-card red">
+                        <div class="feature-icon">⏰</div>
+                        <h3>Deadlines</h3>
+                        <p>Stay on top of all your deadlines with smart notifications and visual tracking. Never miss an important submission or meeting again.</p>
+                    </div>
+                    <div class="feature-card purple">
+                        <div class="feature-icon">🚀</div>
+                        <h3>Future Work</h3>
+                        <p>Plan and organize your future work ideas, upcoming tasks, and long-term projects. Keep your vision clear and actionable.</p>
+                    </div>
+                    <div class="feature-card indigo">
+                        <div class="feature-icon">🎯</div>
+                        <h3>Career & Goals</h3>
+                        <p>Set, track, and achieve your career aspirations and personal goals. Break down big dreams into manageable milestones.</p>
+                    </div>
                 </div>
-                <div class="objective-item">
-                    <div class="objective-number">2</div>
-                    <p><strong>Enhanced Productivity:</strong> Help users stay focused and productive by offering intuitive tools for project management, deadline tracking, and goal setting.</p>
-                </div>
-                <div class="objective-item">
-                    <div class="objective-number">3</div>
-                    <p><strong>Seamless Collaboration:</strong> Enable effective team collaboration with features that allow project members to work together efficiently and stay aligned.</p>
-                </div>
-                <div class="objective-item">
-                    <div class="objective-number">4</div>
-                    <p><strong>User-Friendly Experience:</strong> Create an interface that's not only powerful but also intuitive and enjoyable to use, reducing the learning curve and increasing adoption.</p>
-                </div>
-                <div class="objective-item">
-                    <div class="objective-number">5</div>
-                    <p><strong>Future-Ready Planning:</strong> Help users think ahead and plan for the future with dedicated spaces for career goals, future work ideas, and long-term aspirations.</p>
+            </div>
+
+            <!-- Objectives Section -->
+            <div class="section">
+                <h2 class="section-title">Our Objectives</h2>
+                <div class="objectives-list">
+                    <div class="objective-card">
+                        <div class="objective-number num1">1</div>
+                        <p><strong>Centralized Organization</strong><br>Provide a single platform where users can manage all aspects of their academic and professional life without switching between multiple tools.</p>
+                    </div>
+                    <div class="objective-card">
+                        <div class="objective-number num2">2</div>
+                        <p><strong>Enhanced Productivity</strong><br>Help users stay focused and productive by offering intuitive tools for project management, deadline tracking, and goal setting.</p>
+                    </div>
+                    <div class="objective-card">
+                        <div class="objective-number num3">3</div>
+                        <p><strong>Seamless Collaboration</strong><br>Enable effective team collaboration with features that allow project members to work together efficiently and stay aligned.</p>
+                    </div>
+                    <div class="objective-card">
+                        <div class="objective-number num4">4</div>
+                        <p><strong>User-Friendly Experience</strong><br>Create an interface that's not only powerful but also intuitive and enjoyable to use, reducing the learning curve and increasing adoption.</p>
+                    </div>
+                    <div class="objective-card">
+                        <div class="objective-number num5">5</div>
+                        <p><strong>Future-Ready Planning</strong><br>Help users think ahead and plan for the future with dedicated spaces for career goals, future work ideas, and long-term aspirations.</p>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div class="section">
-            <h2>Making Life Easier</h2>
-            <div class="description">
-                Our platform transforms the way you work and study by eliminating the chaos of scattered information and missed deadlines. With everything in one place, you spend less time searching and more time doing. The intuitive design means you can start being productive immediately without extensive training. Smart notifications keep you informed without overwhelming you, while the organized structure helps you maintain clarity even during the busiest times. Whether you're managing multiple research projects, tracking assignment deadlines, planning your career path, or collaborating with teammates, our dashboard adapts to your needs and grows with you. It's not just a tool—it's your personal productivity companion that understands the challenges of modern academic and professional life and helps you overcome them effortlessly.
+        <!-- Making Life Easier Section -->
+        <div class="easier-section">
+            <div class="easier-content">
+                <h2>Making Life Easier</h2>
+                <p>Our platform transforms the way you work and study by eliminating the chaos of scattered information and missed deadlines. With everything in one place, you spend less time searching and more time doing.</p>
+                <p>The intuitive design means you can start being productive immediately without extensive training. Smart notifications keep you informed without overwhelming you, while the organized structure helps you maintain clarity even during the busiest times.</p>
+                <p>Whether you're managing multiple research projects, tracking assignment deadlines, planning your career path, or collaborating with teammates, our dashboard adapts to your needs and grows with you. It's not just a tool—it's your personal productivity companion.</p>
             </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <div class="footer-logo">
+                <div class="footer-icon">📊</div>
+                <h3>ProjectTracker</h3>
+            </div>
+            <p>Empowering productivity through intelligent project management</p>
+            <p>© 2024 ProjectTracker. All rights reserved.</p>
         </div>
     </div>
 </body>
