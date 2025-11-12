@@ -253,7 +253,7 @@
 
     .remember-forgot {
       display: flex;
-      justify-content: space-between;
+      justify-content: flex-start;
       align-items: center;
       margin-bottom: 25px;
       font-size: 0.85rem;
@@ -270,16 +270,6 @@
       width: 16px;
       height: 16px;
       cursor: pointer;
-    }
-
-    .forgot-link {
-      color: #4a90e2;
-      text-decoration: none;
-      cursor: pointer;
-    }
-
-    .forgot-link:hover {
-      text-decoration: underline;
     }
 
     .submit-btn {
@@ -313,64 +303,11 @@
       transform: none;
     }
 
-    .social-divider {
-      text-align: center;
-      margin: 25px 0;
-      color: #7f8c8d;
-      font-size: 0.85rem;
-      position: relative;
-    }
-
-    .social-divider::before,
-    .social-divider::after {
-      content: '';
-      position: absolute;
-      top: 50%;
-      width: 40%;
-      height: 1px;
-      background: #e0e6ed;
-    }
-
-    .social-divider::before {
-      left: 0;
-    }
-
-    .social-divider::after {
-      right: 0;
-    }
-
-    .social-buttons {
-      display: flex;
-      gap: 12px;
-      margin-bottom: 25px;
-    }
-
-    .social-btn {
-      flex: 1;
-      padding: 11px;
-      border: 1px solid #e0e6ed;
-      border-radius: 6px;
-      background: white;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      font-size: 0.9rem;
-      color: #5a6c7d;
-      font-weight: 500;
-      transition: all 0.3s;
-    }
-
-    .social-btn:hover {
-      border-color: #bdc3c9;
-      background: #f8f9fa;
-    }
-
     .signup-link {
       text-align: center;
       color: #7f8c8d;
       font-size: 0.9rem;
+      margin-top: 20px;
     }
 
     .signup-link a {
