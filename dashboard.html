@@ -1,596 +1,732 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>About Us - Dashboard</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', sans-serif;
-            background: #f5f5f5;
-            min-height: 100vh;
-        }
-
-        .sidebar {
-            width: 240px;
-            background: #ffffff;
-            color: #0f172a;
-            padding: 24px 0;
-            display: flex;
-            flex-direction: column;
-            box-shadow: 1px 0 0 #e2e8f0;
-            position: fixed;
-            height: 100vh;
-            overflow-y: auto;
-        }
-
-        .sidebar-logo {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 0 24px;
-            margin-bottom: 32px;
-        }
-
-        .sidebar-logo-icon {
-            width: 32px;
-            height: 32px;
-            background: linear-gradient(135deg, #6366f1, #8b5cf6);
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: bold;
-            font-size: 18px;
-        }
-
-        .sidebar-logo-text {
-            font-size: 1.25rem;
-            font-weight: 700;
-            color: #0f172a;
-        }
-
-        .menu-item {
-            margin: 4px 16px;
-            padding: 10px 16px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 0.938rem;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            transition: all 0.2s;
-            color: #475569;
-            text-decoration: none;
-        }
-
-        .menu-item:hover {
-            background: #f1f5f9;
-            color: #0f172a;
-        }
-
-        .menu-item.active {
-            background: #eef2ff;
-            color: #6366f1;
-        }
-
-        .menu-item::before {
-            content: '';
-            width: 20px;
-            height: 20px;
-            display: inline-block;
-            opacity: 0.8;
-        }
-
-        .menu-item[href*="dashboard"]::before { content: '📊'; }
-        .menu-item[href*="calendar"]::before { content: '📅'; }
-        .menu-item[href*="profile"]::before { content: '👤'; }
-        .menu-item[href*="aboutus"]::before { content: 'ℹ️'; }
-        .menu-item[href*="logout"]::before { content: '🚪'; }
-
-        .menu-item[href*="logout"] {
-            margin-top: auto;
-            color: #ef4444;
-            font-weight: 500;
-        }
-
-        .menu-item[href*="logout"]:hover {
-            background: #fef2f2;
-        }
-
-        .main-content {
-            margin-left: 240px;
-            min-height: 100vh;
-        }
-
-        /* Hero Section */
-        .hero-section {
-            background: linear-gradient(135deg, #667eea 0%, #a855f7 50%, #4ade80 100%);
-            padding: 80px 40px;
-            text-align: center;
-            color: white;
-        }
-
-        .hero-section h1 {
-            font-size: 48px;
-            font-weight: 700;
-            margin-bottom: 20px;
-        }
-
-        .hero-section p {
-            font-size: 18px;
-            max-width: 800px;
-            margin: 0 auto;
-            line-height: 1.6;
-            opacity: 0.95;
-        }
-
-        /* Content Container */
-        .content-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 60px 40px;
-        }
-
-        /* Section Styling */
-        .section {
-            margin-bottom: 80px;
-        }
-
-        .section-title {
-            font-size: 36px;
-            font-weight: 700;
-            text-align: center;
-            margin-bottom: 50px;
-            color: #1a1a1a;
-        }
-
-        /* Vision Section */
-        .vision-box {
-            background: #f0f4ff;
-            padding: 40px;
-            border-radius: 16px;
-            max-width: 900px;
-            margin: 0 auto;
-        }
-
-        .vision-box p {
-            color: #4a5568;
-            font-size: 16px;
-            line-height: 1.8;
-            margin-bottom: 20px;
-        }
-
-        .vision-box p:last-child {
-            margin-bottom: 0;
-        }
-
-        /* Team Grid */
-        .team-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 30px;
-            max-width: 1000px;
-            margin: 0 auto;
-        }
-
-        .team-card {
-            background: white;
-            border-radius: 16px;
-            padding: 40px 30px;
-            text-align: center;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-            transition: transform 0.3s, box-shadow 0.3s;
-        }
-
-        .team-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-        }
-
-        .avatar {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            margin: 0 auto 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 28px;
-            font-weight: 700;
-        }
-
-        .avatar.blue {
-            background: #3b82f6;
-        }
-
-        .avatar.purple {
-            background: #a855f7;
-        }
-
-        .avatar.green {
-            background: #10b981;
-        }
-
-        .team-card h3 {
-            font-size: 20px;
-            font-weight: 600;
-            color: #1a1a1a;
-            margin-bottom: 8px;
-        }
-
-        .team-card .role {
-            color: #10b981;
-            font-size: 14px;
-            font-weight: 500;
-            margin-bottom: 8px;
-        }
-
-        .team-card .email {
-            color: #6b7280;
-            font-size: 14px;
-        }
-
-        /* Features Grid */
-        .features-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 25px;
-            max-width: 1100px;
-            margin: 0 auto;
-        }
-
-        .feature-card {
-            background: white;
-            border-radius: 12px;
-            padding: 30px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-        }
-
-        .feature-icon {
-            width: 48px;
-            height: 48px;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            margin-bottom: 15px;
-        }
-
-        .feature-card.blue { background: #eff6ff; }
-        .feature-card.blue .feature-icon { background: #3b82f6; color: white; }
-
-        .feature-card.yellow { background: #fffbeb; }
-        .feature-card.yellow .feature-icon { background: #f59e0b; color: white; }
-
-        .feature-card.green { background: #f0fdf4; }
-        .feature-card.green .feature-icon { background: #10b981; color: white; }
-
-        .feature-card.red { background: #fef2f2; }
-        .feature-card.red .feature-icon { background: #ef4444; color: white; }
-
-        .feature-card.purple { background: #faf5ff; }
-        .feature-card.purple .feature-icon { background: #a855f7; color: white; }
-
-        .feature-card.indigo { background: #eef2ff; }
-        .feature-card.indigo .feature-icon { background: #6366f1; color: white; }
-
-        .feature-card h3 {
-            font-size: 18px;
-            font-weight: 600;
-            color: #1a1a1a;
-            margin-bottom: 10px;
-        }
-
-        .feature-card p {
-            color: #4a5568;
-            font-size: 14px;
-            line-height: 1.6;
-        }
-
-        /* Objectives */
-        .objectives-list {
-            max-width: 900px;
-            margin: 0 auto;
-        }
-
-        .objective-card {
-            background: white;
-            border-radius: 12px;
-            padding: 25px 30px;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: flex-start;
-            gap: 20px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-        }
-
-        .objective-number {
-            width: 36px;
-            height: 36px;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            font-size: 16px;
-            color: white;
-            flex-shrink: 0;
-        }
-
-        .objective-number.num1 { background: #3b82f6; }
-        .objective-number.num2 { background: #a855f7; }
-        .objective-number.num3 { background: #10b981; }
-        .objective-number.num4 { background: #f97316; }
-        .objective-number.num5 { background: #8b5cf6; }
-
-        .objective-card p {
-            color: #4a5568;
-            font-size: 15px;
-            line-height: 1.6;
-            margin: 0;
-        }
-
-        .objective-card strong {
-            color: #1a1a1a;
-        }
-
-        /* Making Life Easier Section */
-        .easier-section {
-            background: linear-gradient(135deg, #667eea 0%, #a855f7 50%, #4ade80 100%);
-            padding: 60px 40px;
-            margin-top: 80px;
-        }
-
-        .easier-content {
-            max-width: 900px;
-            margin: 0 auto;
-            text-align: center;
-            color: white;
-        }
-
-        .easier-content h2 {
-            font-size: 36px;
-            font-weight: 700;
-            margin-bottom: 30px;
-        }
-
-        .easier-content p {
-            font-size: 16px;
-            line-height: 1.8;
-            margin-bottom: 20px;
-            opacity: 0.95;
-        }
-
-        /* Footer */
-        .footer {
-            background: #1a1a2e;
-            color: white;
-            padding: 40px;
-            text-align: center;
-        }
-
-        .footer-logo {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            margin-bottom: 15px;
-        }
-
-        .footer-icon {
-            width: 32px;
-            height: 32px;
-            background: #6366f1;
-            border-radius: 6px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 18px;
-        }
-
-        .footer-logo h3 {
-            font-size: 20px;
-            font-weight: 600;
-        }
-
-        .footer p {
-            color: #9ca3af;
-            font-size: 14px;
-            margin-bottom: 5px;
-        }
-
-        @media (max-width: 768px) {
-            .sidebar {
-                width: 100%;
-                position: relative;
-                height: auto;
-            }
-
-            .main-content {
-                margin-left: 0;
-            }
-
-            .hero-section {
-                padding: 60px 20px;
-            }
-
-            .hero-section h1 {
-                font-size: 36px;
-            }
-
-            .content-container {
-                padding: 40px 20px;
-            }
-
-            .section-title {
-                font-size: 28px;
-            }
-
-            .team-grid,
-            .features-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .easier-section {
-                padding: 40px 20px;
-            }
-
-            .easier-content h2 {
-                font-size: 28px;
-            }
-        }
-    </style>
+  <meta charset="UTF-8">
+  <title>Dashboard</title>
+  <style>
+    :root{
+      --accent:#6366f1;
+      --accent-2:#4f46e5;
+      --bg:#f8f9fc;
+      --card:#ffffff;
+      --muted:#64748b;
+      --text-primary:#0f172a;
+      --text-secondary:#475569;
+      --sidebar-bg:#ffffff;
+      --border:#e2e8f0;
+    }
+   
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', sans-serif;
+      display: flex;
+      height: 100vh;
+      background: var(--bg);
+      color: var(--text-primary);
+    }
+   
+    .sidebar {
+      width: 240px;
+      background: var(--sidebar-bg);
+      color: var(--text-primary);
+      padding: 24px 0;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 1px 0 0 var(--border);
+      position: relative;
+    }
+
+    .sidebar-logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 0 24px;
+      margin-bottom: 32px;
+    }
+
+    .sidebar-logo-icon {
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+      font-size: 18px;
+    }
+
+    .sidebar-logo-text {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .sidebar ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      flex: 1;
+    }
+
+    .sidebar li {
+      margin: 4px 16px;
+      padding: 10px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.938rem;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transition: all 0.2s;
+      color: var(--text-secondary);
+    }
+
+    .sidebar li:hover {
+      background: #f1f5f9;
+      color: var(--text-primary);
+    }
+
+    .sidebar li.active {
+      background: #eef2ff;
+      color: var(--accent);
+    }
+
+    .sidebar li::before {
+      content: '';
+      width: 20px;
+      height: 20px;
+      display: inline-block;
+      opacity: 0.8;
+    }
+
+    #menu-dashboard::before { content: '📊'; }
+    #menu-calendar::before { content: '📅'; }
+    #menu-profile::before { content: '👤'; }
+    #menu-aboutus::before { content: 'ℹ️'; }
+    #logout::before { content: '🚪'; }
+
+    #logout {
+      margin-top: auto;
+      color: #ef4444;
+      font-weight: 500;
+    }
+
+    #logout:hover {
+      background: #fef2f2;
+    }
+
+    .main {
+      flex: 1;
+      padding: 40px;
+      background: var(--bg);
+      overflow-y: auto;
+    }
+
+    .top-bar {
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+      margin-bottom: 32px;
+    }
+
+    .welcome-text {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .dashboard-header {
+      margin-bottom: 32px;
+    }
+
+    .dashboard-header h1 {
+      font-size: 1.125rem;
+      color: var(--text-primary);
+      margin: 0;
+      font-weight: 600;
+      margin-bottom: 24px;
+    }
+
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      max-width: 100%;
+    }
+
+    .dashboard-tile {
+      background: var(--card);
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+      cursor: pointer;
+      transition: all 0.3s;
+      border: 1px solid var(--border);
+      position: relative;
+      overflow: hidden;
+      min-height: 260px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .dashboard-tile:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 24px rgba(0,0,0,0.1);
+      border-color: rgba(99,102,241,0.2);
+    }
+
+    .tile-header {
+      display: flex;
+      justify-content: flex-start;
+      align-items: flex-start;
+      margin-bottom: 20px;
+    }
+
+    .tile-title-section {
+      flex: 1;
+    }
+
+    .tile-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      margin-bottom: 12px;
+    }
+
+    .tile-title {
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin: 0 0 8px 0;
+    }
+
+    .tile-description {
+      font-size: 0.813rem;
+      color: var(--text-secondary);
+      line-height: 1.5;
+      margin: 0;
+    }
+
+    .tile-action-icon {
+      display: none;
+    }
+
+    .tile-content {
+      color: var(--text-secondary);
+      line-height: 1.6;
+      flex: 1;
+      font-size: 0.875rem;
+    }
+
+    .tile-item {
+      background: transparent;
+      padding: 12px 0;
+      border-bottom: 1px solid #f1f5f9;
+      margin-bottom: 0;
+      border-left: none;
+      font-size: 0.875rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--text-primary);
+    }
+
+    .tile-item:last-child {
+      border-bottom: none;
+    }
+
+    .tile-item::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--accent);
+      flex-shrink: 0;
+    }
+
+    .tile-footer {
+      margin-top: auto;
+      padding-top: 16px;
+    }
+
+    .tile-button {
+      width: 100%;
+      padding: 10px;
+      border: none;
+      background: transparent;
+      color: var(--accent);
+      font-weight: 600;
+      font-size: 0.875rem;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .tile-button:hover {
+      background: #eef2ff;
+    }
+
+    /* Tile-specific colors */
+    .projects .tile-icon { background: #eef2ff; color: #6366f1; }
+    .projects .tile-action-icon { background: #eef2ff; color: #6366f1; }
+    
+    .ideas .tile-icon { background: #fef3c7; color: #f59e0b; }
+    .ideas .tile-action-icon { background: #fef3c7; color: #f59e0b; }
+    
+    .notes .tile-icon { background: #d1fae5; color: #10b981; }
+    .notes .tile-action-icon { background: #d1fae5; color: #10b981; }
+    
+    .deadlines .tile-icon { background: #fee2e2; color: #ef4444; }
+    .deadlines .tile-action-icon { background: #fee2e2; color: #ef4444; }
+    
+    .future .tile-icon { background: #dbeafe; color: #3b82f6; }
+    .future .tile-action-icon { background: #dbeafe; color: #3b82f6; }
+    
+    .career .tile-icon { background: #f3e8ff; color: #a855f7; }
+    .career .tile-action-icon { background: #f3e8ff; color: #a855f7; }
+
+    .progress-section {
+      margin-top: 16px;
+    }
+
+    .progress-item {
+      margin-bottom: 12px;
+    }
+
+    .progress-item:last-child {
+      margin-bottom: 0;
+    }
+
+    .progress-label {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 6px;
+      font-size: 0.813rem;
+    }
+
+    .progress-title {
+      color: var(--text-primary);
+      font-weight: 500;
+    }
+
+    .progress-percent {
+      color: var(--text-secondary);
+      font-weight: 600;
+    }
+
+    .progress-bar-container {
+      width: 100%;
+      height: 6px;
+      background: #f1f5f9;
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .progress-bar {
+      height: 100%;
+      border-radius: 3px;
+      transition: width 0.3s;
+    }
+
+    .career .progress-bar {
+      background: linear-gradient(90deg, #a855f7, #c084fc);
+    }
+
+    .empty-state {
+      text-align: center;
+      color: var(--text-secondary);
+      font-style: italic;
+      margin-top: 20px;
+      font-size: 0.875rem;
+    }
+
+    .loading {
+      text-align: center;
+      color: var(--text-secondary);
+      font-style: italic;
+      margin: 20px 0;
+      font-size: 0.875rem;
+    }
+
+    .error {
+      color: #ef4444;
+      text-align: center;
+      font-size: 0.875rem;
+      margin: 10px 0;
+    }
+
+    .item-count-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2px 8px;
+      background: #f1f5f9;
+      color: var(--text-secondary);
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      margin-left: auto;
+    }
+
+    @media (max-width: 1200px) {
+      .dashboard-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 768px) {
+      .dashboard-grid {
+        grid-template-columns: 1fr;
+      }
+      .sidebar {
+        width: 200px;
+      }
+      .main {
+        padding: 24px;
+      }
+    }
+  </style>
 </head>
 <body>
-    <div class="sidebar">
-        <div class="sidebar-logo">
-            <div class="sidebar-logo-icon">P</div>
-            <div class="sidebar-logo-text">Productiv.</div>
-        </div>
-        <a href="dashboard.html" class="menu-item">Dashboard</a>
-        <a href="calendar.html" class="menu-item">Calendar</a>
-        <a href="profile.html" class="menu-item">Profile</a>
-        <a href="aboutus.html" class="menu-item active">About Us</a>
-        <a href="logout.html" class="menu-item">Logout</a>
+  <div class="sidebar">
+    <div class="sidebar-logo">
+      <div class="sidebar-logo-icon">P</div>
+      <div class="sidebar-logo-text">Productiv.</div>
+    </div>
+    <ul>
+      <li id="menu-dashboard" class="active">Dashboard</li>
+      <li id="menu-calendar">Calendar</li>
+      <li id="menu-profile">Profile</li>
+      <li id="menu-aboutus">About Us</li>
+      <li id="logout">Logout</li>
+    </ul>
+  </div>
+
+  <div class="main">
+    <div class="top-bar">
+      <div class="welcome-text">
+        Welcome back!
+      </div>
     </div>
 
-    <div class="main-content">
-        <!-- Hero Section -->
-        <div class="hero-section">
-            <h1>About Us</h1>
-            <p>Meet the team behind this innovative productivity platform that transforms the way you manage projects, ideas, and career goals</p>
+    <div id="dashboardView">
+      <div class="dashboard-grid">
+        <!-- Projects Tile -->
+        <div class="dashboard-tile projects" data-tile="projects">
+          <div class="tile-header">
+            <div class="tile-title-section">
+              <div class="tile-icon">🚀</div>
+              <h3 class="tile-title">Your Projects</h3>
+              <p class="tile-description">Manage all your projects in one centralized hub. Track members, view details, and monitor progress.</p>
+            </div>
+          </div>
+          <div class="tile-content" id="projects-content">
+            <div class="loading">Loading projects...</div>
+          </div>
+          <div class="tile-footer">
+            <button class="tile-button">View All Projects →</button>
+          </div>
         </div>
 
-        <div class="content-container">
-            <!-- Vision Section -->
-            <div class="section">
-                <h2 class="section-title">Our Vision</h2>
-                <div class="vision-box">
-                    <p>In today's fast-paced academic and professional world, staying organized and managing multiple aspects of life can be overwhelming. Our platform was born from the recognition that students and professionals need a comprehensive, user-friendly solution to manage their projects, ideas, deadlines, and career goals all in one place.</p>
-                    <p>We envisioned a system that doesn't just store information, but actively helps users stay on track, collaborate effectively, and achieve their goals with ease. This dashboard represents our commitment to making productivity intuitive, accessible, and genuinely helpful for everyone who strives to excel in their academic and professional journey.</p>
-                </div>
+        <!-- Ideas Tile -->
+        <div class="dashboard-tile ideas" data-tile="ideas">
+          <div class="tile-header">
+            <div class="tile-title-section">
+              <div class="tile-icon">💡</div>
+              <h3 class="tile-title">Recent Ideas</h3>
+              <p class="tile-description">Capture and organize your brilliant ideas. Never lose a creative thought again.</p>
             </div>
-
-            <!-- Team Section -->
-            <div class="section">
-                <h2 class="section-title">Our Team</h2>
-                <div class="team-grid">
-                    <div class="team-card">
-                        <div class="avatar blue">NG</div>
-                        <h3>Dr. Nishant Gupta</h3>
-                        <div class="role">Faculty Mentor</div>
-                        <div class="email">nishant.gupta@lnmiit.ac.in</div>
-                    </div>
-                    <div class="team-card">
-                        <div class="avatar purple">HV</div>
-                        <h3>Himi Vyas</h3>
-                        <div class="role">Developer</div>
-                        <div class="email">23uec550@lnmiit.ac.in</div>
-                    </div>
-                    <div class="team-card">
-                        <div class="avatar green">AJ</div>
-                        <h3>Archi Jain</h3>
-                        <div class="role">Developer</div>
-                        <div class="email">23ume514@lnmiit.ac.in</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Features Section -->
-            <div class="section">
-                <h2 class="section-title">Key Features</h2>
-                <div class="features-grid">
-                    <div class="feature-card blue">
-                        <div class="feature-icon">📁</div>
-                        <h3>Your Projects</h3>
-                        <p>Manage all your projects in one centralized hub. Track members, view detailed descriptions, monitor progress, and access all project-related features seamlessly.</p>
-                    </div>
-                    <div class="feature-card yellow">
-                        <div class="feature-icon">💡</div>
-                        <h3>Recent Ideas</h3>
-                        <p>Capture and organize your brilliant ideas across different topics. Never lose a creative thought again with our intuitive idea management system.</p>
-                    </div>
-                    <div class="feature-card green">
-                        <div class="feature-icon">📝</div>
-                        <h3>Quick Notes</h3>
-                        <p>Take quick notes on the fly and access them instantly whenever you need. Perfect for jotting down important information during meetings or classes.</p>
-                    </div>
-                    <div class="feature-card red">
-                        <div class="feature-icon">⏰</div>
-                        <h3>Deadlines</h3>
-                        <p>Stay on top of all your deadlines with smart notifications and visual tracking. Never miss an important submission or meeting again.</p>
-                    </div>
-                    <div class="feature-card purple">
-                        <div class="feature-icon">🚀</div>
-                        <h3>Future Work</h3>
-                        <p>Plan and organize your future work ideas, upcoming tasks, and long-term projects. Keep your vision clear and actionable.</p>
-                    </div>
-                    <div class="feature-card indigo">
-                        <div class="feature-icon">🎯</div>
-                        <h3>Career & Goals</h3>
-                        <p>Set, track, and achieve your career aspirations and personal goals. Break down big dreams into manageable milestones.</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Objectives Section -->
-            <div class="section">
-                <h2 class="section-title">Our Objectives</h2>
-                <div class="objectives-list">
-                    <div class="objective-card">
-                        <div class="objective-number num1">1</div>
-                        <p><strong>Centralized Organization</strong><br>Provide a single platform where users can manage all aspects of their academic and professional life without switching between multiple tools.</p>
-                    </div>
-                    <div class="objective-card">
-                        <div class="objective-number num2">2</div>
-                        <p><strong>Enhanced Productivity</strong><br>Help users stay focused and productive by offering intuitive tools for project management, deadline tracking, and goal setting.</p>
-                    </div>
-                    <div class="objective-card">
-                        <div class="objective-number num3">3</div>
-                        <p><strong>Seamless Collaboration</strong><br>Enable effective team collaboration with features that allow project members to work together efficiently and stay aligned.</p>
-                    </div>
-                    <div class="objective-card">
-                        <div class="objective-number num4">4</div>
-                        <p><strong>User-Friendly Experience</strong><br>Create an interface that's not only powerful but also intuitive and enjoyable to use, reducing the learning curve and increasing adoption.</p>
-                    </div>
-                    <div class="objective-card">
-                        <div class="objective-number num5">5</div>
-                        <p><strong>Future-Ready Planning</strong><br>Help users think ahead and plan for the future with dedicated spaces for career goals, future work ideas, and long-term aspirations.</p>
-                    </div>
-                </div>
-            </div>
+          </div>
+          <div class="tile-content" id="ideas-content">
+            <div class="loading">Loading ideas...</div>
+          </div>
+          <div class="tile-footer">
+            <button class="tile-button">Manage Ideas →</button>
+          </div>
         </div>
 
-        <!-- Making Life Easier Section -->
-        <div class="easier-section">
-            <div class="easier-content">
-                <h2>Making Life Easier</h2>
-                <p>Our platform transforms the way you work and study by eliminating the chaos of scattered information and missed deadlines. With everything in one place, you spend less time searching and more time doing.</p>
-                <p>The intuitive design means you can start being productive immediately without extensive training. Smart notifications keep you informed without overwhelming you, while the organized structure helps you maintain clarity even during the busiest times.</p>
-                <p>Whether you're managing multiple research projects, tracking assignment deadlines, planning your career path, or collaborating with teammates, our dashboard adapts to your needs and grows with you. It's not just a tool—it's your personal productivity companion.</p>
+        <!-- Notes Tile -->
+        <div class="dashboard-tile notes" data-tile="notes">
+          <div class="tile-header">
+            <div class="tile-title-section">
+              <div class="tile-icon">📝</div>
+              <h3 class="tile-title">Quick Notes</h3>
+              <p class="tile-description">Take quick notes on the fly and access them instantly whenever you need them.</p>
             </div>
+          </div>
+          <div class="tile-content" id="notes-content">
+            <div class="loading">Loading notes...</div>
+          </div>
+          <div class="tile-footer">
+            <button class="tile-button">Save Note →</button>
+          </div>
         </div>
 
-        <!-- Footer -->
-        <div class="footer">
-            <div class="footer-logo">
-                <div class="footer-icon">📊</div>
-                <h3>ProjectTracker</h3>
+        <!-- Deadlines Tile -->
+        <div class="dashboard-tile deadlines" data-tile="deadlines">
+          <div class="tile-header">
+            <div class="tile-title-section">
+              <div class="tile-icon">⏰</div>
+              <h3 class="tile-title">Deadlines</h3>
+              <p class="tile-description">Stay on top of all your deadlines with smart notifications and visual tracking.</p>
             </div>
-            <p>Empowering productivity through intelligent project management</p>
-            <p>© 2024 ProjectTracker. All rights reserved.</p>
+          </div>
+          <div class="tile-content" id="deadlines-content">
+            <div class="loading">Loading deadlines...</div>
+          </div>
+          <div class="tile-footer">
+            <button class="tile-button">View Deadlines →</button>
+          </div>
         </div>
+
+        <!-- Future Work Tile -->
+        <div class="dashboard-tile future" data-tile="future">
+          <div class="tile-header">
+            <div class="tile-title-section">
+              <div class="tile-icon">🔮</div>
+              <h3 class="tile-title">Future Work</h3>
+              <p class="tile-description">Plan and organize your future work ideas, upcoming tasks, and long-term projects.</p>
+            </div>
+          </div>
+          <div class="tile-content" id="future-content">
+            <div class="loading">Loading future work...</div>
+          </div>
+          <div class="tile-footer">
+            <button class="tile-button">Plan Future →</button>
+          </div>
+        </div>
+
+        <!-- Career Tile -->
+        <div class="dashboard-tile career" data-tile="career">
+          <div class="tile-header">
+            <div class="tile-title-section">
+              <div class="tile-icon">🎯</div>
+              <h3 class="tile-title">Career & Goals</h3>
+              <p class="tile-description">Set, track, and achieve your career aspirations and personal goals.</p>
+            </div>
+          </div>
+          <div class="tile-content" id="career-content">
+            <div class="loading">Loading goals...</div>
+          </div>
+          <div class="tile-footer">
+            <button class="tile-button">Track Goals →</button>
+          </div>
+        </div>
+      </div>
     </div>
+  </div>
+
+  <script>
+  // ===================== API CONFIGURATION =====================
+  const API_BASE = window.location.origin;
+
+  // ===================== AUTHENTICATION =====================
+  function getCurrentUser() {
+    return sessionStorage.getItem('userEmail');
+  }
+
+  function isUserLoggedIn() {
+    return sessionStorage.getItem('isLoggedIn') === 'true';
+  }
+
+  function redirectToLogin() {
+    alert('Please log in to access this page');
+    window.location.href = '/';
+  }
+
+  // Check authentication
+  if (!isUserLoggedIn()) {
+    redirectToLogin();
+  }
+
+  const userEmail = getCurrentUser();
+  if (!userEmail) {
+    redirectToLogin();
+  }
+
+  // Display user email
+ // document.getElementById('userEmail').textContent = userEmail;
+
+  // ===================== API HELPERS =====================
+  async function apiCall(endpoint, options = {}) {
+    try {
+      const response = await fetch(`${API_BASE}${endpoint}`, {
+        headers: {
+          'Content-Type': 'application/json',
+          ...options.headers
+        },
+        ...options
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'API call failed');
+      }
+      
+      return data;
+    } catch (error) {
+      console.error('API Error:', error);
+      throw error;
+    }
+  }
+
+  // ===================== DATABASE INTEGRATION =====================
+  
+  // Load tile data from database APIs
+  async function loadTileData(tileType) {
+    try {
+      const data = await apiCall(`/${tileType}/${encodeURIComponent(userEmail)}`);
+      return data;
+    } catch (error) {
+      console.error(`Failed to load ${tileType}:`, error);
+      return [];
+    }
+  }
+
+  // ===================== DASHBOARD RENDERING =====================
+
+  // Render tile content
+  function renderTile(tileType) {
+    loadTileData(tileType).then(data => {
+      const contentEl = document.getElementById(`${tileType}-content`);
+      
+      if (data.length === 0) {
+        contentEl.innerHTML = `<div class="empty-state">No ${tileType} yet</div>`;
+        return;
+      }
+
+      // Show top 3 items for all tiles (including career)
+      const topItems = data.slice(0, 3);
+      contentEl.innerHTML = topItems.map(item => {
+        let displayText = item.title || item.name || item.content || item.description || '';
+        
+        // Add specific formatting based on tile type
+        switch(tileType) {
+          case 'deadlines':
+            if (item.due_date) {
+              const daysLeft = Math.ceil((new Date(item.due_date) - new Date()) / (1000 * 60 * 60 * 24));
+              displayText += ` <span style="color: ${daysLeft <= 0 ? '#ef4444' : 'var(--text-secondary)'}; font-size: 0.813rem;">(${daysLeft > 0 ? daysLeft + ' days' : 'overdue'})</span>`;
+            }
+            break;
+          case 'ideas':
+            if (item.category) {
+              displayText += ` <span style="color: var(--text-secondary); font-size: 0.813rem;">• ${item.category}</span>`;
+            }
+            break;
+          case 'future':
+            if (item.timeline) {
+              displayText += ` <span style="color: var(--text-secondary); font-size: 0.813rem;">(${item.timeline})</span>`;
+            }
+            break;
+        }
+        
+        return `<div class="tile-item">${displayText}</div>`;
+      }).join('');
+      
+      if (data.length > 3) {
+        contentEl.innerHTML += `<div class="empty-state" style="margin-top: 10px;">+${data.length - 3} more items</div>`;
+      }
+    }).catch(error => {
+      const contentEl = document.getElementById(`${tileType}-content`);
+      contentEl.innerHTML = `<div class="error">Failed to load ${tileType}</div>`;
+      console.error(`Error rendering ${tileType}:`, error);
+    });
+  }
+
+  // Initialize all tiles
+  function initializeDashboard() {
+    const tileTypes = ['deadlines', 'ideas', 'projects', 'notes', 'career', 'future'];
+    tileTypes.forEach(renderTile);
+  }
+
+  // ===================== NAVIGATION =====================
+  const menuDashboard = document.getElementById("menu-dashboard");
+  const menuCalendar = document.getElementById("menu-calendar");
+
+  menuDashboard.onclick = () => {
+    menuDashboard.classList.add("active");
+    menuCalendar.classList.remove("active");
+  };
+
+  menuCalendar.onclick = () => {
+    window.location.href = '/outlook-calendar.html';
+  };
+
+  const menuProfile = document.getElementById("menu-profile");
+  if (menuProfile) {
+    menuProfile.onclick = () => {
+      window.location.href = '/profile.html';
+    };
+  }
+
+  const menuAboutUs = document.getElementById("menu-aboutus");
+  if (menuAboutUs) {
+    menuAboutUs.onclick = () => {
+      window.location.href = '/aboutus.html';
+    };
+  }
+
+  // Tile click handlers
+  document.querySelectorAll('.dashboard-tile').forEach(tile => {
+    tile.addEventListener('click', () => {
+      const tileType = tile.dataset.tile;
+      
+      sessionStorage.setItem('activeTile', tileType);
+      
+      switch(tileType) {
+        case 'ideas':
+          window.location.href = 'ideas.html';
+          break;
+        case 'notes':
+          window.location.href = 'notes.html';
+          break;
+        case 'projects':
+          window.location.href = 'projects.html';
+          break;
+        case 'deadlines':
+          window.location.href = 'deadlines.html';
+          break;
+        case 'career':
+          window.location.href = 'career.html';
+          break;
+        case 'future':
+          window.location.href = 'future.html';
+          break;
+        default:
+          alert(`${tileType.charAt(0).toUpperCase() + tileType.slice(1)} Management\n\nThis would redirect to a dedicated ${tileType} management page.`);
+      }
+    });
+  });
+
+  // Logout
+  document.getElementById("logout").onclick = () => {
+    sessionStorage.removeItem("userEmail");
+    sessionStorage.removeItem("isLoggedIn");
+    window.location.href = "/";
+  };
+
+  // ===================== INITIALIZATION =====================
+  initializeDashboard();
+
+  </script>
 </body>
 </html>
