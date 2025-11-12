@@ -5,12 +5,14 @@
   <title>Future Work - Project Management Portal</title>
   <style>
     :root {
-      --accent: #4f46e5;
-      --accent-2: #4f46e5;
-      --bg: #f4f4ff;
+      --accent: #3b82f6;
+      --accent-2: #2563eb;
+      --bg: #f8f9fc;
       --card: #ffffff;
-      --muted: #6b7280;
-      --border: rgba(6, 182, 212, 0.15);
+      --muted: #64748b;
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --border: #e2e8f0;
     }
 
     * {
@@ -20,91 +22,137 @@
     }
 
     body {
-      font-family: Arial, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', sans-serif;
       background: var(--bg);
       display: flex;
       height: 100vh;
+      color: var(--text-primary);
     }
 
     .sidebar {
-      width: 220px;
-      background: linear-gradient(180deg, #4f46e5, #4f46e5);
-      color: white;
-      padding: 20px 15px;
+      width: 240px;
+      background: #ffffff;
+      color: var(--text-primary);
+      padding: 24px 0;
       display: flex;
       flex-direction: column;
-      box-shadow: 3px 0 10px rgba(0,0,0,0.15);
+      box-shadow: 1px 0 0 var(--border);
+      position: relative;
     }
 
-    .sidebar h2 {
-      margin-top: 5px;
-      font-size: 1.7rem;
+    .sidebar-logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 0 24px;
+      margin-bottom: 32px;
+    }
+
+    .sidebar-logo-icon {
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
       font-weight: bold;
-      text-align: center;
-      letter-spacing: 1px;
+      font-size: 18px;
+    }
+
+    .sidebar-logo-text {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--text-primary);
     }
 
     .sidebar ul {
       list-style: none;
       padding: 0;
-      margin: 15px 0;
+      margin: 0;
+      flex: 1;
     }
 
     .sidebar li {
-      margin: 12px 0;
-      padding: 10px 15px;
+      margin: 4px 16px;
+      padding: 10px 16px;
       border-radius: 8px;
       cursor: pointer;
-      font-size: 1.2rem;
+      font-size: 0.938rem;
+      font-weight: 500;
       display: flex;
       align-items: center;
-      gap: 10px;
-      transition: background 0.3s, transform 0.2s;
+      gap: 12px;
+      transition: all 0.2s;
+      color: var(--text-secondary);
     }
 
     .sidebar li:hover {
-      background: rgba(255,255,255,0.15);
-      transform: translateX(5px);
+      background: #f1f5f9;
+      color: var(--text-primary);
     }
 
     .sidebar li.active {
-      background: rgba(255,255,255,0.2);
+      background: #eef2ff;
+      color: #6366f1;
     }
 
-    .sidebar li:last-child {
+    .sidebar li::before {
+      content: '';
+      width: 20px;
+      height: 20px;
+      display: inline-block;
+      opacity: 0.8;
+    }
+
+    #menu-dashboard::before { content: '📊'; }
+    #menu-ideas::before { content: '💡'; }
+    #menu-notes::before { content: '📝'; }
+    #menu-projects::before { content: '🚀'; }
+    #menu-future::before { content: '🔮'; }
+    #logout::before { content: '🚪'; }
+
+    #logout {
       margin-top: auto;
+      color: #ef4444;
+      font-weight: 500;
+    }
+
+    #logout:hover {
+      background: #fef2f2;
     }
 
     .main {
       flex: 1;
-      padding: 30px;
+      padding: 40px;
       overflow-y: auto;
     }
 
     .header {
-      margin-bottom: 30px;
+      margin-bottom: 32px;
     }
 
     .header h1 {
-      font-size: 2.5rem;
-      color: #333;
-      margin: 0 0 10px 0;
-      font-weight: 700;
+      font-size: 1.5rem;
+      color: var(--text-primary);
+      margin: 0 0 8px 0;
+      font-weight: 600;
       display: flex;
       align-items: center;
-      gap: 15px;
+      gap: 10px;
     }
 
     .header p {
-      color: var(--muted);
-      font-size: 1.1rem;
+      color: var(--text-secondary);
+      font-size: 0.875rem;
       margin: 0;
     }
 
     .controls {
       display: flex;
       gap: 15px;
-      margin-bottom: 25px;
+      margin-bottom: 24px;
       flex-wrap: wrap;
     }
 
@@ -116,12 +164,13 @@
       color: white;
       cursor: pointer;
       font-weight: 600;
-      font-size: 1rem;
-      transition: opacity 0.3s;
+      font-size: 0.875rem;
+      transition: transform 0.2s, box-shadow 0.2s;
     }
 
     .btn:hover {
-      opacity: 0.9;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
     }
 
     .search-box {
@@ -130,22 +179,30 @@
       padding: 10px 15px;
       border: 1px solid var(--border);
       border-radius: 8px;
-      font-size: 1rem;
+      font-size: 0.875rem;
+      color: var(--text-primary);
     }
 
     .filter-group {
       display: flex;
-      gap: 10px;
+      gap: 8px;
       align-items: center;
     }
 
+    .filter-group label {
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+
     .filter-select {
-      padding: 10px 15px;
+      padding: 8px 12px;
       border: 1px solid var(--border);
       border-radius: 8px;
-      font-size: 1rem;
+      font-size: 0.875rem;
       background: white;
       cursor: pointer;
+      color: var(--text-primary);
     }
 
     .grid {
@@ -156,18 +213,18 @@
 
     .card {
       background: var(--card);
-      border-radius: 12px;
-      padding: 20px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
       border: 1px solid var(--border);
-      transition: transform 0.3s, box-shadow 0.3s;
+      transition: transform 0.2s, box-shadow 0.2s;
       cursor: pointer;
       position: relative;
     }
 
     .card:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.1);
     }
 
     .card-header {
@@ -178,9 +235,9 @@
     }
 
     .card-title {
-      font-size: 1.3rem;
+      font-size: 1.125rem;
       font-weight: 600;
-      color: #333;
+      color: var(--text-primary);
       margin-bottom: 8px;
       word-break: break-word;
     }
@@ -194,40 +251,41 @@
 
     .badge {
       padding: 4px 10px;
-      border-radius: 6px;
-      font-size: 0.85rem;
+      border-radius: 12px;
+      font-size: 0.813rem;
       font-weight: 600;
       display: inline-block;
     }
 
     .badge.priority-high {
       background: #fee2e2;
-      color: #dc2626;
+      color: #991b1b;
     }
 
     .badge.priority-medium {
       background: #fef3c7;
-      color: #d97706;
+      color: #92400e;
     }
 
     .badge.priority-low {
       background: #dbeafe;
-      color: #2563eb;
+      color: #1e40af;
     }
 
     .badge.timeline {
-      background: rgba(6, 182, 212, 0.1);
+      background: #dbeafe;
       color: var(--accent-2);
       border: 1px solid var(--border);
     }
 
     .card-description {
-      color: var(--muted);
+      color: var(--text-secondary);
       line-height: 1.6;
       margin-bottom: 12px;
       max-height: 80px;
       overflow: hidden;
       text-overflow: ellipsis;
+      font-size: 0.875rem;
     }
 
     .card-footer {
@@ -235,9 +293,9 @@
       justify-content: space-between;
       align-items: center;
       padding-top: 12px;
-      border-top: 1px solid #f0f0f7;
-      font-size: 0.9rem;
-      color: var(--muted);
+      border-top: 1px solid #f1f5f9;
+      font-size: 0.875rem;
+      color: var(--text-secondary);
     }
 
     .date-info {
@@ -270,7 +328,7 @@
     }
 
     .icon-btn:hover {
-      background: rgba(0,0,0,0.05);
+      background: #f1f5f9;
     }
 
     .icon-btn.delete:hover {
@@ -294,7 +352,7 @@
     .modal-content {
       background: white;
       padding: 30px;
-      border-radius: 12px;
+      border-radius: 16px;
       width: 500px;
       max-width: 90%;
       max-height: 90vh;
@@ -309,8 +367,10 @@
     }
 
     .modal-header h2 {
-      color: #333;
+      color: var(--text-primary);
       margin: 0;
+      font-size: 1.25rem;
+      font-weight: 600;
     }
 
     .btn-edit {
@@ -321,12 +381,13 @@
       color: white;
       cursor: pointer;
       font-weight: 600;
-      font-size: 0.9rem;
-      transition: opacity 0.3s;
+      font-size: 0.875rem;
+      transition: transform 0.2s, box-shadow 0.2s;
     }
 
     .btn-edit:hover {
-      opacity: 0.9;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
     }
 
     .view-mode {
@@ -342,7 +403,7 @@
     }
 
     .view-field-label {
-      font-size: 0.85rem;
+      font-size: 0.813rem;
       color: #9ca3af;
       text-transform: uppercase;
       letter-spacing: 0.5px;
@@ -351,17 +412,16 @@
     }
 
     .view-field-value {
-      color: #333;
-      font-size: 1rem;
+      color: var(--text-primary);
+      font-size: 0.875rem;
       line-height: 1.6;
       white-space: pre-wrap;
       word-wrap: break-word;
       overflow-wrap: break-word;
     }
 
-
     .view-field-value.empty {
-      color: var(--muted);
+      color: var(--text-secondary);
       font-style: italic;
     }
 
@@ -373,18 +433,20 @@
       display: block;
       margin-bottom: 8px;
       font-weight: 600;
-      color: #333;
+      color: var(--text-primary);
+      font-size: 0.875rem;
     }
 
     .form-group input,
     .form-group textarea,
     .form-group select {
       width: 100%;
-      padding: 10px;
+      padding: 10px 12px;
       border: 1px solid var(--border);
       border-radius: 8px;
-      font-size: 1rem;
+      font-size: 0.875rem;
       font-family: inherit;
+      color: var(--text-primary);
     }
 
     .form-group textarea {
@@ -400,31 +462,49 @@
     }
 
     .btn-secondary {
-      background: #e5e7eb;
-      color: #374151;
+      background: white;
+      color: var(--text-primary);
+      border: 1px solid var(--border);
+      font-weight: 500;
+    }
+
+    .btn-secondary:hover {
+      background: #f1f5f9;
+      transform: none;
+      box-shadow: none;
     }
 
     .empty-state {
       text-align: center;
       padding: 60px 20px;
-      color: var(--muted);
+      color: var(--text-secondary);
     }
 
     .empty-state-icon {
       font-size: 4rem;
-      margin-bottom: 20px;
+      margin-bottom: 15px;
       opacity: 0.5;
     }
 
     .empty-state h3 {
-      font-size: 1.5rem;
+      font-size: 1.125rem;
       margin-bottom: 10px;
-      color: #333;
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+
+    .empty-state p {
+      font-size: 0.875rem;
+      color: var(--text-secondary);
     }
 
     @media (max-width: 768px) {
       .sidebar {
-        width: 180px;
+        width: 200px;
+      }
+
+      .main {
+        padding: 24px;
       }
 
       .grid {
@@ -438,12 +518,19 @@
       .search-box {
         width: 100%;
       }
+
+      .header h1 {
+        font-size: 1.25rem;
+      }
     }
   </style>
 </head>
 <body>
   <div class="sidebar">
-    <h2>Menu</h2>
+    <div class="sidebar-logo">
+      <div class="sidebar-logo-icon">P</div>
+      <div class="sidebar-logo-text">Productiv.</div>
+    </div>
     <ul>
       <li id="menu-dashboard">Dashboard</li>
       <li id="menu-ideas">Ideas</li>
@@ -887,5 +974,3 @@
   </script>
 </body>
 </html>
-
-
