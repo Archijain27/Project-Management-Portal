@@ -536,21 +536,6 @@
         font-size: 0.95rem;
       }
 
-      .social-divider {
-        margin: 20px 0;
-        font-size: 0.8rem;
-      }
-
-      .social-buttons {
-        gap: 10px;
-        margin-bottom: 20px;
-      }
-
-      .social-btn {
-        padding: 10px;
-        font-size: 0.85rem;
-      }
-
       .signup-link {
         font-size: 0.85rem;
       }
@@ -660,22 +645,6 @@
         font-size: 0.9rem;
       }
 
-      .social-divider {
-        margin: 18px 0;
-        font-size: 0.75rem;
-      }
-
-      .social-buttons {
-        flex-direction: column;
-        gap: 8px;
-        margin-bottom: 18px;
-      }
-
-      .social-btn {
-        padding: 10px;
-        font-size: 0.8rem;
-      }
-
       .signup-link {
         font-size: 0.8rem;
       }
@@ -770,9 +739,6 @@
         margin-bottom: 14px;
       }
 
-      .social-divider {
-        margin: 15px 0;
-      }
     }
   </style>
 </head>
@@ -840,17 +806,17 @@
             <div class="error-message" id="loginPasswordError">Password must be at least 6 characters</div>
           </div>
 
-          <div class="remember-forgot">
+          <!-- <div class="remember-forgot">
             <label class="remember-me">
               <input type="checkbox" id="rememberMe">
               <span>Remember me</span>
             </label>
             <a href="#" class="forgot-link">Forgot your password?</a>
-          </div>
+          </div> -->
 
           <button type="submit" class="submit-btn" id="loginBtn">Login</button>
 
-          <div class="social-divider">Or continue with</div>
+          <!-- <div class="social-divider">Or continue with</div>
 
           <div class="social-buttons">
             <button type="button" class="social-btn">
@@ -859,7 +825,7 @@
             <button type="button" class="social-btn">
               <span style="color: #333;">⚉</span> GitHub
             </button>
-          </div>
+          </div> -->
 
           <div class="signup-link">
             Don't have an account? <a href="#" onclick="switchTab('signup'); return false;">Sign Up</a>
@@ -898,7 +864,7 @@
 
           <button type="submit" class="submit-btn" id="signupBtn">Create Account</button>
 
-          <div class="social-divider">Or continue with</div>
+          <!-- <div class="social-divider">Or continue with</div>
 
           <div class="social-buttons">
             <button type="button" class="social-btn">
@@ -907,7 +873,7 @@
             <button type="button" class="social-btn">
               <span style="color: #333;">⚉</span> GitHub
             </button>
-          </div>
+          </div> -->
 
           <div class="signup-link">
             Already have an account? <a href="#" onclick="switchTab('login'); return false;">Login</a>
@@ -989,7 +955,7 @@
         if (response.ok && data.success) {
           sessionStorage.setItem('isLoggedIn', 'true');
           sessionStorage.setItem('userEmail', email);
-          showMessage('successMessage', '✅ Login successful! Redirecting...');
+          showMessage('successMessage', '✅ Login successful!');
           setTimeout(() => {
             window.location.href = 'dashboard.html';
           }, 1000);
@@ -1137,3 +1103,4 @@
   </script>
 </body>
 </html>
+
