@@ -17,98 +17,34 @@
             min-height: 100vh;
         }
 
-        .sidebar {
-            width: 240px;
-            background: #ffffff;
-            color: #0f172a;
-            padding: 24px 0;
-            display: flex;
-            flex-direction: column;
-            box-shadow: 1px 0 0 #e2e8f0;
+        .back-button {
             position: fixed;
-            height: 100vh;
-            overflow-y: auto;
-        }
-
-        .sidebar-logo {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 0 24px;
-            margin-bottom: 32px;
-        }
-
-        .sidebar-logo-icon {
-            width: 32px;
-            height: 32px;
-            background: linear-gradient(135deg, #6366f1, #8b5cf6);
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            top: 20px;
+            left: 20px;
+            background: #6366f1;
             color: white;
-            font-weight: bold;
-            font-size: 18px;
-        }
-
-        .sidebar-logo-text {
-            font-size: 1.25rem;
-            font-weight: 700;
-            color: #0f172a;
-        }
-
-        .menu-item {
-            margin: 4px 16px;
-            padding: 10px 16px;
+            padding: 12px 24px;
             border-radius: 8px;
-            cursor: pointer;
-            font-size: 0.938rem;
-            font-weight: 500;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
             display: flex;
             align-items: center;
-            gap: 12px;
-            transition: all 0.2s;
-            color: #475569;
-            text-decoration: none;
+            gap: 8px;
+            box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
+            transition: all 0.3s;
+            z-index: 1000;
         }
 
-        .menu-item:hover {
-            background: #f1f5f9;
-            color: #0f172a;
+        .back-button:hover {
+            background: #4f46e5;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
         }
 
-        .menu-item.active {
-            background: #eef2ff;
-            color: #6366f1;
-        }
-
-        .menu-item::before {
-            content: '';
-            width: 20px;
-            height: 20px;
-            display: inline-block;
-            opacity: 0.8;
-        }
-
-        .menu-item[href*="dashboard"]::before { content: '📊'; }
-        .menu-item[href*="calendar"]::before { content: '📅'; }
-        .menu-item[href*="profile"]::before { content: '👤'; }
-        .menu-item[href*="aboutus"]::before { content: 'ℹ️'; }
-        .menu-item[href*="logout"]::before { content: '🚪'; }
-
-        .menu-item[href*="logout"] {
-            margin-top: auto;
-            color: #ef4444;
-            font-weight: 500;
-        }
-
-        .menu-item[href*="logout"]:hover {
-            background: #fef2f2;
-        }
-
-        .main-content {
-            margin-left: 240px;
-            min-height: 100vh;
+        .back-button::before {
+            content: '←';
+            font-size: 18px;
         }
 
         /* Hero Section */
@@ -411,16 +347,6 @@
         }
 
         @media (max-width: 768px) {
-            .sidebar {
-                width: 100%;
-                position: relative;
-                height: auto;
-            }
-
-            .main-content {
-                margin-left: 0;
-            }
-
             .hero-section {
                 padding: 60px 20px;
             }
@@ -449,144 +375,143 @@
             .easier-content h2 {
                 font-size: 28px;
             }
+
+            .back-button {
+                top: 10px;
+                left: 10px;
+                padding: 10px 20px;
+                font-size: 13px;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="sidebar">
-        <a href="dashboard.html" class="menu-item">Dashboard</a>
-        <a href="calendar.html" class="menu-item">Calendar</a>
-        <a href="profile.html" class="menu-item">Profile</a>
-        <a href="aboutus.html" class="menu-item active">About Us</a>
-        <a href="logout.html" class="menu-item">Logout</a>
+    <a href="dashboard.html" class="back-button">Back to Dashboard</a>
+
+    <!-- Hero Section -->
+    <div class="hero-section">
+        <h1>About Us</h1>
+        <p>Meet the team behind this innovative productivity platform that transforms the way you manage projects, ideas, and career goals</p>
     </div>
 
-    <div class="main-content">
-        <!-- Hero Section -->
-        <div class="hero-section">
-            <h1>About Us</h1>
-            <p>Meet the team behind this innovative productivity platform that transforms the way you manage projects, ideas, and career goals</p>
+    <div class="content-container">
+        <!-- Vision Section -->
+        <div class="section">
+            <h2 class="section-title">Our Vision</h2>
+            <div class="vision-box">
+                <p>In today's fast-paced academic and professional world, staying organized and managing multiple aspects of life can be overwhelming. Our platform was born from the recognition that students and professionals need a comprehensive, user-friendly solution to manage their projects, ideas, deadlines, and career goals all in one place.</p>
+                <p>We envisioned a system that doesn't just store information, but actively helps users stay on track, collaborate effectively, and achieve their goals with ease. This dashboard represents our commitment to making productivity intuitive, accessible, and genuinely helpful for everyone who strives to excel in their academic and professional journey.</p>
+            </div>
         </div>
 
-        <div class="content-container">
-            <!-- Vision Section -->
-            <div class="section">
-                <h2 class="section-title">Our Vision</h2>
-                <div class="vision-box">
-                    <p>In today's fast-paced academic and professional world, staying organized and managing multiple aspects of life can be overwhelming. Our platform was born from the recognition that students and professionals need a comprehensive, user-friendly solution to manage their projects, ideas, deadlines, and career goals all in one place.</p>
-                    <p>We envisioned a system that doesn't just store information, but actively helps users stay on track, collaborate effectively, and achieve their goals with ease. This dashboard represents our commitment to making productivity intuitive, accessible, and genuinely helpful for everyone who strives to excel in their academic and professional journey.</p>
+        <!-- Team Section -->
+        <div class="section">
+            <h2 class="section-title">Our Team</h2>
+            <div class="team-grid">
+                <div class="team-card">
+                    <div class="avatar blue">NG</div>
+                    <h3>Dr. Nishant Gupta</h3>
+                    <div class="role">Faculty Mentor</div>
+                    <div class="email">nishant.gupta@lnmiit.ac.in</div>
                 </div>
-            </div>
-
-            <!-- Team Section -->
-            <div class="section">
-                <h2 class="section-title">Our Team</h2>
-                <div class="team-grid">
-                    <div class="team-card">
-                        <div class="avatar blue">NG</div>
-                        <h3>Dr. Nishant Gupta</h3>
-                        <div class="role">Faculty Mentor</div>
-                        <div class="email">nishant.gupta@lnmiit.ac.in</div>
-                    </div>
-                    <div class="team-card">
-                        <div class="avatar purple">HV</div>
-                        <h3>Himi Vyas</h3>
-                        <div class="role">Developer</div>
-                        <div class="email">23uec550@lnmiit.ac.in</div>
-                    </div>
-                    <div class="team-card">
-                        <div class="avatar green">AJ</div>
-                        <h3>Archi Jain</h3>
-                        <div class="role">Developer</div>
-                        <div class="email">23ume514@lnmiit.ac.in</div>
-                    </div>
+                <div class="team-card">
+                    <div class="avatar purple">HV</div>
+                    <h3>Himi Vyas</h3>
+                    <div class="role">Developer</div>
+                    <div class="email">23uec550@lnmiit.ac.in</div>
                 </div>
-            </div>
-
-            <!-- Features Section -->
-            <div class="section">
-                <h2 class="section-title">Key Features</h2>
-                <div class="features-grid">
-                    <div class="feature-card blue">
-                        <div class="feature-icon">📁</div>
-                        <h3>Your Projects</h3>
-                        <p>Manage all your projects in one centralized hub. Track members, view detailed descriptions, monitor progress, and access all project-related features seamlessly.</p>
-                    </div>
-                    <div class="feature-card yellow">
-                        <div class="feature-icon">💡</div>
-                        <h3>Recent Ideas</h3>
-                        <p>Capture and organize your brilliant ideas across different topics. Never lose a creative thought again with our intuitive idea management system.</p>
-                    </div>
-                    <div class="feature-card green">
-                        <div class="feature-icon">📝</div>
-                        <h3>Quick Notes</h3>
-                        <p>Take quick notes on the fly and access them instantly whenever you need. Perfect for jotting down important information during meetings or classes.</p>
-                    </div>
-                    <div class="feature-card red">
-                        <div class="feature-icon">⏰</div>
-                        <h3>Deadlines</h3>
-                        <p>Stay on top of all your deadlines with smart notifications and visual tracking. Never miss an important submission or meeting again.</p>
-                    </div>
-                    <div class="feature-card purple">
-                        <div class="feature-icon">🚀</div>
-                        <h3>Future Work</h3>
-                        <p>Plan and organize your future work ideas, upcoming tasks, and long-term projects. Keep your vision clear and actionable.</p>
-                    </div>
-                    <div class="feature-card indigo">
-                        <div class="feature-icon">🎯</div>
-                        <h3>Career & Goals</h3>
-                        <p>Set, track, and achieve your career aspirations and personal goals. Break down big dreams into manageable milestones.</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Objectives Section -->
-            <div class="section">
-                <h2 class="section-title">Our Objectives</h2>
-                <div class="objectives-list">
-                    <div class="objective-card">
-                        <div class="objective-number num1">1</div>
-                        <p><strong>Centralized Organization</strong><br>Provide a single platform where users can manage all aspects of their academic and professional life without switching between multiple tools.</p>
-                    </div>
-                    <div class="objective-card">
-                        <div class="objective-number num2">2</div>
-                        <p><strong>Enhanced Productivity</strong><br>Help users stay focused and productive by offering intuitive tools for project management, deadline tracking, and goal setting.</p>
-                    </div>
-                    <div class="objective-card">
-                        <div class="objective-number num3">3</div>
-                        <p><strong>Seamless Collaboration</strong><br>Enable effective team collaboration with features that allow project members to work together efficiently and stay aligned.</p>
-                    </div>
-                    <div class="objective-card">
-                        <div class="objective-number num4">4</div>
-                        <p><strong>User-Friendly Experience</strong><br>Create an interface that's not only powerful but also intuitive and enjoyable to use, reducing the learning curve and increasing adoption.</p>
-                    </div>
-                    <div class="objective-card">
-                        <div class="objective-number num5">5</div>
-                        <p><strong>Future-Ready Planning</strong><br>Help users think ahead and plan for the future with dedicated spaces for career goals, future work ideas, and long-term aspirations.</p>
-                    </div>
+                <div class="team-card">
+                    <div class="avatar green">AJ</div>
+                    <h3>Archi Jain</h3>
+                    <div class="role">Developer</div>
+                    <div class="email">23ume514@lnmiit.ac.in</div>
                 </div>
             </div>
         </div>
 
-        <!-- Making Life Easier Section -->
-        <div class="easier-section">
-            <div class="easier-content">
-                <h2>Making Life Easier</h2>
-                <p>Our platform transforms the way you work and study by eliminating the chaos of scattered information and missed deadlines. With everything in one place, you spend less time searching and more time doing.</p>
-                <p>The intuitive design means you can start being productive immediately without extensive training. Smart notifications keep you informed without overwhelming you, while the organized structure helps you maintain clarity even during the busiest times.</p>
-                <p>Whether you're managing multiple research projects, tracking assignment deadlines, planning your career path, or collaborating with teammates, our dashboard adapts to your needs and grows with you. It's not just a tool—it's your personal productivity companion.</p>
+        <!-- Features Section -->
+        <div class="section">
+            <h2 class="section-title">Key Features</h2>
+            <div class="features-grid">
+                <div class="feature-card blue">
+                    <div class="feature-icon">📁</div>
+                    <h3>Your Projects</h3>
+                    <p>Manage all your projects in one centralized hub. Track members, view detailed descriptions, monitor progress, and access all project-related features seamlessly.</p>
+                </div>
+                <div class="feature-card yellow">
+                    <div class="feature-icon">💡</div>
+                    <h3>Recent Ideas</h3>
+                    <p>Capture and organize your brilliant ideas across different topics. Never lose a creative thought again with our intuitive idea management system.</p>
+                </div>
+                <div class="feature-card green">
+                    <div class="feature-icon">📝</div>
+                    <h3>Quick Notes</h3>
+                    <p>Take quick notes on the fly and access them instantly whenever you need. Perfect for jotting down important information during meetings or classes.</p>
+                </div>
+                <div class="feature-card red">
+                    <div class="feature-icon">⏰</div>
+                    <h3>Deadlines</h3>
+                    <p>Stay on top of all your deadlines with smart notifications and visual tracking. Never miss an important submission or meeting again.</p>
+                </div>
+                <div class="feature-card purple">
+                    <div class="feature-icon">🚀</div>
+                    <h3>Future Work</h3>
+                    <p>Plan and organize your future work ideas, upcoming tasks, and long-term projects. Keep your vision clear and actionable.</p>
+                </div>
+                <div class="feature-card indigo">
+                    <div class="feature-icon">🎯</div>
+                    <h3>Career & Goals</h3>
+                    <p>Set, track, and achieve your career aspirations and personal goals. Break down big dreams into manageable milestones.</p>
+                </div>
             </div>
         </div>
 
-        <!-- Footer -->
-        <div class="footer">
-            <div class="footer-logo">
-                <div class="footer-icon">📊</div>
-                <h3>UniDesk</h3>
+        <!-- Objectives Section -->
+        <div class="section">
+            <h2 class="section-title">Our Objectives</h2>
+            <div class="objectives-list">
+                <div class="objective-card">
+                    <div class="objective-number num1">1</div>
+                    <p><strong>Centralized Organization</strong><br>Provide a single platform where users can manage all aspects of their academic and professional life without switching between multiple tools.</p>
+                </div>
+                <div class="objective-card">
+                    <div class="objective-number num2">2</div>
+                    <p><strong>Enhanced Productivity</strong><br>Help users stay focused and productive by offering intuitive tools for project management, deadline tracking, and goal setting.</p>
+                </div>
+                <div class="objective-card">
+                    <div class="objective-number num3">3</div>
+                    <p><strong>Seamless Collaboration</strong><br>Enable effective team collaboration with features that allow project members to work together efficiently and stay aligned.</p>
+                </div>
+                <div class="objective-card">
+                    <div class="objective-number num4">4</div>
+                    <p><strong>User-Friendly Experience</strong><br>Create an interface that's not only powerful but also intuitive and enjoyable to use, reducing the learning curve and increasing adoption.</p>
+                </div>
+                <div class="objective-card">
+                    <div class="objective-number num5">5</div>
+                    <p><strong>Future-Ready Planning</strong><br>Help users think ahead and plan for the future with dedicated spaces for career goals, future work ideas, and long-term aspirations.</p>
+                </div>
             </div>
-            <p>Empowering productivity through intelligent project management</p>
-            <p>© 2025 UniDesk. All rights reserved.</p>
         </div>
+    </div>
+
+    <!-- Making Life Easier Section -->
+    <div class="easier-section">
+        <div class="easier-content">
+            <h2>Making Life Easier</h2>
+            <p>Our platform transforms the way you work and study by eliminating the chaos of scattered information and missed deadlines. With everything in one place, you spend less time searching and more time doing.</p>
+            <p>The intuitive design means you can start being productive immediately without extensive training. Smart notifications keep you informed without overwhelming you, while the organized structure helps you maintain clarity even during the busiest times.</p>
+            <p>Whether you're managing multiple research projects, tracking assignment deadlines, planning your career path, or collaborating with teammates, our dashboard adapts to your needs and grows with you. It's not just a tool—it's your personal productivity companion.</p>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+        <div class="footer-logo">
+            <div class="footer-icon">📊</div>
+            <h3>UniDesk</h3>
+        </div>
+        <p>Empowering productivity through intelligent project management</p>
+        <p>© 2025 UniDesk. All rights reserved.</p>
     </div>
 </body>
 </html>
